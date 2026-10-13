@@ -1,0 +1,12 @@
+{
+  "docs/README.md": "Development-Home",
+  "docs/PRODUCT.md": "PRODUCT",
+  "docs/DESIGN.md": "DESIGN",
+  "docs/DEVELOPMENT.md": "DEVELOPMENT",
+  "docs/THREADS.md": "THREADS",
+  "docs/WIKI.md": "WIKI",
+  "docs/QUALITY.md": "QUALITY",
+  "docs/ARCHITECTURE.md": "ARCHITECTURE",
+  "docs/GLOSSARY.md": "GLOSSARY",
+  "docs/CODING_STANDARDS.md": "CODING_STANDARDS"
+}
