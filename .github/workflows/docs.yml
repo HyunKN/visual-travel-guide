@@ -1,0 +1,80 @@
+name: Docs and Wiki
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'AGENTS.md'
+      - 'README.md'
+      - '.github/wiki-pages.json'
+      - '.github/pull_request_template.md'
+      - '.github/workflows/docs.yml'
+      - 'scripts/**'
+  pull_request:
+    paths:
+      - 'docs/**'
+      - 'AGENTS.md'
+      - 'README.md'
+      - '.github/wiki-pages.json'
+      - '.github/pull_request_template.md'
+      - '.github/workflows/docs.yml'
+      - 'scripts/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-wiki-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+      - name: Check documentation links and publication inputs
+        run: python3 scripts/sync_wiki.py --check
+      - name: Verify publication behavior
+        run: python3 -m unittest discover -s scripts/tests -v
+
+  publish:
+    needs: check
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          path: source
+          persist-credentials: false
+      - name: Checkout existing Wiki
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          repository: ${{ github.repository }}.wiki
+          ref: master
+          path: _wiki
+      - name: Generate managed pages
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+          SOURCE_REPO: ${{ github.repository }}
+        run: python3 source/scripts/sync_wiki.py --repo-root source --wiki-dir _wiki --repository "$SOURCE_REPO" --sha "$SOURCE_SHA"
+      - name: Commit and publish
+        working-directory: _wiki
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- '*.md' .codex-docs-sync.json
+          if git diff --cached --quiet; then
+            echo 'Wiki already matches this source commit.'
+          else
+            git commit -m "docs: sync development documents from $SOURCE_SHA"
+            git push origin HEAD:master
+          fi
