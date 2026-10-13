@@ -7,6 +7,7 @@
 | 작업 | 먼저 읽을 문서 |
 | --- | --- |
 | 기능 범위·우선순위 결정 | [PRODUCT](docs/PRODUCT.md), 해당 기능 Issue |
+| 시나리오 프로토타입 구현·관찰·인계 | [프로토타입 설계 시작점](docs/prototype/README.md), 해당 작업 Issue |
 | 구현·수정 시작 | [DEVELOPMENT](docs/DEVELOPMENT.md), [QUALITY](docs/QUALITY.md), 해당 작업 Issue 또는 승인된 작업 요청 |
 | 화면·상호작용 변경 | [DESIGN](docs/DESIGN.md) |
 | 구조·데이터 흐름 변경 | [ARCHITECTURE](docs/ARCHITECTURE.md), 관련 ADR이 있으면 해당 기록 |

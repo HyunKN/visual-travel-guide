@@ -8,5 +8,11 @@
   "docs/QUALITY.md": "QUALITY",
   "docs/ARCHITECTURE.md": "ARCHITECTURE",
   "docs/GLOSSARY.md": "GLOSSARY",
-  "docs/CODING_STANDARDS.md": "CODING_STANDARDS"
+  "docs/CODING_STANDARDS.md": "CODING_STANDARDS",
+  "docs/prototype/README.md": "Prototype",
+  "docs/prototype/SCREENS.md": "Prototype-Screens",
+  "docs/prototype/DATA.md": "Prototype-Data",
+  "docs/prototype/TESTING.md": "Prototype-Testing",
+  "docs/prototype/TASKS.md": "Prototype-Tasks",
+  "docs/prototype/HANDOFF.md": "Prototype-Handoff"
 }
