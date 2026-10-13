@@ -30,9 +30,9 @@
 | 한 작업씩 구현 | [TASKS](TASKS.md) | 8개 작업안, 의존 관계, 인수 조건, 검증 |
 | Sol에게 전달 | [HANDOFF](HANDOFF.md) | 시작 프롬프트, 버전 확인, 완료 보고, Issue 연결 |
 
-이 묶음은 버전 관리하는 상세 설계 부속자료다. 기능의 목적·수용 범위·진행 상태는 발행한 상위 Issue가 관리하고, 작업별 수용 조건·의존 관계는 하위 Issue에서 관리한다. 발행 전인 [TASKS](TASKS.md)는 발행용 초안이며 진행 체크리스트가 아니다. 발행 후에는 실제 Issue 링크를 붙이고 변경된 범위는 Issue와 해당 상세 설계에 함께 반영한다.
+이 묶음은 버전 관리하는 상세 설계 부속자료다. 기능의 목적·수용 범위·진행 상태는 상위 Issue가 관리하고, 작업별 수용 조건·의존 관계는 하위 Issue에서 관리한다. [TASKS](TASKS.md)는 작업 설계와 발행된 Issue 연결이며 진행 체크리스트가 아니다. 변경된 범위는 Issue와 해당 상세 설계에 함께 반영한다.
 
-현재 기능 Issue·구현 PR은 아직 연결하지 않았다. 기존 [AI Workflow 설정 Issue](https://github.com/HyunKN/visual-travel-guide/issues/1)는 공통 환경 설정 기록이며 이번 제품 기능의 상위 Issue로 재사용하지 않는다.
+기록: [상위 Issue](https://github.com/HyunKN/visual-travel-guide/issues/4), [설계 검토 PR](https://github.com/HyunKN/visual-travel-guide/pull/5), [8개 작업 Issue 연결](TASKS.md). 설계 PR과 앱 구현 PR은 구분하며 앱 구현은 아직 시작하지 않았다. 기존 [AI Workflow 설정 Issue](https://github.com/HyunKN/visual-travel-guide/issues/1)는 공통 환경 설정 기록이다.
 
 ## 3. 결정 수준
 

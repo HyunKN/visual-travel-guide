@@ -2,6 +2,8 @@
 
 상태: 구현을 시작할 때 사용할 인계안. 현재 문서는 앱을 구현하거나 다른 채팅에서 Sol을 실행했다는 증거가 아니다.
 
+현재 인계 연결: [설계 PR](https://github.com/HyunKN/visual-travel-guide/pull/5) · [상위 Issue](https://github.com/HyunKN/visual-travel-guide/issues/4) · 첫 작업 [P01 콘텐츠](https://github.com/HyunKN/visual-travel-guide/issues/6) / [P02 첫 흐름](https://github.com/HyunKN/visual-travel-guide/issues/7). 설계 브랜치는 `codex/prototype-scenario-design`, 본문 설계 기준 커밋은 `03b4c2b176664f74c136e3a5d43bc4294d96eb85`다. URL 연결은 그 뒤 커밋에서 보완되므로 시작 때 PR 최신 head와 실제 로컬 상태를 확인한다.
+
 ## 1. 이 인계에서 고정할 것
 
 - 목표: 준비된 경복궁 장면에서 **건물 전체와 문양·구조물 탐색 → 이름·짧은 설명 → 관련 질문**, 그리고 선택적인 홈 카드 경로를 관찰할 수 있게 만든다.
@@ -26,16 +28,20 @@
 
 ## 3. Sol에게 전달할 시작 요청
 
-아래를 전달할 때 실제 Issue·버전을 채운다. 작업 요청의 제품 조건은 이 문서 작성에 대한 사용자 요청과 이후 승인된 범위를 따른다.
+아래 요청에는 현재의 Issue와 설계 PR을 넣었다. 전달 직전에 최신 head·실제 checkout을 확인한다. 작업 요청의 제품 조건은 이 문서 작성에 대한 사용자 요청과 이후 승인된 범위를 따른다.
 
 ```text
 작업 종류: 시나리오 기반 프로토타입 구현
 목적: 경복궁의 건물 전체와 문양·구조물을 탐색해 이름·짧은 설명·출처를
 확인하고, 원하면 관련 질문이나 홈의 호기심 카드로 이어지는 흐름을 만든다.
 
-작업 Issue URL: [실제 상위 Issue + 시작할 하위 Issue URL]
-기준 브랜치·커밋 또는 PR: [설계 문서가 포함된 실제 버전]
-첫 작업: TASKS의 P01/P02 중 선행 조건이 준비된 작업.
+작업 Issue URL: https://github.com/HyunKN/visual-travel-guide/issues/4
+첫 작업: P01 https://github.com/HyunKN/visual-travel-guide/issues/6
+자료 확보가 지연되면 P02 https://github.com/HyunKN/visual-travel-guide/issues/7
+기준 PR: https://github.com/HyunKN/visual-travel-guide/pull/5
+기준 브랜치: codex/prototype-scenario-design
+설계 본문 기준 커밋: 03b4c2b176664f74c136e3a5d43bc4294d96eb85
+이후 링크 보완 커밋을 포함한 PR 최신 head를 확인한 뒤 시작해라.
 
 먼저 AGENTS.md와 docs/DEVELOPMENT.md, docs/QUALITY.md,
 docs/prototype/README.md, docs/prototype/TASKS.md를 읽어라.

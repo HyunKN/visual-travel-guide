@@ -1,8 +1,22 @@
-# 프로토타입 작업 분할안과 Issue 초안
+# 프로토타입 작업 분할과 Issue 연결
 
-상태: 발행 전 작업안. P01~P08은 설계 내 식별자이며 GitHub Issue 번호가 아니다. 진행 상태는 Issue 발행 후 그곳에서만 관리한다. 이 문서에는 작업의 경계와 발행할 수용 조건을 둔다.
+상태: 구현 전 작업 설계. P01~P08은 설계 식별자이며 아래 실제 GitHub Issue에 연결했다. 진행 상태는 Issue에서만 관리한다. 이 문서는 작업 경계와 수용 조건의 설계 근거이며, 수용 범위를 바꾸면 해당 Issue와 함께 갱신한다.
 
-## 1. 상위 Issue 초안
+| 설계 ID | 실제 작업 Issue |
+| --- | --- |
+| 상위 | [프로토타입 시나리오 검증](https://github.com/HyunKN/visual-travel-guide/issues/4) |
+| P01 | [실제 건물 장면 콘텐츠](https://github.com/HyunKN/visual-travel-guide/issues/6) |
+| P02 | [홈→건물 전체 설명](https://github.com/HyunKN/visual-travel-guide/issues/7) |
+| P03 | [문양·구조물 탐색과 수정](https://github.com/HyunKN/visual-travel-guide/issues/8) |
+| P04 | [관련 질문·미지원](https://github.com/HyunKN/visual-travel-guide/issues/9) |
+| P05 | [맥락·호기심 카드](https://github.com/HyunKN/visual-travel-guide/issues/10) |
+| P06 | [관찰 자료 통합](https://github.com/HyunKN/visual-travel-guide/issues/11) |
+| P07 | [기기·복구·실행 점검](https://github.com/HyunKN/visual-travel-guide/issues/12) |
+| P08 | [사람 관찰·후속 판단](https://github.com/HyunKN/visual-travel-guide/issues/13) |
+
+설계 변경은 [검토 PR](https://github.com/HyunKN/visual-travel-guide/pull/5)에서 확인한다. 아래는 Issue 발행의 기준이 된 명세이며 완료 기록이 아니다.
+
+## 1. 상위 기능 명세
 
 **제목:** `[Prototype] 경복궁 전체·부분 탐색과 호기심 카드의 시나리오 검증`
 
@@ -12,7 +26,7 @@
 
 **범위:** 모바일 웹의 실제 상호작용, 사전 연결 사진·대상·설명, 모의 관람 3상황, 선택 수정·미지원·자료 오류 복구. 자유 질문 입력·LLM·자동 인식·실제 위치·지도·설치·음성·다국어는 제외한다.
 
-**상세 설계:** [설계 시작점](README.md), [화면](SCREENS.md), [자료](DATA.md), [관찰 계획](TESTING.md). 발행 시 설계가 포함된 실제 커밋/PR의 GitHub 링크로 바꾼다. 아직 main에 없는 파일을 main URL로 연결하지 않는다.
+**상세 설계:** [설계 시작점](README.md), [화면](SCREENS.md), [자료](DATA.md), [관찰 계획](TESTING.md). 발행한 Issue는 설계 PR의 브랜치를 연결한다. 아직 main에 없는 파일을 main URL로 연결하지 않는다.
 
 **상위 수용 조건:**
 
