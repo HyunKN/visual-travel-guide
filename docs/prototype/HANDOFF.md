@@ -9,6 +9,7 @@
 - 목표: 준비된 경복궁 장면에서 **건물 전체와 문양·구조물 탐색 → 이름·짧은 설명 → 관련 질문**, 그리고 선택적인 홈 카드 경로를 관찰할 수 있게 만든다.
 - 범위: [설계 시작점](README.md), 작업별 [P01~P08](TASKS.md). Sol의 코드 작업은 P01~P07이며 P08은 사람과 수행한다.
 - 질문 방식: 기본 설명 먼저, 원하면 준비된 관련 질문 선택. 자유 텍스트 입력·LLM·진행자 응답 큐는 포함하지 않는다.
+- 시각 방향: [DESIGN](../DESIGN.md)의 흰 바탕·둥근 UI·단청 청록/녹색 중심·작은 붉은 포인트. [실제 참고](VISUAL_REFERENCES.md)와 [제외 시안·방지 기준](ANTI_SLOP.md)을 함께 읽는다. 이전 미색 생성 시안은 구현 기준이 아니다. 최종 시안과 정확한 토큰은 아직 미정이다.
 - 상태: 설계 문서 작성 단계. 앱·콘텐츠·실기기·사람 관찰은 각각 검증해야 한다.
 - 설계 조사 기준 커밋: `2c350649260a480864b754178ac0976356c961aa`. 이 커밋만 checkout하면 새 설계가 없다. 아래 시작 정보에는 **설계가 실제 포함된 버전**을 적는다.
 
@@ -45,6 +46,10 @@
 
 먼저 AGENTS.md와 docs/DEVELOPMENT.md, docs/QUALITY.md,
 docs/prototype/README.md, docs/prototype/TASKS.md를 읽어라.
+UI 작업은 docs/DESIGN.md, docs/prototype/VISUAL_REFERENCES.md,
+docs/prototype/ANTI_SLOP.md도 읽어라. 흰 바탕·둥근 UI·단청 청록/녹색
+중심·작은 붉은 포인트를 지키고 누런 배경과 이전 미색 생성 시안은 사용하지 마라.
+아직 최종 시안은 미정이므로 합의된 방향을 바탕으로 시안을 선택한 뒤 구현한다.
 선택한 작업에 연결된 SCREENS/DATA/TESTING만 추가로 읽고
 현재 Git 상태와 Issue를 확인한 뒤 작은 실행 계획을 알려줘.
 

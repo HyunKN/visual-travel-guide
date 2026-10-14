@@ -14,5 +14,7 @@
   "docs/prototype/DATA.md": "Prototype-Data",
   "docs/prototype/TESTING.md": "Prototype-Testing",
   "docs/prototype/TASKS.md": "Prototype-Tasks",
-  "docs/prototype/HANDOFF.md": "Prototype-Handoff"
+  "docs/prototype/HANDOFF.md": "Prototype-Handoff",
+  "docs/prototype/VISUAL_REFERENCES.md": "Prototype-Visual-References",
+  "docs/prototype/ANTI_SLOP.md": "Prototype-Anti-Slop"
 }

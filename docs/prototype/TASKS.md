@@ -107,6 +107,8 @@ flowchart LR
 
 **읽을 문서:** [SCREENS H/V/A](SCREENS.md), [DATA](DATA.md), [DEVELOPMENT](../DEVELOPMENT.md), [QUALITY](../QUALITY.md).
 
+시각 구현 전 [DESIGN](../DESIGN.md), [실제 UI·굿즈 참고](VISUAL_REFERENCES.md), [제외 시안과 방지 기준](ANTI_SLOP.md)을 함께 읽는다. 합의한 시각 방향을 유지하고 최종 시안 선택 후 정확한 토큰을 구현한다. 이전 미색 시안은 기준으로 사용하지 않는다.
+
 **소유 범위:** `prototype/`의 최초 앱·자료 로드·상태·기본 화면·실행 설정. 실행 안내를 README에 연결한다. 아래 경로는 새로 만들 위치 제안이지 현재 존재하는 코드가 아니다.
 
 **할 일:**
