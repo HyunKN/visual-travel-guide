@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "contentVersion": "2026-10-16-scenes.2",
+  "contentVersion": "2026-10-16-scenes.3",
   "scenes": [
     {
       "id": "C01",
@@ -549,18 +549,26 @@
       "licenseEvidenceUrl": "https://www.heritage.go.kr/heri/cul/imgHeritage.do?ccimId=6409289&ccbaKdcd=12&ccbaAsno=0017590000000&ccbaCtcd=11",
       "creatorCredit": "경복궁 사정전_근경 · 국가유산청 국가유산포털 제공",
       "sourceRecordId": "6409289",
-      "localPath": "assets/sajeongjeon-reference.jpg",
-      "width": 4000,
-      "height": 2154,
+      "localPath": "assets/sajeongjeon-reference.webp",
+      "width": 1600,
+      "height": 862,
       "byteLength": 6068124,
-      "sha256": "825593c6eaa427129d2c8ec847d5c046d7fed217c3d45b6fc5504f2bcd0357d3",
+      "sha256": "c2b717a8157fe28986c9b22946105b0e7c3613de5c740d917d346d08f3cd995b",
       "licenseLabel": "공공누리 제1유형 · 출처표시",
       "licenseUrl": "https://www.kogl.or.kr/info/licenseType1.do",
-      "modificationNote": "제공된 JPEG 원본 바이트 그대로 저장. 크롭·색보정·표식 합성·생성형 확대 없음.",
+      "modificationNote": "P01 원본에서 긴 변 최대1600px 비율 유지 축소·WebP quality90 변환. 크롭·색보정·생성형 처리·표식 합성 없음.",
       "capturedAt": null,
       "captureDateNote": "정확한 촬영일 미상. 파일명의 2021 날짜 및 페이지 게시일을 촬영일로 사용하지 않음.",
       "checkedAt": "2026-10-16",
-      "creditNote": "개별 촬영자 이름은 제공 화면에서 확인하지 못해 제공기관과 원문 제목으로 표기."
+      "creditNote": "개별 촬영자 이름은 제공 화면에서 확인하지 못해 제공기관과 원문 제목으로 표기.",
+      "byteSize": 315462,
+      "original": {
+        "localPath": "../content-preparation/assets/sajeongjeon-reference.jpg",
+        "sha256": "825593c6eaa427129d2c8ec847d5c046d7fed217c3d45b6fc5504f2bcd0357d3",
+        "width": 4000,
+        "height": 2154,
+        "byteSize": 6068124
+      }
     },
     {
       "id": "photo-sujeongjeon-reference",
@@ -570,18 +578,26 @@
       "licenseEvidenceUrl": "https://www.heritage.go.kr/heri/cul/imgHeritage.do?ccimId=6411382&ccbaKdcd=12&ccbaAsno=0017600000000&ccbaCtcd=11",
       "creatorCredit": "경복궁 수정전_전경 · 국가유산청 국가유산포털 제공",
       "sourceRecordId": "6411382",
-      "localPath": "assets/sujeongjeon-reference.jpg",
-      "width": 4000,
-      "height": 2383,
+      "localPath": "assets/sujeongjeon-reference.webp",
+      "width": 1600,
+      "height": 953,
       "byteLength": 5699356,
-      "sha256": "c266cd0a8b44da8e9deedf47cde80891933fb02853aebe60656f1706a164e2a7",
+      "sha256": "8655a051ea0c8b6d2b489fb1f4614cc655866e4a184fe110560945515f1ae2f9",
       "licenseLabel": "공공누리 제1유형 · 출처표시",
       "licenseUrl": "https://www.kogl.or.kr/info/licenseType1.do",
-      "modificationNote": "제공된 JPEG 원본 바이트 그대로 저장. 크롭·색보정·표식 합성·생성형 확대 없음.",
+      "modificationNote": "P01 원본에서 긴 변 최대1600px 비율 유지 축소·WebP quality90 변환. 크롭·색보정·생성형 처리·표식 합성 없음.",
       "capturedAt": null,
       "captureDateNote": "정확한 촬영일 미상. 파일명의 2021 날짜 및 페이지 게시일을 촬영일로 사용하지 않음.",
       "checkedAt": "2026-10-16",
-      "creditNote": "개별 촬영자 이름은 제공 화면에서 확인하지 못해 제공기관과 원문 제목으로 표기."
+      "creditNote": "개별 촬영자 이름은 제공 화면에서 확인하지 못해 제공기관과 원문 제목으로 표기.",
+      "byteSize": 284518,
+      "original": {
+        "localPath": "../content-preparation/assets/sujeongjeon-reference.jpg",
+        "sha256": "c266cd0a8b44da8e9deedf47cde80891933fb02853aebe60656f1706a164e2a7",
+        "width": 4000,
+        "height": 2383,
+        "byteSize": 5699356
+      }
     },
     {
       "id": "photo-sujeongjeon-input",
@@ -591,18 +607,26 @@
       "licenseEvidenceUrl": "https://royal.khs.go.kr/user/board/E101020000_view_storyBoard.ajax?id=20231123030313005428&siteCode=ENG",
       "creatorCredit": "수정전 전경 · 국가유산청 궁능유적본부",
       "sourceRecordId": "5705",
-      "localPath": "assets/sujeongjeon-input.jpg",
-      "width": 2000,
-      "height": 1333,
+      "localPath": "assets/sujeongjeon-input.webp",
+      "width": 1600,
+      "height": 1066,
       "byteLength": 627667,
-      "sha256": "4b0716c4b8e75f6717571fcc0503f3de62b6511ae1f37e9a52504d3c951c31da",
+      "sha256": "7c837ab85008ac2225649b63b39554743a84bbab364996b67fac878a8cbf6bd6",
       "licenseLabel": "공공누리 제1유형 · 출처표시",
       "licenseUrl": "https://www.kogl.or.kr/info/licenseType1.do",
-      "modificationNote": "제공된 JPEG 원본 바이트 그대로 저장. 크롭·색보정·표식 합성·생성형 확대 없음.",
+      "modificationNote": "P01 원본에서 긴 변 최대1600px 비율 유지 축소·WebP quality90 변환. 크롭·색보정·생성형 처리·표식 합성 없음.",
       "capturedAt": null,
       "captureDateNote": "정확한 촬영일 미상. 파일명의 2021 날짜 및 페이지 게시일을 촬영일로 사용하지 않음.",
       "checkedAt": "2026-10-16",
-      "creditNote": "개별 촬영자 이름은 제공 화면에서 확인하지 못해 제공기관과 원문 제목으로 표기."
+      "creditNote": "개별 촬영자 이름은 제공 화면에서 확인하지 못해 제공기관과 원문 제목으로 표기.",
+      "byteSize": 433232,
+      "original": {
+        "localPath": "../content-preparation/assets/sujeongjeon-input.jpg",
+        "sha256": "4b0716c4b8e75f6717571fcc0503f3de62b6511ae1f37e9a52504d3c951c31da",
+        "width": 2000,
+        "height": 1333,
+        "byteSize": 627667
+      }
     }
   ],
   "cards": [
@@ -623,7 +647,7 @@
       "sceneId": "C01",
       "contextKey": "before-visit",
       "cardVisible": false,
-      "contentVersion": "2026-10-16-scenes.2",
+      "contentVersion": "2026-10-16-scenes.3",
       "comparisonCaseId": null,
       "navigationScenes": [
         {
@@ -645,7 +669,7 @@
       "sceneId": "C02",
       "contextKey": "courtyard-area",
       "cardVisible": false,
-      "contentVersion": "2026-10-16-scenes.2",
+      "contentVersion": "2026-10-16-scenes.3",
       "comparisonCaseId": null,
       "navigationScenes": [
         {
@@ -667,7 +691,7 @@
       "sceneId": "C03",
       "contextKey": "chimney-area",
       "cardVisible": true,
-      "contentVersion": "2026-10-16-scenes.2",
+      "contentVersion": "2026-10-16-scenes.3",
       "comparisonCaseId": null,
       "navigationScenes": [
         {
@@ -716,7 +740,7 @@
           "selectableInNewExplore": false
         }
       ],
-      "contentVersion": "2026-10-16-scenes.2"
+      "contentVersion": "2026-10-16-scenes.3"
     },
     {
       "id": "S5",
@@ -744,7 +768,7 @@
           "selectableInNewExplore": true
         }
       ],
-      "contentVersion": "2026-10-16-scenes.2"
+      "contentVersion": "2026-10-16-scenes.3"
     }
   ],
   "comparisonCases": [

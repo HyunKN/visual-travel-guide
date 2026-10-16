@@ -46,6 +46,13 @@ for (const asset of data.assets) {
     const size = imageSize(bytes);
     if (size.width !== asset.width || size.height !== asset.height) errors.push(`${asset.id}: 실제 사진 크기 불일치`);
     if (createHash('sha256').update(bytes).digest('hex') !== asset.sha256) errors.push(`${asset.id}: 사진 해시 불일치`);
+    if (asset.original) {
+      if (!/^\.\.\/content-preparation\/assets\/[a-z0-9-]+\.jpg$/.test(asset.original.localPath)) throw new Error('원본 보관 경로 오류');
+      const original = await readFile(new URL(asset.original.localPath, contentUrl));
+      const originalSize = imageSize(original);
+      if (original.length !== asset.original.byteSize || createHash('sha256').update(original).digest('hex') !== asset.original.sha256 || originalSize.width !== asset.original.width || originalSize.height !== asset.original.height) errors.push(`${asset.id}: 보관 원본 불일치`);
+      if (bytes.length !== asset.byteSize) errors.push(`${asset.id}: 화면용 사진 용량 불일치`);
+    }
   } catch (error) { errors.push(`${asset.id}: ${error.message}`); }
 }
 

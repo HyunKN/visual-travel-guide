@@ -6,13 +6,15 @@ P01 보완 자료의 근거는 [별도 준비 묶음](../content-preparation/REA
 
 ## 먼저 확인할 자료
 
-- [content.json](content.json): v2 `2026-10-16-scenes.2`, C01~C06 장면, 대상 7개, 답변 13개, 관련 질문 6개, 출처 10개와 사진 6개의 provenance. 기존 ID·기본 설명·사진을 보존했다.
-- 새 사진: [사정전 참고](assets/sajeongjeon-reference.jpg), [수정전 입력](assets/sujeongjeon-input.jpg), [수정전 참고](assets/sujeongjeon-reference.jpg). P01 원본과 같은 바이트·해시다. 경량 파생본과 전체 시나리오 검수는 P06 범위다.
+- [content.json](content.json): v2 `2026-10-16-scenes.3`, C01~C06 장면, 대상 7개, 답변 13개, 관련 질문 6개, 출처 10개와 사진 6개의 provenance. 기존 ID·기본 설명을 보존하고 새 사진3장을 화면용으로 변환했다.
+- 새 사진: [사정전 참고](assets/sajeongjeon-reference.webp), [수정전 입력](assets/sujeongjeon-input.webp), [수정전 참고](assets/sujeongjeon-reference.webp). P06에서 긴 변 최대1600px·WebP quality90으로 변환했고 `original`에 P01 보관 경로·원본 크기·용량·해시를 연결했다. 원본은 publicDir 밖에 보존한다. 런타임 버전은 `2026-10-16-scenes.3`이다.
 - [경회루 사진](assets/gyeonghoeru.jpg): 궁능유적본부 제공, 2000×1499px. 연못과 누각 전체가 보이는 높은 시점의 사진이다. 실제 방문자의 눈높이를 재현한 자료로 해석하지 않는다.
 - [근정전 사진](assets/geunjeongjeon.jpg): 궁능유적본부 제공, 2000×1151px. 정면 건물과 앞마당의 돌 표식이 보인다. 부분 선택 영역과 모바일 판독성은 P06에서 확인한다.
 - [자경전 십장생굴뚝 사진](assets/ten-longevity-chimney.webp): 한국민족문화대백과사전 미디어 `7b8dca9e`, 1200×1194px. 응답의 실제 형식인 WebP로 저장했고 하단 기관 표기를 보존했다.
 
 세 사진 모두 원본 바이트를 저장했다. 크롭·색상 보정·생성형 확대·표식 합성을 하지 않았다. 촬영일은 모두 미상이다. 웹 업로드일이나 파일 수정일을 촬영일로 사용하지 않는다.
+
+위 ‘세 사진’은 기존 C01~C03이다. 추가 P01 사진3장의 원본은 준비 폴더에 보존하고 런타임에는 축소 WebP만 둔다. 원본 합계12,395,147 bytes → 화면용1,033,212 bytes이며 같은 세 사진의 비교다. 원본 보관본과 파생본의 SHA-256·크기·용량을 모두 검사한다. `python prototype/scripts/prepare-images.py`(Pillow 필요)로 재생성한다. 삭제한 런타임 중복 JPEG는 보관 원본에서 복구할 수 있다.
 
 궁능유적본부 자료는 해당 건물 사진 묶음의 `OPEN BY` 표시(공공누리 제1유형)를 확인했다. JSON의 `licenseEvidenceUrl`은 해당 사진 묶음, `licenseMarkUrl`은 그 묶음이 표시한 유형 표식이다. 한국민족문화대백과사전은 선택한 개별 미디어의 제1유형 표시를 확인했다. 해설과 사진의 출처는 화면에서도 각각 보여준다.
 
