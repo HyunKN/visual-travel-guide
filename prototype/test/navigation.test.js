@@ -78,10 +78,11 @@ test('candidate references stay hidden before S4 and empty exploration remains r
       assert.equal(canRestore({ ...initialState(preset(id)), sceneId: 'C03', contextKey: 'chimney-area', cardVisible: true }, preset(id), index), false);
     }
   }
-  const s = act(initialState(preset('S4')), 'whole'); // Candidate UI is P03; test empty N infrastructure only.
-  const n = act(s, 'new-explore');
-  assert.deepEqual(explorationScenes(n, preset('S4'), index), []);
-  assert.equal(canRestore(n, preset('S4'), index), true);
+  const p = structuredClone(preset('S1'));
+  p.navigationScenes = p.navigationScenes.filter((n) => n.sceneId === p.sceneId);
+  const n = act(act(initialState(p), 'whole', {}, p), 'new-explore', {}, p);
+  assert.deepEqual(explorationScenes(n, p, index), []);
+  assert.equal(canRestore(n, p, index), true);
 });
 
 test('restoration rejects hidden stale values and out-of-photo points', () => {

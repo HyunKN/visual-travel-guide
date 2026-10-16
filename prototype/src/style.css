@@ -119,6 +119,15 @@ summary { cursor: pointer; color: var(--accent-dark); min-height: 44px; padding:
 .explore-choice > span { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 0; font-size: 1rem; line-height: 1.6; }
 .explore-choice svg { flex-shrink: 0; }
 .explore-credit { display: block; min-height: 44px; color: var(--muted); font-size: .75rem; line-height: 1.8; overflow-wrap: anywhere; }
+.photo-label { font-size: .875rem; color: var(--muted); margin: 18px 0 10px; }
+.comparison-list { display: grid; gap: 32px; margin: 28px 0; }
+.comparison-option { border-top: 1px solid var(--line); padding-top: 8px; }
+.comparison-reference { width: 100%; height: 210px; object-fit: contain; display: block; border-radius: 20px; background: #f5f6f8; }
+.comparison-option h2 { margin-top: 16px; font-size: 1.375rem; }
+.comparison-option ul { padding-left: 22px; margin: 12px 0; line-height: 1.8; }
+.clue-sources { display: block; font-size: .75rem; }
+.clue-sources a { display: inline-block; padding: 8px 0; min-height: 44px; }
+.previous-choice { color: var(--muted); font-size: .875rem; margin-top: 8px; }
 .question-list { margin: 12px 0 28px; }
 .empty-questions { color: var(--muted); padding: 18px 0; font-size: 0.9375rem; }
 .error-content { padding: 38px 0; }

@@ -1,6 +1,6 @@
 # 콘텐츠·상태·구현 경계
 
-현재 계약은 **schemaVersion 2**다. [보완 개발 설계 4·5절](FLOW_EXTENSION_DESIGN.md)의 ComparisonCase·Continuation·preset 허용 장면과 N/홈/이력을 구현했다. 후보 화면 C는 P03, 다음 관람 카드 UI는 P05의 범위다. 기존 부분 영역 중첩 거부는 유지하고, 틀린 건물 후보를 실제 입력 사진의 대상 목록에 추가하지 않는다.
+현재 계약은 **schemaVersion 2**다. [보완 개발 설계 4·5절](FLOW_EXTENSION_DESIGN.md)의 ComparisonCase·Continuation·preset 허용 장면과 N/홈/이력을 구현했다. P03의 후보 C는 case/option/input/reference/target을 함께 검사하고 후보 참고 장면에서 설명·질문을 연다. 다음 관람 카드 UI는 P05의 범위다. 부분 영역 중첩은 거부하고 틀린 후보를 입력 사진의 실제 대상으로 추가하지 않는다.
 
 이관 근거는 [P01 준비 묶음](content-preparation/README.md)이다. 검수 자료를 [런타임 JSON](content/content.json)에 병합하고 새 사진 3장을 같은 해시로 복사했다. P01 packet은 변경하지 않은 이관 입력이며 진행자 정답표는 publicDir 밖에 있다. 새 사진 촬영일은 미상이다. 화면용 이미지 최적화·전체 시나리오 통합은 P06에서 확인한다.
 

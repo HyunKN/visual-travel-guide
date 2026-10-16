@@ -3,7 +3,7 @@ import './app-design.css';
 import './glass.css';
 import { bindGlassOptics } from './glass-optics.js';
 import { validateContent, indexContent, configurePreset, fitImage, pointInImage } from './content.js';
-import { initialState, transition, canRestore, explorationScenes } from './state.js';
+import { initialState, transition, canRestore, explorationScenes, comparisonForScene } from './state.js';
 import { takePhotoSnapshot, animateScreen, bindPressFeedback, motionEnabled, setMotionPreference } from './motion.js';
 
 const app = document.querySelector('#app');
@@ -47,7 +47,7 @@ function rememberView() {
   if (!state || restoring || location.hash === '#test' || history.state?.runId !== runId) return;
   const scroller = app.querySelector('.photo-scroll');
   const focused = document.activeElement;
-  const attribute = ['data-action', 'data-target', 'data-question', 'data-scene'].find((name) => focused?.hasAttribute(name));
+  const attribute = ['data-action', 'data-target', 'data-question', 'data-scene', 'data-option'].find((name) => focused?.hasAttribute(name));
   const ui = { y: window.scrollY, zoomed, expandedTargets, photoX: scroller?.scrollLeft ?? 0, photoY: scroller?.scrollTop ?? 0,
     focus: attribute ? { attribute, value: focused.getAttribute(attribute) } : null,
     details: [...app.querySelectorAll('details[open]')].map((d) => d.className) };
@@ -65,7 +65,7 @@ function restoreView(ui = {}) {
     if (generation !== restoreGeneration) return;
     const scroller = app.querySelector('.photo-scroll');
     if (scroller) { scroller.scrollLeft = nonnegative(ui.photoX); scroller.scrollTop = nonnegative(ui.photoY); }
-    const allowed = ['data-action', 'data-target', 'data-question', 'data-scene'];
+    const allowed = ['data-action', 'data-target', 'data-question', 'data-scene', 'data-option'];
     const focus = allowed.includes(ui.focus?.attribute) ? [...app.querySelectorAll(`[${ui.focus.attribute}]`)].find((el) => el.getAttribute(ui.focus.attribute) === ui.focus.value) : null;
     (focus ?? app.querySelector('h1') ?? app.querySelector('main'))?.focus({ preventScroll: true });
     window.scrollTo(0, nonnegative(ui.y));
@@ -125,15 +125,18 @@ function shell(content, title, home = false) {
   <dialog class="design-menu" aria-labelledby="design-menu-title"><div class="menu-heading"><h2 id="design-menu-title">화면 둘러보기</h2><button class="icon-button" data-action="close-menu" aria-label="메뉴 닫기">×</button></div><p>같은 흐름을 두 가지 화면으로 살펴보세요.</p><div class="design-options"><button data-design="story" aria-pressed="${homeDesign === 'story'}">1안 · 3D 궁궐</button><button data-design="photo" aria-pressed="${homeDesign === 'photo'}">2안 · 사진 두 개</button></div><label class="check-label motion-choice"><span>움직임 효과</span><input type="checkbox" id="motion-effects" ${motionEnabled() ? 'checked' : ''}/></label><p class="form-hint">처음에는 기기의 동작 줄이기 설정을 따라요. 여기서 원하는 쪽으로 바꿀 수 있어요.</p><a class="materials-link" href="./materials.html" target="_blank" rel="noopener noreferrer">색과 버튼 반응 비교 ↗<span class="sr-only"> 새 탭</span></a><p class="form-hint">준비된 장면을 쓰며 실제 위치나 카메라는 사용하지 않아요.</p></dialog></div>`;
 }
 
-function photo({ interactive = false, compact = false } = {}) {
+function photo({ interactive = false, compact = false, zoomable = interactive } = {}) {
   const scene = index.scenes.get(state.sceneId), asset = index.assets.get(scene.assetId);
   const broken = fault === 'image' ? 'unavailable-photo.jpg' : asset.localPath;
   const src = `${base}${broken}${imageRetry ? `?retry=${imageRetry}` : ''}`;
   const tag = interactive ? 'button' : 'div';
-  return `<div class="photo-wrap ${compact ? 'compact-photo' : ''}"><div class="photo-scroll"><${tag} class="photo-canvas ${zoomed && interactive ? 'zoomed' : ''}" style="--ratio:${asset.width}/${asset.height}" ${interactive ? 'type="button" aria-label="사진에서 궁금한 곳 선택" data-photo-tap' : ''}>
+  const credit = comparisonForScene(state, preset, index)
+    ? `<details class="photo-credit"><summary>사진 출처 · 이용 조건</summary><p>${escape(asset.creatorCredit)}</p><a href="${escape(asset.sourceUrl)}" target="_blank" rel="noopener noreferrer">원본 출처<span class="sr-only"> (새 탭)</span> ↗</a><a href="${escape(asset.licenseUrl)}" target="_blank" rel="noopener noreferrer">${escape(asset.licenseLabel)}<span class="sr-only"> (새 탭)</span> ↗</a></details>`
+    : `<a href="${escape(asset.sourceUrl)}" target="_blank" rel="noopener noreferrer">사진: ${escape(asset.creatorCredit)}<span class="sr-only"> · 공공누리 제1유형, 새 탭</span> ↗</a>`;
+  return `<div class="photo-wrap ${compact ? 'compact-photo' : ''}"><div class="photo-scroll"><${tag} class="photo-canvas ${zoomed && zoomable ? 'zoomed' : ''}" style="--ratio:${asset.width}/${asset.height}" ${interactive ? 'type="button" aria-label="사진에서 궁금한 곳 선택" data-photo-tap' : ''}>
     <img class="scene-photo" data-shared-photo src="${escape(src)}" alt="${escape(asset.alt)}" width="${asset.width}" height="${asset.height}" ${compact ? '' : 'fetchpriority="high"'} /><div class="overlay" aria-hidden="true"></div></${tag}></div>
     <div class="image-failure" hidden><p>사진을 불러오지 못했어요.</p><button class="text-button" data-action="retry">사진 다시 불러오기</button><p>다른 부분 고르기에서 글로도 선택할 수 있어요.</p></div>
-    ${interactive ? `<div class="photo-toolbar"><a href="${escape(asset.sourceUrl)}" target="_blank" rel="noopener noreferrer">사진: ${escape(asset.creatorCredit)}<span class="sr-only"> · 공공누리 제1유형, 새 탭</span> ↗</a><button class="text-button" data-action="zoom" aria-pressed="${zoomed}">${zoomed ? '전체 크기로 보기' : '사진 확대'}</button></div>` : ''}
+    ${zoomable ? `<div class="photo-toolbar">${credit}<button class="text-button" data-action="zoom" aria-pressed="${zoomed}">${zoomed ? '전체 크기로 보기' : '사진 확대'}</button></div>` : ''}
   </div>`;
 }
 
@@ -169,11 +172,25 @@ function newExploreScreen() {
 
 function viewScreen() {
   const scene = index.scenes.get(state.sceneId), target = index.targets.get(state.targetId);
+  if (comparisonForScene(state, preset, index)) return shell(`<div class="screen-heading"><p class="eyebrow">사진 속 건물 확인하기</p><h1 tabindex="-1">이 건물은 무엇일까요?</h1><p>사진과 준비된 후보를 비교해 볼 수 있어요.</p></div>${photo({ zoomable: true })}<button class="primary" data-action="compare">이 사진으로 알아보기 ${icon('arrow')}</button><p class="prototype-note">실제 AI 분석 없이 준비된 후보 두 개를 보여드려요.</p>`, '건물 후보 알아보기');
   return shell(`<div class="screen-heading"><p class="eyebrow">사진 속에서 찾아보기</p><h1 tabindex="-1">어디가 궁금한가요?</h1><p>궁금한 곳을 눌러보세요.<br>골라본 뒤에도 다시 바꿀 수 있어요.</p></div>
     ${photo({ interactive: true })}
     <div class="selection" aria-live="polite">${state.error === 'unsupported-part' ? '<p class="selection-title">이 부분은 아직 준비된 설명이 없어요.</p><p>다른 부분을 골라볼 수 있어요.</p><button class="secondary" data-action="view">다시 고르기</button>' : target ? `<p class="selection-kicker">선택한 곳</p><p class="selection-title">${escape(target.neutralLabel)}</p><button class="primary" data-action="confirm">이 부분 알아보기 ${icon('arrow')}</button><button class="text-button" data-action="view">다시 고르기</button>` : '<p class="selection-empty">사진에서 한 곳을 골라주세요.</p>'}</div>
     ${scene.wholeTargetId ? '<button class="secondary whole-action" data-action="whole">건물 전체 알아보기</button>' : ''}
     <div class="text-alternative"><button class="text-button" data-action="targets" aria-expanded="${expandedTargets}" aria-controls="target-list">글로 대상 고르기</button><div id="target-list" ${expandedTargets ? '' : 'hidden'}><p>사진으로 고르기 어렵다면 여기서 선택하세요.</p>${scene.targetIds.map((id) => `<button class="target-row" data-target="${escape(id)}">${escape(index.targets.get(id).neutralLabel)} ${icon('arrow')}</button>`).join('')}</div></div>`, '궁금한 곳 선택');
+}
+
+function comparisonScreen() {
+  const comparison = activeIndex.comparisonCases.get(state.comparisonCaseId);
+  return shell(`<div class="screen-heading"><p class="eyebrow">준비된 후보 비교</p><h1 tabindex="-1">어느 건물과 닮았나요?</h1><p>실제 인식 결과가 아닌 준비된 후보예요. 보이는 특징을 비교해 보세요.</p></div>
+    <h2 class="photo-label">알아보는 사진</h2>${photo({ zoomable: true })}
+    <div class="comparison-list">${comparison.options.map((option) => {
+      const target = index.targets.get(option.targetId), asset = index.assets.get(index.scenes.get(option.referenceSceneId).assetId);
+      return `<article class="comparison-option"><p class="photo-label">비교용 사진</p><img class="comparison-reference" src="${escape(base + asset.localPath)}" alt="${escape(asset.alt)}" width="${asset.width}" height="${asset.height}" loading="lazy"/>
+        <h2>${escape(target.displayName)}</h2>${state.comparisonOptionId === option.id ? '<p class="previous-choice">이전에 고른 후보</p>' : ''}<ul>${option.clues.map((clue) => `<li>${escape(clue.text)}<span class="clue-sources">${clue.sourceIds.map((id) => activeIndex.sources.get(id)).filter(Boolean).map((source) => `<a href="${escape(source.url)}" target="_blank" rel="noopener noreferrer">특징 근거<span class="sr-only"> · ${escape(source.title)} (새 탭)</span> ↗</a>`).join('') || '근거를 확인할 수 없어요.'}</span></li>`).join('')}</ul>
+        <a class="explore-credit" href="${escape(asset.sourceUrl)}" target="_blank" rel="noopener noreferrer">${escape(asset.creatorCredit)} · ${escape(asset.licenseLabel)}<span class="sr-only"> (새 탭)</span> ↗</a>
+        <button class="primary" data-option="${escape(option.id)}" aria-label="${escape(target.displayName)} · 이 건물이에요">이 건물이에요 ${icon('arrow')}</button></article>`;
+    }).join('')}</div><button class="secondary" data-action="no-candidate">둘 다 아닌 것 같아요</button><button class="text-button" data-action="retry-comparison-photo">사진 다시 보기</button>`, '건물 후보 비교');
 }
 
 function answerScreen() {
@@ -187,7 +204,7 @@ function answerScreen() {
     ${answer.moreText ? `<details class="more-answer"><summary>더 읽기</summary><p>${escape(answer.moreText)}</p></details>` : ''}
     <div class="sources"><p>설명 출처</p>${sources.map((source) => `<a href="${escape(source.url)}" target="_blank" rel="noopener noreferrer">${escape(source.title)}<span class="sr-only"> (새 탭)</span><span aria-hidden="true">↗</span></a>`).join('')}
     <details class="photo-credit"><summary>사진 출처 · 이용 조건</summary><p>${escape(asset.creatorCredit)}</p><a href="${escape(asset.sourceUrl)}" target="_blank" rel="noopener noreferrer">원본 출처<span class="sr-only"> (새 탭)</span> ↗</a><a href="${escape(asset.licenseUrl)}" target="_blank" rel="noopener noreferrer">${escape(asset.licenseLabel)}<span class="sr-only"> (새 탭)</span> ↗</a><p>촬영일 미상 · 사진 원본 유지</p></details></div>
-    <div class="answer-actions"><button class="related-row" data-action="questions">관련 질문 더 보기 ${icon('arrow')}</button>${state.questionId ? '<button class="text-button" data-action="overview">기본 설명으로</button>' : ''}${index.scenes.get(state.sceneId).regions.length ? `<button class="text-button" data-action="view">${icon('change')}같은 사진에서 다른 부분 보기</button>` : ''}<button class="primary" data-action="new-explore">다른 대상 알아보기 ${icon('arrow')}</button></div></article>`, target.displayName);
+    ${state.entryOrigin === 'candidate' ? '<p class="prototype-note">선택한 후보의 비교용 사진과 설명이에요. 처음 사진의 건물로 확정한 것은 아니에요.</p>' : ''}<div class="answer-actions"><button class="related-row" data-action="questions">관련 질문 더 보기 ${icon('arrow')}</button>${state.questionId ? '<button class="text-button" data-action="overview">기본 설명으로</button>' : ''}${state.comparisonCaseId ? '<button class="text-button" data-action="compare-again">후보 다시 비교하기</button>' : ''}${index.scenes.get(state.sceneId).regions.length ? `<button class="text-button" data-action="view">${icon('change')}같은 사진에서 다른 부분 보기</button>` : ''}<button class="primary" data-action="new-explore">다른 대상 알아보기 ${icon('arrow')}</button></div></article>`, target.displayName);
 }
 
 function questionScreen() {
@@ -196,13 +213,14 @@ function questionScreen() {
 }
 
 function errorScreen() {
+  if (state.error === 'no-candidate') return shell('<section class="error-content"><h1 tabindex="-1">닮은 건물이 없나요?</h1><p>이번 사진에 준비된 후보가 맞지 않을 수 있어요. 다시 비교하거나 다른 대상을 살펴볼 수 있어요.</p><button class="primary" data-action="compare-again">후보 다시 보기</button><button class="secondary" data-action="retry-comparison-photo">사진 다시 보기</button><button class="text-button" data-action="new-explore">다른 대상 알아보기</button></section>', '해당하는 후보 없음');
   const messages = {
     'unsupported-question': ['찾는 질문이 없나요?', '이번에는 준비된 설명과 질문만 볼 수 있어요. 궁금한 점은 관찰이 끝난 뒤 진행자에게 알려주세요.'],
     'missing-answer': ['설명을 불러올 수 없어요.', '준비된 자료를 확인해야 해요. 다른 부분을 고르거나 홈으로 돌아갈 수 있어요.'],
     'missing-source': ['출처를 확인할 수 없어요.', '근거를 확인하지 못한 설명은 표시하지 않아요. 다른 부분을 고르거나 홈으로 돌아갈 수 있어요.'],
   };
   const [title, text] = messages[state.error] ?? ['이 부분은 아직 준비되지 않았어요.', '다른 부분을 골라보세요.'];
-  return shell(`<section class="error-content"><div class="error-symbol" aria-hidden="true">?</div><h1 tabindex="-1">${title}</h1><p>${text}</p>${state.targetId && !state.error?.startsWith('missing') ? '<button class="primary" data-action="overview">기본 설명으로</button>' : ''}<button class="secondary" data-action="view">다른 부분 고르기</button><button class="text-button" data-action="home">홈으로</button></section>`, title);
+  return shell(`<section class="error-content"><div class="error-symbol" aria-hidden="true">?</div><h1 tabindex="-1">${title}</h1><p>${text}</p>${state.targetId && !state.error?.startsWith('missing') ? '<button class="primary" data-action="overview">기본 설명으로</button>' : ''}${state.comparisonCaseId ? '<button class="secondary" data-action="compare-again">후보 다시 비교하기</button>' : ''}<button class="secondary" data-action="view">다른 부분 고르기</button><button class="text-button" data-action="home">홈으로</button></section>`, title);
 }
 
 function testScreen() {
@@ -245,7 +263,7 @@ function render({ focus = true, snapshot } = {}) {
   const photoScroll = previousScroll ? { x: previousScroll.scrollLeft, y: previousScroll.scrollTop } : null;
   observer?.disconnect();
   const isTest = location.hash === '#test';
-  app.innerHTML = isTest ? testScreen() : ({ H: homeScreen, V: viewScreen, A: answerScreen, Q: questionScreen, E: errorScreen, N: newExploreScreen }[state.screen] ?? errorScreen)();
+  app.innerHTML = isTest ? testScreen() : ({ H: homeScreen, V: viewScreen, A: answerScreen, Q: questionScreen, E: errorScreen, N: newExploreScreen, C: comparisonScreen }[state.screen] ?? errorScreen)();
   document.title = `${isTest ? '테스트 준비' : app.querySelector('h1')?.textContent.replace(/\s+/g, ' ') ?? '경복궁'} · 궁금한 궁`;
   if (focus) { app.querySelector('h1')?.focus(); window.scrollTo(0, 0); }
   for (const el of app.querySelectorAll('[data-action]')) el.addEventListener('click', () => {
@@ -261,6 +279,7 @@ function render({ focus = true, snapshot } = {}) {
   for (const el of app.querySelectorAll('[data-target]')) el.addEventListener('click', () => dispatch({ type: 'text-target', targetId: el.dataset.target }));
   for (const el of app.querySelectorAll('[data-question]')) el.addEventListener('click', () => dispatch({ type: 'question', questionId: el.dataset.question }));
   for (const el of app.querySelectorAll('[data-scene]')) el.addEventListener('click', () => dispatch({ type: 'choose-scene', sceneId: el.dataset.scene }));
+  for (const el of app.querySelectorAll('[data-option]')) el.addEventListener('click', () => dispatch({ type: 'choose-candidate', optionId: el.dataset.option }));
   app.querySelector('.photo-scroll')?.addEventListener('scroll', rememberView, { passive: true });
   for (const detail of app.querySelectorAll('details')) detail.addEventListener('toggle', rememberView);
   for (const el of app.querySelectorAll('[data-design]')) el.addEventListener('click', () => {
