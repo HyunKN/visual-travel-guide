@@ -11,7 +11,7 @@ const act = (s, type, extra = {}, i = index) => transition(s, { type, ...extra }
 
 test('actual reviewed content has consistent scene/target/question/source links', () => {
   assert.deepEqual(validateContent(original), []);
-  assert.equal(original.scenes.length, 3);
+  assert.equal(original.scenes.length, 6);
 });
 
 test('rejects mismatched question, dangling source, missing attribution, wrong parent and overlapping regions', () => {

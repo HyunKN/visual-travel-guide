@@ -12,7 +12,7 @@
 | 기존·추가 실제 콘텐츠 통합 | [P06](https://github.com/HyunKN/visual-travel-guide/issues/11) |
 | R06 통합 검증·관찰 준비 | [P07](https://github.com/HyunKN/visual-travel-guide/issues/12) |
 
-진행 순서는 P01 자료 → P02 계약·탐색·이력 → P03 후보 및 P04 질문·P05 다음 관람 → P06 실제 콘텐츠 통합 → P07 검증·준비 → [P08 사람 관찰·백로그 반영](https://github.com/HyunKN/visual-travel-guide/issues/13)이다. P02는 자료 계약을 기준으로 개발 fixture부터 시작할 수 있다. 구현·자료가 로컬 미커밋 상태인 점은 각 Issue에 명시했다.
+진행 순서는 P01 자료 → P02 계약·탐색·이력 → P03 후보 및 P04 질문·P05 다음 관람 → P06 전체 시나리오·이미지 통합 → P07 검증·준비 → [P08 사람 관찰·백로그 반영](https://github.com/HyunKN/visual-travel-guide/issues/13)이다. 현재 구현·자료 버전과 게시 여부는 각 Issue와 실제 Git 상태를 확인한다. P02의 실제 자료 이관이 P06의 전체 화면·이미지 검수를 대신하지 않는다.
 
 통합 이력: 새로 분할했던 [14](https://github.com/HyunKN/visual-travel-guide/issues/14)·[15](https://github.com/HyunKN/visual-travel-guide/issues/15)·[16](https://github.com/HyunKN/visual-travel-guide/issues/16)·[17](https://github.com/HyunKN/visual-travel-guide/issues/17)·[18](https://github.com/HyunKN/visual-travel-guide/issues/18)·[19](https://github.com/HyunKN/visual-travel-guide/issues/19)는 명세를 이전한 뒤 종료했다. 구현 완료가 아니며 과거 분할 이력으로만 남긴다. 현재 작업 목록은 [상위 Issue](https://github.com/HyunKN/visual-travel-guide/issues/4)와 기존 P 이슈를 따른다.
 

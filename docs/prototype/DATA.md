@@ -1,8 +1,8 @@
 # 콘텐츠·상태·구현 경계
 
-설계 추가(미구현): [보완 개발 설계 4·5절](FLOW_EXTENSION_DESIGN.md)에 schemaVersion 2, ComparisonCase·Continuation, preset의 허용 장면, 상태·복원 변경안을 정의했다. 현재 콘텐츠는 v1이며 이 문서 작업에서는 이관하지 않았다. 기존 부분 영역 중첩 거부는 유지하고, 건물 후보를 실제 입력 사진의 대상 목록에 억지로 추가하지 않는다.
+현재 계약은 **schemaVersion 2**다. [보완 개발 설계 4·5절](FLOW_EXTENSION_DESIGN.md)의 ComparisonCase·Continuation·preset 허용 장면과 N/홈/이력을 구현했다. 후보 화면 C는 P03, 다음 관람 카드 UI는 P05의 범위다. 기존 부분 영역 중첩 거부는 유지하고, 틀린 건물 후보를 실제 입력 사진의 대상 목록에 추가하지 않는다.
 
-실제 추가 자료와 이관 입력은 [P01 준비 묶음](content-preparation/README.md), [packet](content-preparation/packet.json)을 따른다. 준비 원본은 현재 publicDir 밖에 두었다. 새 사진의 촬영일은 미상이며 출처·개별 이용 조건·실제 크기·해시를 기록했다. P01의 자료 검수와 P02/P06의 v2 런타임 통합을 구분한다.
+이관 근거는 [P01 준비 묶음](content-preparation/README.md)이다. 검수 자료를 [런타임 JSON](content/content.json)에 병합하고 새 사진 3장을 같은 해시로 복사했다. P01 packet은 변경하지 않은 이관 입력이며 진행자 정답표는 publicDir 밖에 있다. 새 사진 촬영일은 미상이다. 화면용 이미지 최적화·전체 시나리오 통합은 P06에서 확인한다.
 
 상태: 콘텐츠·상태 계약. [실제 콘텐츠](content/README.md)와 [모바일 웹](../../prototype/README.md)을 연결했다. 화면 동작은 [SCREENS](SCREENS.md), 작업 경계는 [TASKS](TASKS.md), 검증 범위는 [검증 기록](../../prototype/VERIFICATION.md)을 따른다.
 
@@ -20,6 +20,7 @@
 | 자료 | 필수 속성 | 규칙 |
 | --- | --- | --- |
 | Dataset | schemaVersion, contentVersion, scenes, targets, questions, answers, sources, assets | 모든 ID는 종류 안에서 유일. 참조는 존재해야 함 |
+| v2 추가 | comparisonCases, continuations, testPresets.navigationScenes·comparisonCaseId | [보완 계약 4절](FLOW_EXTENSION_DESIGN.md#4-콘텐츠-계약의-변경안). v1은 명시적으로 거부 |
 | Scene | id, title, areaLabel, assetId, wholeTargetId 또는 null, regions, targetIds | 하나의 준비된 관찰 장면. 실제 좌표/GPS가 아님. 건물 전체가 사진에 없으면 null |
 | Region | id, targetIds, x, y, width, height | 원본 이미지 기준 0~1 사각형. 범위를 벗어나거나 크기 0이면 잘못된 자료 |
 | Target | id, kind, displayName, neutralLabel, sceneIds, parentTargetId, overviewAnswerId, questionIds | kind는 building/part. 부분의 parent는 실제 지원 건물 또는 null |
@@ -44,7 +45,7 @@
 
 사용자가 선택한 준비 대상은 **근정전·경회루·자경전 십장생굴뚝 세 곳**이다. 근정전·경회루는 궁능유적본부 사진, 굴뚝은 아래 한국민족문화대백과사전 사진으로 연결했다. 지원 부분은 앞마당의 돌바닥, 굴뚝 중앙 문양, 위쪽 배출구다. [원본과 선정 근거](content/README.md)에서 사실·이용 조건·남은 사용자 검토를 구분한다. 공식 명칭이 불명확한 부분에는 임의의 전통 용어를 붙이지 않는다.
 
-현재 자료는 장면 3개, 대상 5개, 설명 7개다. P01의 C01 외에 P06의 S2·S3와 카드 후속 질문을 연결했다. 장면 수를 채우느라 검수가 끝나지 않은 자료를 넣지 않는다. 사진의 촬영일은 모두 미상이며 [파일별 출처·크기·해시](content/content.json)를 보존한다.
+현재 자료는 장면 6개, 대상 7개, 답변 13개, 질문 6개다. 기존 C01~C03을 보존하고 P01의 C04~C06·사정전/수정전·추가 질문·다음 관람 관계를 병합했다. S1~S3은 기존 세 장면만 허용한다. 사진 촬영일은 모두 미상이며 [파일별 출처·크기·해시](content/content.json)를 보존한다.
 
 ### 사진 선정 기준과 교체 후보
 
@@ -140,10 +141,12 @@ ny = (pointerY - containerTop  - offsetY) / renderH
 2. scene이 바뀌면 이전 선택·질문·답변이 남지 않는다.
 3. target이 바뀌면 이전 질문·답변이 남지 않는다.
 4. 이름·설명·출처·강조 영역은 동일한 선택 상태에서 계산한다. 각 화면에 따로 복사해 서로 어긋나게 하지 않는다.
-5. 홈 카드가 가리키는 scene/target/question/answer는 검증된 연결이어야 한다. 첫 버전은 `card.sceneId === preset.sceneId`로 제한한다. 다른 장면 연결이나 잘못된 카드는 숨기고 개발 검사에서 실패시킨다.
+5. 홈 카드의 scene/target/question/answer는 검증된 연결이어야 한다. `card.sceneId === state.sceneId`와 현재 맥락을 함께 검사한다. 장면 이동은 preset.navigationScenes에서 scene/context/card를 함께 읽고 이전 선택·비교 상태를 비운다.
 6. 사용자 입력이나 URL에서 주어진 ID를 그대로 신뢰하지 않는다. 검증된 자료에 없는 ID는 안전한 오류·초기 상태로 보낸다.
 7. 준비된 내용의 부재와 프로그램의 자료 오류를 구분한다. 전자는 E의 지원 한계, 후자는 검사 실패와 복구 가능한 오류다.
 8. 새로고침은 개인정보나 질문 이력을 복구하지 않는다. 앱은 localStorage·계정·외부 분석 도구를 사용하지 않는다.
+9. 홈은 같은 실행의 현재 장면으로 이동한다. N은 출발 설명을 유지하고 다른 허용 장면을 고르면 V로 이동한다. 새 탐색에 표시하지 않는 참고 장면도 허용 이력 목록과 구분한다.
+10. 정상 뒤로/앞으로는 runId와 허용 장면·맥락·카드·화면별 대상/질문/답변을 검사한 뒤 복원한다. 잘못된 snapshot은 시작 H로 교체한다. 스크롤·확대·내부 스크롤·포커스는 각 browser history 항목의 UI snapshot으로 복원한다. 진행자 초기화/새로고침은 새 runId다.
 
 ## 6. 입력 → 처리 → 저장 → 표시
 

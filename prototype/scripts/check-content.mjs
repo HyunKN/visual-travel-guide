@@ -50,6 +50,7 @@ for (const asset of data.assets) {
 }
 
 if (data.answers.some((answer) => answer.reviewStatus !== 'reviewed')) errors.push('관찰용 자료에 미검수 답변 포함');
+for (const key of ['comparisonCases', 'continuations']) if (data[key]?.some((item) => item.reviewStatus !== 'reviewed')) errors.push(`${key}: 관찰용 자료 미검수`);
 if (errors.length) {
   console.error(errors.join('\n'));
   process.exitCode = 1;

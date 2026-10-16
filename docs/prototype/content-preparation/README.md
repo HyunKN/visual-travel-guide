@@ -1,6 +1,6 @@
 # P01 자료 묶음 — 비교 후보·관련 질문·다음 관람
 
-자료 버전: `2026-10-16-p01.1`. 이 폴더는 P02/P06이 가져갈 준비 자료다. 현재 앱이 읽는 [v1 content.json](../content/content.json)은 변경하지 않았다. 진행·검증의 원본은 [기존 P01 Issue](https://github.com/HyunKN/visual-travel-guide/issues/6)다.
+자료 버전: `2026-10-16-p01.1`. 이 폴더는 P01 당시의 준비 자료다. P02에서 [런타임 content.json](../content/content.json) v2에 실제 자료를 병합했다. 이 packet은 부분 변경 입력이므로 런타임 Dataset으로 쓰지 않는다. 아래 이관 절차·검수 기록은 P01 시점의 근거이며 최신 실행·검증은 [앱 안내](../../../prototype/README.md)를 따른다. P01 기록의 원본은 [기존 Issue](https://github.com/HyunKN/visual-travel-guide/issues/6)다.
 
 ## 확정한 자료와 파일
 

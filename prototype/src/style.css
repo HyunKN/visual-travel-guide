@@ -112,6 +112,13 @@ summary { cursor: pointer; color: var(--accent-dark); min-height: 44px; padding:
 .photo-credit summary { font-size: 0.75rem; }
 .answer-actions .related-row { border-top: 1px solid var(--line); font-weight: 650; }
 .answer-actions > .text-button { display: flex; margin-top: 12px; }
+.answer-actions > .primary { margin-top: 24px; }
+.explore-list { display: grid; gap: 28px; margin: 16px 0 28px; }
+.explore-choice { width: 100%; padding: 0; background: transparent; color: var(--accent-dark); text-align: left; }
+.explore-choice img { display: block; width: 100%; height: auto; border-radius: 24px; }
+.explore-choice > span { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 0; font-size: 1rem; line-height: 1.6; }
+.explore-choice svg { flex-shrink: 0; }
+.explore-credit { display: block; min-height: 44px; color: var(--muted); font-size: .75rem; line-height: 1.8; overflow-wrap: anywhere; }
 .question-list { margin: 12px 0 28px; }
 .empty-questions { color: var(--muted); padding: 18px 0; font-size: 0.9375rem; }
 .error-content { padding: 38px 0; }

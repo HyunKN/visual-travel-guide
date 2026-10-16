@@ -2,8 +2,8 @@ import './style.css';
 import './app-design.css';
 import './glass.css';
 import { bindGlassOptics } from './glass-optics.js';
-import { validateContent, indexContent, fitImage, pointInImage } from './content.js';
-import { initialState, transition, canRestore } from './state.js';
+import { validateContent, indexContent, configurePreset, fitImage, pointInImage } from './content.js';
+import { initialState, transition, canRestore, explorationScenes } from './state.js';
 import { takePhotoSnapshot, animateScreen, bindPressFeedback, motionEnabled, setMotionPreference } from './motion.js';
 
 const app = document.querySelector('#app');
@@ -41,6 +41,38 @@ let imageReady = false, imageFailed = false, zoomed = false, expandedTargets = f
 let fault = 'none', invalidUrl = false, observer;
 let textScale = 'normal';
 let homeDesign = 'photo', disposeStory, disposePress, disposeOptics, storyGeneration = 0;
+let restoring = false, restoreGeneration = 0;
+
+function rememberView() {
+  if (!state || restoring || location.hash === '#test' || history.state?.runId !== runId) return;
+  const scroller = app.querySelector('.photo-scroll');
+  const focused = document.activeElement;
+  const attribute = ['data-action', 'data-target', 'data-question', 'data-scene'].find((name) => focused?.hasAttribute(name));
+  const ui = { y: window.scrollY, zoomed, expandedTargets, photoX: scroller?.scrollLeft ?? 0, photoY: scroller?.scrollTop ?? 0,
+    focus: attribute ? { attribute, value: focused.getAttribute(attribute) } : null,
+    details: [...app.querySelectorAll('details[open]')].map((d) => d.className) };
+  history.replaceState({ runId, state, ui }, '', urlFor(preset));
+}
+
+function restoreView(ui = {}) {
+  const nonnegative = (n) => Number.isFinite(n) ? Math.max(0, n) : 0;
+  const generation = ++restoreGeneration;
+  restoring = true;
+  zoomed = ui.zoomed === true; expandedTargets = ui.expandedTargets === true;
+  render({ focus: false, snapshot: null });
+  for (const detail of app.querySelectorAll('details')) detail.open = Array.isArray(ui.details) && ui.details.includes(detail.className);
+  requestAnimationFrame(() => {
+    if (generation !== restoreGeneration) return;
+    const scroller = app.querySelector('.photo-scroll');
+    if (scroller) { scroller.scrollLeft = nonnegative(ui.photoX); scroller.scrollTop = nonnegative(ui.photoY); }
+    const allowed = ['data-action', 'data-target', 'data-question', 'data-scene'];
+    const focus = allowed.includes(ui.focus?.attribute) ? [...app.querySelectorAll(`[${ui.focus.attribute}]`)].find((el) => el.getAttribute(ui.focus.attribute) === ui.focus.value) : null;
+    (focus ?? app.querySelector('h1') ?? app.querySelector('main'))?.focus({ preventScroll: true });
+    window.scrollTo(0, nonnegative(ui.y));
+    restoring = false;
+    rememberView();
+  });
+}
 
 function urlFor(p, test = false) {
   const url = new URL(location.href);
@@ -54,6 +86,7 @@ function urlFor(p, test = false) {
 }
 
 function startRun(nextPreset) {
+  restoreGeneration++; restoring = false;
   preset = { ...nextPreset };
   runId = crypto.randomUUID();
   state = initialState(preset);
@@ -71,13 +104,16 @@ function configureFault(value) {
 
 function dispatch(action) {
   const snapshot = takePhotoSnapshot(app, action.type === 'card' ? '.curiosity-card img' : undefined);
-  const next = transition(state, action, activeIndex);
+  const next = transition(state, action, activeIndex, preset);
   if (next === state) return;
-  if (action.type === 'home') { startRun(preset); return; }
+  restoreGeneration++; restoring = false;
+  rememberView();
   const sameScreen = next.screen === state.screen;
+  if (next.sceneId !== state.sceneId) { zoomed = false; expandedTargets = false; imageRetry = 0; }
   state = next;
   history[['point', 'text-target'].includes(action.type) ? 'replaceState' : 'pushState']({ runId, state }, '', urlFor(preset));
   render({ focus: !sameScreen, snapshot: sameScreen ? null : snapshot });
+  rememberView();
   if (['point', 'text-target'].includes(action.type)) {
     const preview = app.querySelector('.selection-title');
     if (preview) { preview.tabIndex = -1; preview.focus(); }
@@ -97,7 +133,7 @@ function photo({ interactive = false, compact = false } = {}) {
   return `<div class="photo-wrap ${compact ? 'compact-photo' : ''}"><div class="photo-scroll"><${tag} class="photo-canvas ${zoomed && interactive ? 'zoomed' : ''}" style="--ratio:${asset.width}/${asset.height}" ${interactive ? 'type="button" aria-label="사진에서 궁금한 곳 선택" data-photo-tap' : ''}>
     <img class="scene-photo" data-shared-photo src="${escape(src)}" alt="${escape(asset.alt)}" width="${asset.width}" height="${asset.height}" ${compact ? '' : 'fetchpriority="high"'} /><div class="overlay" aria-hidden="true"></div></${tag}></div>
     <div class="image-failure" hidden><p>사진을 불러오지 못했어요.</p><button class="text-button" data-action="retry">사진 다시 불러오기</button><p>다른 부분 고르기에서 글로도 선택할 수 있어요.</p></div>
-    ${interactive ? `<div class="photo-toolbar"><a href="${escape(asset.sourceUrl)}" target="_blank" rel="noopener noreferrer">사진: ${asset.id === 'photo-ten-longevity-chimney' ? '한국학중앙연구원' : '궁능유적본부'}<span class="sr-only"> · 공공누리 제1유형, 새 탭</span> ↗</a><button class="text-button" data-action="zoom" aria-pressed="${zoomed}">${zoomed ? '전체 크기로 보기' : '사진 확대'}</button></div>` : ''}
+    ${interactive ? `<div class="photo-toolbar"><a href="${escape(asset.sourceUrl)}" target="_blank" rel="noopener noreferrer">사진: ${escape(asset.creatorCredit)}<span class="sr-only"> · 공공누리 제1유형, 새 탭</span> ↗</a><button class="text-button" data-action="zoom" aria-pressed="${zoomed}">${zoomed ? '전체 크기로 보기' : '사진 확대'}</button></div>` : ''}
   </div>`;
 }
 
@@ -118,7 +154,17 @@ function homeScreen() {
     <p class="home-hint">${scene.assetId !== heroAsset.id ? `이번 탐색: ${escape(scene.title.replace(/의 장면$/, ''))} 사진` : '사진에서 궁금한 곳을 직접 골라보세요.'}</p>
     <a class="hero-credit" href="${escape(heroAsset.sourceUrl)}" target="_blank" rel="noopener noreferrer">${story ? '일러스트는 실제 조사·복원 자료가 아니에요. 사진 출처' : `사진: ${heroAsset.id === 'photo-ten-longevity-chimney' ? '한국민족문화대백과사전 · 한국학중앙연구원' : '궁능유적본부'}`}<span class="sr-only"> (새 탭)</span> ↗</a>
     ${state.cardVisible && card ? `<section class="curiosity"><div class="section-label"><span>잠깐, 이런 것도 있어요</span>${motif}</div><button class="curiosity-card" data-action="card"><div class="discovery-photo"><img src="${escape(base + asset.localPath)}" alt="" width="1200" height="1194" /><span class="discovery-icon glass">${icon('look')}</span></div><span class="curiosity-text"><span>${escape(card.prompt)}</span><span class="card-link">더 알아보기 ${icon('arrow')}</span></span></button><a class="card-credit" href="${escape(asset.sourceUrl)}" target="_blank" rel="noopener noreferrer">사진: 한국민족문화대백과사전 · 한국학중앙연구원<span class="sr-only"> (새 탭)</span> ↗</a></section>` : ''}
-    <p class="prototype-note">사진 인식과 현재 위치 확인은 하지 않아요.<br>준비된 세 장면에서 사용 흐름을 체험해요.</p>`, '홈', true);
+    <p class="prototype-note">사진 인식과 현재 위치 확인은 하지 않아요.<br>준비된 사진으로 사용 흐름을 체험해요.</p>`, '홈', true);
+}
+
+function newExploreScreen() {
+  const choices = explorationScenes(state, preset, index);
+  return shell(`<div class="screen-heading"><p class="eyebrow">다른 대상 알아보기</p><h1 tabindex="-1">무엇을 더 살펴볼까요?</h1><p>촬영 대신 준비된 사진으로 체험해요.</p></div>
+    <div class="explore-list">${choices.map((choice) => {
+      const scene = index.scenes.get(choice.sceneId), asset = index.assets.get(scene.assetId);
+      return `<section class="explore-item"><button class="explore-choice" data-scene="${escape(scene.id)}"><img src="${escape(base + asset.localPath)}" alt="${escape(asset.alt)}" width="${asset.width}" height="${asset.height}" loading="lazy"/><span>${escape(scene.title)} ${icon('arrow')}</span></button><a class="explore-credit" href="${escape(asset.sourceUrl)}" target="_blank" rel="noopener noreferrer">${escape(asset.creatorCredit)} · ${escape(asset.licenseLabel)}<span class="sr-only"> (새 탭)</span> ↗</a></section>`;
+    }).join('') || '<p class="empty-questions" role="status">이번 체험에서 더 고를 수 있는 사진이 없어요. 설명으로 돌아가거나 홈에서 다시 살펴볼 수 있어요.</p>'}</div>
+    <button class="secondary" data-action="back">설명으로 돌아가기</button><button class="text-button" data-action="home">홈으로</button>`, '다른 대상 알아보기');
 }
 
 function viewScreen() {
@@ -141,7 +187,7 @@ function answerScreen() {
     ${answer.moreText ? `<details class="more-answer"><summary>더 읽기</summary><p>${escape(answer.moreText)}</p></details>` : ''}
     <div class="sources"><p>설명 출처</p>${sources.map((source) => `<a href="${escape(source.url)}" target="_blank" rel="noopener noreferrer">${escape(source.title)}<span class="sr-only"> (새 탭)</span><span aria-hidden="true">↗</span></a>`).join('')}
     <details class="photo-credit"><summary>사진 출처 · 이용 조건</summary><p>${escape(asset.creatorCredit)}</p><a href="${escape(asset.sourceUrl)}" target="_blank" rel="noopener noreferrer">원본 출처<span class="sr-only"> (새 탭)</span> ↗</a><a href="${escape(asset.licenseUrl)}" target="_blank" rel="noopener noreferrer">${escape(asset.licenseLabel)}<span class="sr-only"> (새 탭)</span> ↗</a><p>촬영일 미상 · 사진 원본 유지</p></details></div>
-    <div class="answer-actions"><button class="related-row" data-action="questions">관련 질문 더 보기 ${icon('arrow')}</button>${state.questionId ? '<button class="text-button" data-action="overview">기본 설명으로</button>' : ''}<button class="text-button" data-action="view">${icon('change')}다른 부분 고르기</button></div></article>`, target.displayName);
+    <div class="answer-actions"><button class="related-row" data-action="questions">관련 질문 더 보기 ${icon('arrow')}</button>${state.questionId ? '<button class="text-button" data-action="overview">기본 설명으로</button>' : ''}${index.scenes.get(state.sceneId).regions.length ? `<button class="text-button" data-action="view">${icon('change')}같은 사진에서 다른 부분 보기</button>` : ''}<button class="primary" data-action="new-explore">다른 대상 알아보기 ${icon('arrow')}</button></div></article>`, target.displayName);
 }
 
 function questionScreen() {
@@ -199,14 +245,14 @@ function render({ focus = true, snapshot } = {}) {
   const photoScroll = previousScroll ? { x: previousScroll.scrollLeft, y: previousScroll.scrollTop } : null;
   observer?.disconnect();
   const isTest = location.hash === '#test';
-  app.innerHTML = isTest ? testScreen() : ({ H: homeScreen, V: viewScreen, A: answerScreen, Q: questionScreen, E: errorScreen }[state.screen] ?? errorScreen)();
+  app.innerHTML = isTest ? testScreen() : ({ H: homeScreen, V: viewScreen, A: answerScreen, Q: questionScreen, E: errorScreen, N: newExploreScreen }[state.screen] ?? errorScreen)();
   document.title = `${isTest ? '테스트 준비' : app.querySelector('h1')?.textContent.replace(/\s+/g, ' ') ?? '경복궁'} · 궁금한 궁`;
   if (focus) { app.querySelector('h1')?.focus(); window.scrollTo(0, 0); }
   for (const el of app.querySelectorAll('[data-action]')) el.addEventListener('click', () => {
     const type = el.dataset.action;
     if (type === 'menu') { app.querySelector('.design-menu').showModal(); return; }
     if (type === 'close-menu') { app.querySelector('.design-menu').close(); return; }
-    if (type === 'back') { history.back(); return; }
+    if (type === 'back') { rememberView(); history.back(); return; }
     if (type === 'targets') { expandedTargets = !expandedTargets; render({ focus: false }); app.querySelector('[data-action="targets"]')?.focus(); return; }
     if (type === 'zoom') { zoomed = !zoomed; render({ focus: false }); app.querySelector('[data-action="zoom"]')?.focus(); return; }
     if (type === 'retry') { imageRetry++; render({ focus: false }); return; }
@@ -214,6 +260,9 @@ function render({ focus = true, snapshot } = {}) {
   });
   for (const el of app.querySelectorAll('[data-target]')) el.addEventListener('click', () => dispatch({ type: 'text-target', targetId: el.dataset.target }));
   for (const el of app.querySelectorAll('[data-question]')) el.addEventListener('click', () => dispatch({ type: 'question', questionId: el.dataset.question }));
+  for (const el of app.querySelectorAll('[data-scene]')) el.addEventListener('click', () => dispatch({ type: 'choose-scene', sceneId: el.dataset.scene }));
+  app.querySelector('.photo-scroll')?.addEventListener('scroll', rememberView, { passive: true });
+  for (const detail of app.querySelectorAll('details')) detail.addEventListener('toggle', rememberView);
   for (const el of app.querySelectorAll('[data-design]')) el.addEventListener('click', () => {
     homeDesign = el.dataset.design;
     startRun(preset);
@@ -233,7 +282,7 @@ function render({ focus = true, snapshot } = {}) {
       textScale = form.elements.textScale.value;
       document.documentElement.style.fontSize = textScale === 'large' ? '200%' : '';
       invalidUrl = false;
-      startRun({ ...p, contextKey: form.elements.context.value === 'before-visit' ? 'before-visit' : p.contextKey === 'before-visit' ? 'gyeonghoeru-area' : p.contextKey, cardVisible: form.elements.card.checked });
+      startRun(configurePreset(index, p.id, { contextKey: form.elements.context.value === 'before-visit' ? 'before-visit' : p.contextKey === 'before-visit' ? 'gyeonghoeru-area' : p.contextKey, cardVisible: form.elements.card.checked }));
     });
   }
   bindPhoto();
@@ -261,6 +310,7 @@ function render({ focus = true, snapshot } = {}) {
     const scroller = app.querySelector('.photo-scroll');
     if (scroller) { scroller.scrollLeft = photoScroll.x; scroller.scrollTop = photoScroll.y; }
   }
+  if (!restoring) rememberView();
 }
 
 async function init() {
@@ -276,24 +326,28 @@ async function init() {
     const defaultPreset = data.testPresets[0];
     const selected = index.testPresets.get(id);
     invalidUrl = !selected;
-    const p = { ...(selected ?? defaultPreset) };
+    const selectedPreset = selected ?? defaultPreset;
+    const overrides = {};
     const context = params.get('context');
     if (context) {
-      const allowed = new Set(['before-visit', 'gyeonghoeru-area', ...data.testPresets.map((item) => item.contextKey)]);
-      if (allowed.has(context) && (context === 'before-visit' || context === p.contextKey || p.id === 'S1' && context === 'gyeonghoeru-area')) p.contextKey = context;
-      else invalidUrl = true;
+      overrides.contextKey = context;
     }
     if (params.has('card')) {
       const value = params.get('card');
-      if (['0', '1'].includes(value)) p.cardVisible = value === '1'; else invalidUrl = true;
+      if (['0', '1'].includes(value)) overrides.cardVisible = value === '1'; else invalidUrl = true;
     }
+    const configured = configurePreset(index, selectedPreset.id, overrides);
+    if (!configured) invalidUrl = true;
+    const p = configured ?? configurePreset(index, selectedPreset.id);
     const test = location.hash === '#test';
     preset = p; state = initialState(p); runId = crypto.randomUUID();
     history.replaceState({ runId, state }, '', urlFor(p, test));
+    history.scrollRestoration = 'manual';
+    window.addEventListener('scroll', rememberView, { passive: true });
+    app.addEventListener('focusin', rememberView);
     window.addEventListener('popstate', (event) => {
-      if (location.hash === '#test') { render(); return; }
-      if (event.state?.runId === runId && canRestore(event.state.state, preset, activeIndex)) { state = event.state.state; render(); }
-      else { state = initialState(preset); history.replaceState({ runId, state }, '', urlFor(preset)); render(); }
+      if (event.state?.runId === runId && canRestore(event.state.state, preset, activeIndex) && location.hash !== '#test') { state = event.state.state; restoreView(event.state.ui); }
+      else { state = initialState(preset); zoomed = false; expandedTargets = false; history.replaceState({ runId, state }, '', urlFor(preset)); render(); }
     });
     window.addEventListener('hashchange', () => { if (location.hash === '#test') render(); });
     render();

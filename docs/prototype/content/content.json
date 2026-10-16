@@ -1,6 +1,6 @@
 {
-  "schemaVersion": 1,
-  "contentVersion": "2026-10-14-scenes.1",
+  "schemaVersion": 2,
+  "contentVersion": "2026-10-16-scenes.2",
   "scenes": [
     {
       "id": "C01",
@@ -68,6 +68,39 @@
         "longevity-panel",
         "smoke-outlets"
       ]
+    },
+    {
+      "id": "C04",
+      "title": "넓은 돌단 위 긴 전각",
+      "areaLabel": "경복궁 · 후보 비교용 준비 장면",
+      "assetId": "photo-sujeongjeon-input",
+      "wholeTargetId": "sujeongjeon",
+      "regions": [],
+      "targetIds": [
+        "sujeongjeon"
+      ]
+    },
+    {
+      "id": "C05",
+      "title": "다섯 칸 정면의 전각",
+      "areaLabel": "경복궁 · 후보 참고 장면",
+      "assetId": "photo-sajeongjeon-reference",
+      "wholeTargetId": "sajeongjeon",
+      "regions": [],
+      "targetIds": [
+        "sajeongjeon"
+      ]
+    },
+    {
+      "id": "C06",
+      "title": "길게 이어진 정면의 전각",
+      "areaLabel": "경회루 남쪽 · 구역 모사",
+      "assetId": "photo-sujeongjeon-reference",
+      "wholeTargetId": "sujeongjeon",
+      "regions": [],
+      "targetIds": [
+        "sujeongjeon"
+      ]
     }
   ],
   "targets": [
@@ -107,7 +140,9 @@
       ],
       "parentTargetId": "geunjeongjeon",
       "overviewAnswerId": "courtyard-floor-overview",
-      "questionIds": []
+      "questionIds": [
+        "courtyard-rank-markers"
+      ]
     },
     {
       "id": "longevity-panel",
@@ -120,7 +155,8 @@
       "parentTargetId": null,
       "overviewAnswerId": "longevity-panel-overview",
       "questionIds": [
-        "chimney-wall"
+        "chimney-wall",
+        "chimney-panel-made"
       ]
     },
     {
@@ -134,6 +170,35 @@
       "parentTargetId": null,
       "overviewAnswerId": "smoke-outlets-overview",
       "questionIds": []
+    },
+    {
+      "id": "sajeongjeon",
+      "kind": "building",
+      "displayName": "사정전",
+      "neutralLabel": "다섯 칸 정면의 전각 전체",
+      "sceneIds": [
+        "C05"
+      ],
+      "parentTargetId": null,
+      "overviewAnswerId": "sajeongjeon-overview",
+      "questionIds": [
+        "sajeongjeon-name"
+      ]
+    },
+    {
+      "id": "sujeongjeon",
+      "kind": "building",
+      "displayName": "수정전",
+      "neutralLabel": "넓은 돌단 위 긴 전각 전체",
+      "sceneIds": [
+        "C04",
+        "C06"
+      ],
+      "parentTargetId": null,
+      "overviewAnswerId": "sujeongjeon-overview",
+      "questionIds": [
+        "sujeongjeon-jiphyeonjeon-site"
+      ]
     }
   ],
   "questions": [
@@ -148,6 +213,30 @@
       "targetId": "longevity-panel",
       "label": "문양이 있는 벽이 굴뚝이라고요?",
       "answerId": "chimney-wall-answer"
+    },
+    {
+      "id": "courtyard-rank-markers",
+      "targetId": "courtyard-floor",
+      "label": "길 옆에 세워진 돌은 무엇인가요?",
+      "answerId": "courtyard-rank-markers-answer"
+    },
+    {
+      "id": "chimney-panel-made",
+      "targetId": "longevity-panel",
+      "label": "이 무늬는 벽에 그린 건가요?",
+      "answerId": "chimney-panel-made-answer"
+    },
+    {
+      "id": "sajeongjeon-name",
+      "targetId": "sajeongjeon",
+      "label": "사정전이라는 이름에는 어떤 뜻이 있나요?",
+      "answerId": "sajeongjeon-name-answer"
+    },
+    {
+      "id": "sujeongjeon-jiphyeonjeon-site",
+      "targetId": "sujeongjeon",
+      "label": "지금 보는 건물이 세종 때의 집현전인가요?",
+      "answerId": "sujeongjeon-jiphyeonjeon-site-answer"
     }
   ],
   "answers": [
@@ -235,6 +324,81 @@
       ],
       "reviewStatus": "reviewed",
       "checkedAt": "2026-10-14"
+    },
+    {
+      "id": "sajeongjeon-overview",
+      "targetId": "sajeongjeon",
+      "questionId": null,
+      "shortText": "사정전은 왕이 신하들과 평소 나랏일을 의논하던 편전이에요. 큰 공식 행사를 치르던 근정전과는 쓰임이 달랐어요.",
+      "moreText": "‘편전’은 왕이 일상적인 정무를 보던 공간을 가리켜요.",
+      "sourceIds": [
+        "royal-sajeongjeon",
+        "royal-geunjeongjeon"
+      ],
+      "reviewStatus": "reviewed",
+      "checkedAt": "2026-10-16"
+    },
+    {
+      "id": "sujeongjeon-overview",
+      "targetId": "sujeongjeon",
+      "questionId": null,
+      "shortText": "수정전은 고종 때 경복궁을 다시 지으면서 세운 건물이에요. 갑오개혁 때는 개혁을 추진한 군국기무처가 이곳을 사용했어요.",
+      "moreText": "경회루의 바로 남쪽에 있어요. 옛 집현전 터와 관련이 있지만, 지금 보이는 건물은 1867년에 다시 지은 것이에요.",
+      "sourceIds": [
+        "royal-sujeongjeon",
+        "aks-sujeongjeon-layout-location"
+      ],
+      "reviewStatus": "reviewed",
+      "checkedAt": "2026-10-16"
+    },
+    {
+      "id": "courtyard-rank-markers-answer",
+      "targetId": "courtyard-floor",
+      "questionId": "courtyard-rank-markers",
+      "shortText": "길 양쪽의 돌 표식은 관리들이 품계에 따라 설 자리를 나타내요. 의식에 참여할 때 각자의 위치를 확인하는 기준이었어요.",
+      "moreText": "",
+      "sourceIds": [
+        "royal-courtyard"
+      ],
+      "reviewStatus": "reviewed",
+      "checkedAt": "2026-10-16"
+    },
+    {
+      "id": "chimney-panel-made-answer",
+      "targetId": "longevity-panel",
+      "questionId": "chimney-panel-made",
+      "shortText": "단순히 벽에 그림을 그린 것은 아니에요. 무늬를 만든 벽돌을 짜 맞추고 회를 발라 넓은 문양을 구성했어요.",
+      "moreText": "",
+      "sourceIds": [
+        "aks-chimney-panel"
+      ],
+      "reviewStatus": "reviewed",
+      "checkedAt": "2026-10-16"
+    },
+    {
+      "id": "sajeongjeon-name-answer",
+      "targetId": "sajeongjeon",
+      "questionId": "sajeongjeon-name",
+      "shortText": "‘사정’에는 나랏일을 잘 다스리기 위해 깊이 생각한다는 뜻이 담겨 있어요. 왕이 신하들과 정무를 의논하던 공간의 성격과 연결되는 이름이에요.",
+      "moreText": "",
+      "sourceIds": [
+        "royal-sajeongjeon"
+      ],
+      "reviewStatus": "reviewed",
+      "checkedAt": "2026-10-16"
+    },
+    {
+      "id": "sujeongjeon-jiphyeonjeon-site-answer",
+      "targetId": "sujeongjeon",
+      "questionId": "sujeongjeon-jiphyeonjeon-site",
+      "shortText": "집현전이 있던 자리와 관련은 있지만 같은 시대의 건물은 아니에요. 지금 보이는 수정전은 세종 때의 원형이 아니라 1867년에 다시 지은 건물이에요.",
+      "moreText": "옛 장소의 역사와 현재 남은 건물의 건립 시기를 구분해서 볼 수 있어요.",
+      "sourceIds": [
+        "royal-sujeongjeon",
+        "aks-sujeongjeon-layout-location"
+      ],
+      "reviewStatus": "reviewed",
+      "checkedAt": "2026-10-16"
     }
   ],
   "sources": [
@@ -285,6 +449,38 @@
       "publisher": "한국학중앙연구원",
       "checkedAt": "2026-10-14",
       "claimNote": "내용: 정상부에 점토 연가를 두어 연기가 빠지도록 함. 사진의 상단 배출구와 대응."
+    },
+    {
+      "id": "royal-sajeongjeon",
+      "title": "사정전 안내 - 궁능유적본부",
+      "url": "https://royal.khs.go.kr/user/board/E101020000_view_storyBoard.ajax?id=20231123030313000072&siteCode=ENG",
+      "publisher": "국가유산청 궁능유적본부",
+      "checkedAt": "2026-10-16",
+      "claimNote": "왕과 신하가 일상 국정을 논의한 편전, 이름의 뜻. 영문 원문을 짧게 번역·재서술."
+    },
+    {
+      "id": "aks-sajeongjeon-layout",
+      "title": "경복궁 사정전 - 한국민족문화대백과사전",
+      "url": "https://encykorea.aks.ac.kr/Article/E0002445",
+      "publisher": "한국학중앙연구원",
+      "checkedAt": "2026-10-16",
+      "claimNote": "내용·건물 정보: 정면 5칸, 측면 3칸, 단층 팔작지붕. 실제 사진 가시성과 함께 비교 단서 검수."
+    },
+    {
+      "id": "royal-sujeongjeon",
+      "title": "수정전 안내 - 궁능유적본부",
+      "url": "https://royal.khs.go.kr/user/board/E101020000_view_storyBoard.ajax?id=20231123030313005428&siteCode=ENG",
+      "publisher": "국가유산청 궁능유적본부",
+      "checkedAt": "2026-10-16",
+      "claimNote": "현 건물은 고종대 경복궁 중건 당시 건립. 갑오개혁 군국기무처 사용, 옛 집현전 터와 현재 건물의 구분."
+    },
+    {
+      "id": "aks-sujeongjeon-layout-location",
+      "title": "경복궁 수정전 - 한국민족문화대백과사전",
+      "url": "https://encykorea.aks.ac.kr/Article/E0002446",
+      "publisher": "한국학중앙연구원",
+      "checkedAt": "2026-10-16",
+      "claimNote": "정면 10칸·측면 4칸, 넓은 월대, 경회루 바로 남쪽의 위치, 1867년 재건. 위치 관계는 거리·실제 이동 가능 시간의 근거가 아님."
     }
   ],
   "assets": [
@@ -344,6 +540,69 @@
       "captureDateNote": "선택한 개별 미디어에 촬영일이 없어 미상으로 기록.",
       "checkedAt": "2026-10-14",
       "sha256": "69dc67b4e60cbbb2a203eb84e162ffbb7a7065111dd76234bf94edb9ec8f7f38"
+    },
+    {
+      "id": "photo-sajeongjeon-reference",
+      "alt": "문 너머로 본 단층 전각의 정면과 다섯 칸의 문·창, 앞쪽 돌계단",
+      "sourceUrl": "https://www.heritage.go.kr/heri/cul/culSelectDetail.do?ccbaCpno=1121117590000&pageNo=1_1_1_1",
+      "downloadUrl": "https://www.heritage.go.kr/unisearch/images/treasure/2021070211522200.jpg",
+      "licenseEvidenceUrl": "https://www.heritage.go.kr/heri/cul/imgHeritage.do?ccimId=6409289&ccbaKdcd=12&ccbaAsno=0017590000000&ccbaCtcd=11",
+      "creatorCredit": "경복궁 사정전_근경 · 국가유산청 국가유산포털 제공",
+      "sourceRecordId": "6409289",
+      "localPath": "assets/sajeongjeon-reference.jpg",
+      "width": 4000,
+      "height": 2154,
+      "byteLength": 6068124,
+      "sha256": "825593c6eaa427129d2c8ec847d5c046d7fed217c3d45b6fc5504f2bcd0357d3",
+      "licenseLabel": "공공누리 제1유형 · 출처표시",
+      "licenseUrl": "https://www.kogl.or.kr/info/licenseType1.do",
+      "modificationNote": "제공된 JPEG 원본 바이트 그대로 저장. 크롭·색보정·표식 합성·생성형 확대 없음.",
+      "capturedAt": null,
+      "captureDateNote": "정확한 촬영일 미상. 파일명의 2021 날짜 및 페이지 게시일을 촬영일로 사용하지 않음.",
+      "checkedAt": "2026-10-16",
+      "creditNote": "개별 촬영자 이름은 제공 화면에서 확인하지 못해 제공기관과 원문 제목으로 표기."
+    },
+    {
+      "id": "photo-sujeongjeon-reference",
+      "alt": "기와지붕 아래 정면이 길게 이어지고 앞에 넓은 돌단이 있는 단층 전각의 참고 사진",
+      "sourceUrl": "https://www.heritage.go.kr/heri/cul/culSelectDetail.do?ccbaCpno=1121117600000&pageNo=1_1_1_1",
+      "downloadUrl": "https://www.heritage.go.kr/unisearch/images/treasure/2021070509000101.jpg",
+      "licenseEvidenceUrl": "https://www.heritage.go.kr/heri/cul/imgHeritage.do?ccimId=6411382&ccbaKdcd=12&ccbaAsno=0017600000000&ccbaCtcd=11",
+      "creatorCredit": "경복궁 수정전_전경 · 국가유산청 국가유산포털 제공",
+      "sourceRecordId": "6411382",
+      "localPath": "assets/sujeongjeon-reference.jpg",
+      "width": 4000,
+      "height": 2383,
+      "byteLength": 5699356,
+      "sha256": "c266cd0a8b44da8e9deedf47cde80891933fb02853aebe60656f1706a164e2a7",
+      "licenseLabel": "공공누리 제1유형 · 출처표시",
+      "licenseUrl": "https://www.kogl.or.kr/info/licenseType1.do",
+      "modificationNote": "제공된 JPEG 원본 바이트 그대로 저장. 크롭·색보정·표식 합성·생성형 확대 없음.",
+      "capturedAt": null,
+      "captureDateNote": "정확한 촬영일 미상. 파일명의 2021 날짜 및 페이지 게시일을 촬영일로 사용하지 않음.",
+      "checkedAt": "2026-10-16",
+      "creditNote": "개별 촬영자 이름은 제공 화면에서 확인하지 못해 제공기관과 원문 제목으로 표기."
+    },
+    {
+      "id": "photo-sujeongjeon-input",
+      "alt": "긴 기와지붕 아래 문들이 가로로 이어지고 앞에 넓은 돌단이 있는 전각",
+      "sourceUrl": "https://royal.khs.go.kr/ENG/contents/E101020000.do?schBdcode=gbg&pageType=story&bdProgramCode=storyCtg3",
+      "downloadUrl": "https://royal.khs.go.kr/afile/preview/5705",
+      "licenseEvidenceUrl": "https://royal.khs.go.kr/user/board/E101020000_view_storyBoard.ajax?id=20231123030313005428&siteCode=ENG",
+      "creatorCredit": "수정전 전경 · 국가유산청 궁능유적본부",
+      "sourceRecordId": "5705",
+      "localPath": "assets/sujeongjeon-input.jpg",
+      "width": 2000,
+      "height": 1333,
+      "byteLength": 627667,
+      "sha256": "4b0716c4b8e75f6717571fcc0503f3de62b6511ae1f37e9a52504d3c951c31da",
+      "licenseLabel": "공공누리 제1유형 · 출처표시",
+      "licenseUrl": "https://www.kogl.or.kr/info/licenseType1.do",
+      "modificationNote": "제공된 JPEG 원본 바이트 그대로 저장. 크롭·색보정·표식 합성·생성형 확대 없음.",
+      "capturedAt": null,
+      "captureDateNote": "정확한 촬영일 미상. 파일명의 2021 날짜 및 페이지 게시일을 촬영일로 사용하지 않음.",
+      "checkedAt": "2026-10-16",
+      "creditNote": "개별 촬영자 이름은 제공 화면에서 확인하지 못해 제공기관과 원문 제목으로 표기."
     }
   ],
   "cards": [
@@ -364,21 +623,181 @@
       "sceneId": "C01",
       "contextKey": "before-visit",
       "cardVisible": false,
-      "contentVersion": "2026-10-14-scenes.1"
+      "contentVersion": "2026-10-16-scenes.2",
+      "comparisonCaseId": null,
+      "navigationScenes": [
+        {
+          "sceneId": "C01",
+          "contextKey": "before-visit",
+          "cardVisible": false,
+          "selectableInNewExplore": true
+        },
+        {
+          "sceneId": "C02",
+          "contextKey": "courtyard-area",
+          "cardVisible": false,
+          "selectableInNewExplore": true
+        }
+      ]
     },
     {
       "id": "S2",
       "sceneId": "C02",
       "contextKey": "courtyard-area",
       "cardVisible": false,
-      "contentVersion": "2026-10-14-scenes.1"
+      "contentVersion": "2026-10-16-scenes.2",
+      "comparisonCaseId": null,
+      "navigationScenes": [
+        {
+          "sceneId": "C01",
+          "contextKey": "gyeonghoeru-area",
+          "cardVisible": false,
+          "selectableInNewExplore": true
+        },
+        {
+          "sceneId": "C02",
+          "contextKey": "courtyard-area",
+          "cardVisible": false,
+          "selectableInNewExplore": true
+        }
+      ]
     },
     {
       "id": "S3",
       "sceneId": "C03",
       "contextKey": "chimney-area",
       "cardVisible": true,
-      "contentVersion": "2026-10-14-scenes.1"
+      "contentVersion": "2026-10-16-scenes.2",
+      "comparisonCaseId": null,
+      "navigationScenes": [
+        {
+          "sceneId": "C01",
+          "contextKey": "gyeonghoeru-area",
+          "cardVisible": false,
+          "selectableInNewExplore": true
+        },
+        {
+          "sceneId": "C02",
+          "contextKey": "courtyard-area",
+          "cardVisible": false,
+          "selectableInNewExplore": true
+        },
+        {
+          "sceneId": "C03",
+          "contextKey": "chimney-area",
+          "cardVisible": true,
+          "selectableInNewExplore": true
+        }
+      ]
+    },
+    {
+      "id": "S4",
+      "sceneId": "C04",
+      "contextKey": "comparison-area",
+      "cardVisible": false,
+      "comparisonCaseId": "compare-single-storey-halls",
+      "navigationScenes": [
+        {
+          "sceneId": "C04",
+          "contextKey": "comparison-area",
+          "cardVisible": false,
+          "selectableInNewExplore": false
+        },
+        {
+          "sceneId": "C05",
+          "contextKey": "reference-sajeongjeon",
+          "cardVisible": false,
+          "selectableInNewExplore": false
+        },
+        {
+          "sceneId": "C06",
+          "contextKey": "gyeonghoeru-south-area",
+          "cardVisible": false,
+          "selectableInNewExplore": false
+        }
+      ],
+      "contentVersion": "2026-10-16-scenes.2"
+    },
+    {
+      "id": "S5",
+      "sceneId": "C01",
+      "contextKey": "gyeonghoeru-area",
+      "cardVisible": false,
+      "comparisonCaseId": null,
+      "navigationScenes": [
+        {
+          "sceneId": "C01",
+          "contextKey": "gyeonghoeru-area",
+          "cardVisible": false,
+          "selectableInNewExplore": true
+        },
+        {
+          "sceneId": "C02",
+          "contextKey": "courtyard-area",
+          "cardVisible": false,
+          "selectableInNewExplore": true
+        },
+        {
+          "sceneId": "C06",
+          "contextKey": "gyeonghoeru-south-area",
+          "cardVisible": false,
+          "selectableInNewExplore": true
+        }
+      ],
+      "contentVersion": "2026-10-16-scenes.2"
+    }
+  ],
+  "comparisonCases": [
+    {
+      "id": "compare-single-storey-halls",
+      "inputSceneId": "C04",
+      "options": [
+        {
+          "id": "option-sajeongjeon",
+          "targetId": "sajeongjeon",
+          "referenceSceneId": "C05",
+          "clues": [
+            {
+              "text": "정면은 5칸으로, 가운데 문을 중심으로 비교적 짧게 이어져요.",
+              "sourceIds": [
+                "aks-sajeongjeon-layout"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "option-sujeongjeon",
+          "targetId": "sujeongjeon",
+          "referenceSceneId": "C06",
+          "clues": [
+            {
+              "text": "정면은 10칸으로, 문과 기둥이 가로로 길게 이어져요.",
+              "sourceIds": [
+                "aks-sujeongjeon-layout-location"
+              ]
+            }
+          ]
+        }
+      ],
+      "reviewStatus": "reviewed",
+      "checkedAt": "2026-10-16",
+      "limitation": "유사한 단층 전각을 비교하는 모사 과제다. 실제 방문객의 혼동 빈도·AI 후보 발생률은 검증하지 않았다. 칸수 세기나 작은 현판 독해를 필수 성공 조건으로 삼지 않는다."
+    }
+  ],
+  "continuations": [
+    {
+      "id": "gyeonghoeru-to-sujeongjeon",
+      "fromTargetId": "gyeonghoeru",
+      "toSceneId": "C06",
+      "toTargetId": "sujeongjeon",
+      "intro": "연못 남쪽의 긴 전각에서는 어떤 나랏일을 했을까요?",
+      "relation": "nearby",
+      "sourceIds": [
+        "aks-sujeongjeon-layout-location"
+      ],
+      "reviewStatus": "reviewed",
+      "checkedAt": "2026-10-16",
+      "displayNote": "테스트에서 정한 구역의 예시입니다. 실제 위치 확인·길찾기 기능이 아닙니다."
     }
   ]
 }

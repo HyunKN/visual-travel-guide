@@ -1,12 +1,13 @@
 # 프로토타입 콘텐츠 원본
 
-P01 보완 자료는 [별도 준비 묶음](../content-preparation/README.md)에 있다. 비교 사진 3장·새 대상 2개·추가 질문 4개·경회루→수정전 연결을 검수했다. 현재 v1 앱이 이 자료를 읽는 것은 아니다. P02/P06 통합 전에는 아래 `content.json`을 준비 묶음으로 교체하지 않는다.
+P01 보완 자료의 근거는 [별도 준비 묶음](../content-preparation/README.md)에 있다. P02에서 실제 자료를 v2에 병합했다. packet을 런타임 JSON으로 통째로 교체하지 않는다. 비교 사진·건물·추가 질문·경회루→수정전 관계는 자료에 포함되며 후보 UI와 다음 관람 카드는 각각 P03/P05에서 연결한다.
 
 이 폴더는 앱이 사용하는 실제 콘텐츠 원본이다. [모바일 웹](../../../prototype/README.md)의 Vite `publicDir`에서 직접 제공하며 빌드 때 자동 복사한다. 원본을 중복 관리하지 않고 출처 필드를 함께 보존한다.
 
 ## 먼저 확인할 자료
 
-- [content.json](content.json): C01~C03 장면, 대상 5개, 설명 7개, 관련 질문 2개, 사실별 출처와 사진 3개의 provenance.
+- [content.json](content.json): v2 `2026-10-16-scenes.2`, C01~C06 장면, 대상 7개, 답변 13개, 관련 질문 6개, 출처 10개와 사진 6개의 provenance. 기존 ID·기본 설명·사진을 보존했다.
+- 새 사진: [사정전 참고](assets/sajeongjeon-reference.jpg), [수정전 입력](assets/sujeongjeon-input.jpg), [수정전 참고](assets/sujeongjeon-reference.jpg). P01 원본과 같은 바이트·해시다. 경량 파생본과 전체 시나리오 검수는 P06 범위다.
 - [경회루 사진](assets/gyeonghoeru.jpg): 궁능유적본부 제공, 2000×1499px. 연못과 누각 전체가 보이는 높은 시점의 사진이다. 실제 방문자의 눈높이를 재현한 자료로 해석하지 않는다.
 - [근정전 사진](assets/geunjeongjeon.jpg): 궁능유적본부 제공, 2000×1151px. 정면 건물과 앞마당의 돌 표식이 보인다. 부분 선택 영역과 모바일 판독성은 P06에서 확인한다.
 - [자경전 십장생굴뚝 사진](assets/ten-longevity-chimney.webp): 한국민족문화대백과사전 미디어 `7b8dca9e`, 1200×1194px. 응답의 실제 형식인 WebP로 저장했고 하단 기관 표기를 보존했다.

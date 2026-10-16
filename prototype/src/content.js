@@ -1,4 +1,4 @@
-const ID_LISTS = ['scenes', 'targets', 'questions', 'answers', 'sources', 'assets', 'cards', 'testPresets'];
+const ID_LISTS = ['scenes', 'targets', 'questions', 'answers', 'sources', 'assets', 'cards', 'testPresets', 'comparisonCases', 'continuations'];
 const nonempty = (value) => typeof value === 'string' && value.trim().length > 0;
 const webUrl = (value) => {
   try { return ['http:', 'https:'].includes(new URL(value).protocol); } catch { return false; }
@@ -9,7 +9,7 @@ export function validateContent(data) {
   const errors = [];
   const require = (condition, message) => { if (!condition) errors.push(message); };
   const maps = {};
-  require(data?.schemaVersion === 1, '지원하지 않는 schemaVersion');
+  require(data?.schemaVersion === 2, '지원하지 않는 schemaVersion (v2 필요)');
   require(nonempty(data?.contentVersion), 'contentVersion 누락');
   for (const key of ID_LISTS) {
     const items = Array.isArray(data?.[key]) ? data[key] : [];
@@ -42,7 +42,7 @@ export function validateContent(data) {
     require(new Set(regions.map((r) => r.id)).size === regions.length, `${scene.id}: 영역 ID 중복`);
     for (const region of regions) {
       require([region.x, region.y, region.width, region.height].every(Number.isFinite) && region.x >= 0 && region.y >= 0 && region.width > 0 && region.height > 0 && region.x + region.width <= 1 && region.y + region.height <= 1, `${scene.id}/${region.id}: 영역 범위 오류`);
-      require(Array.isArray(region.targetIds) && region.targetIds.length === 1, `${scene.id}/${region.id}: 후보 비교는 미구현`);
+      require(Array.isArray(region.targetIds) && region.targetIds.length === 1, `${scene.id}/${region.id}: 부분 대상은 하나여야 함`);
       for (const id of region.targetIds ?? []) require(belongs(scene.targetIds, id) && maps.targets[id]?.kind === 'part', `${scene.id}/${region.id}: 부분 대상 불일치`);
     }
     for (let i = 0; i < regions.length; i++) for (let j = i + 1; j < regions.length; j++) {
@@ -87,14 +87,70 @@ export function validateContent(data) {
     require(scene?.assetId === card.assetId && belongs(scene?.targetIds, card.targetId), `${card.id}: 카드 장면 불일치`);
     require(answer?.targetId === card.targetId && answer?.questionId === card.questionId && answer?.reviewStatus === 'reviewed', `${card.id}: 카드 답변 불일치`);
   }
+  const reviewedOverview = (targetId) => {
+    const target = maps.targets[targetId], answer = maps.answers[target?.overviewAnswerId];
+    return answer?.targetId === targetId && answer.questionId === null && answer.reviewStatus === 'reviewed' && nonempty(answer.shortText);
+  };
+  const reviewed = (item) => item.reviewStatus === 'reviewed' && nonempty(item.checkedAt);
+  const sourceIdsValid = (ids) => Array.isArray(ids) && ids.length > 0 && ids.every((id) => maps.sources[id]);
+  for (const item of Object.values(maps.comparisonCases)) {
+    require(!!maps.scenes[item.inputSceneId], `${item.id}: 비교 입력 장면 없음`);
+    require(reviewed(item), `${item.id}: 비교 자료 미검수`);
+    const options = Array.isArray(item.options) ? item.options : [];
+    require(options.length === 2, `${item.id}: 후보는 정확히 2개`);
+    require(options.every((o) => nonempty(o.id)) && new Set(options.map((o) => o.id)).size === options.length, `${item.id}: 옵션 ID 누락/중복`);
+    require(new Set(options.map((o) => o.targetId)).size === options.length, `${item.id}: 후보 대상 중복`);
+    for (const option of options) {
+      const reference = maps.scenes[option.referenceSceneId];
+      require(reference && reference.id !== item.inputSceneId && belongs(reference.targetIds, option.targetId), `${item.id}/${option.id}: 참고 장면 불일치`);
+      require(maps.targets[option.targetId]?.kind === 'building' && reviewedOverview(option.targetId), `${item.id}/${option.id}: 검수 건물 설명 없음`);
+      const clues = Array.isArray(option.clues) ? option.clues : [];
+      require(clues.length >= 1 && clues.length <= 2 && clues.every((clue) => nonempty(clue.text) && sourceIdsValid(clue.sourceIds)), `${item.id}/${option.id}: 구별 근거 오류`);
+    }
+  }
+  const origins = new Set();
+  for (const item of Object.values(maps.continuations)) {
+    require(!!maps.targets[item.fromTargetId] && !origins.has(item.fromTargetId), `${item.id}: 출발 대상 없음/중복`);
+    origins.add(item.fromTargetId);
+    require(item.fromTargetId !== item.toTargetId && belongs(maps.scenes[item.toSceneId]?.targetIds, item.toTargetId) && reviewedOverview(item.toTargetId), `${item.id}: 다음 관람 목적지 오류`);
+    require(nonempty(item.intro) && ['nearby', 'related'].includes(item.relation) && sourceIdsValid(item.sourceIds) && reviewed(item), `${item.id}: 다음 관람 근거/검수 오류`);
+  }
   for (const preset of Object.values(maps.testPresets)) {
     require(!!maps.scenes[preset.sceneId] && preset.contentVersion === data.contentVersion, `${preset.id}: 설정 장면/버전 오류`);
     require(nonempty(preset.contextKey) && typeof preset.cardVisible === 'boolean', `${preset.id}: 설정 오류`);
     const card = Object.values(maps.cards).find((item) => item.contextKey === preset.contextKey);
     if (preset.cardVisible && card) require(card.sceneId === preset.sceneId, `${preset.id}: 다른 장면 카드`);
+    const navigation = Array.isArray(preset.navigationScenes) ? preset.navigationScenes : [];
+    require(navigation.length > 0 && new Set(navigation.map((item) => item.sceneId)).size === navigation.length, `${preset.id}: 허용 장면 없음/중복`);
+    for (const item of navigation) {
+      require(!!maps.scenes[item.sceneId] && nonempty(item.contextKey) && typeof item.cardVisible === 'boolean' && typeof item.selectableInNewExplore === 'boolean', `${preset.id}: 허용 장면 설정 오류`);
+      const navCard = Object.values(maps.cards).find((c) => c.contextKey === item.contextKey);
+      require(!item.cardVisible || !navCard || navCard.sceneId === item.sceneId, `${preset.id}: 허용 장면 카드 불일치`);
+    }
+    const start = navigation.find((item) => item.sceneId === preset.sceneId);
+    require(start?.contextKey === preset.contextKey && start?.cardVisible === preset.cardVisible, `${preset.id}: 시작 설정과 허용 장면 불일치`);
+    const comparison = maps.comparisonCases[preset.comparisonCaseId];
+    require(preset.comparisonCaseId === null || (comparison?.inputSceneId === preset.sceneId && Array.isArray(comparison.options) && comparison.options.every((o) => navigation.some((n) => n.sceneId === o.referenceSceneId))), `${preset.id}: 비교 설정 불일치`);
   }
   require(Object.keys(maps.scenes).length > 0 && Object.keys(maps.testPresets).length > 0, '실행할 장면/설정 없음');
   return errors;
+}
+
+/** Normalize only the start entry; destinations keep their explicit context/card settings. */
+export function configurePreset(index, presetId, overrides = {}) {
+  const source = index.testPresets.get(presetId);
+  if (!source) return null;
+  const preset = structuredClone(source);
+  const context = overrides.contextKey ?? preset.contextKey;
+  const card = overrides.cardVisible ?? preset.cardVisible;
+  const allowedContexts = new Set([source.contextKey, 'before-visit']);
+  if (source.sceneId === 'C01') allowedContexts.add('gyeonghoeru-area');
+  if (!allowedContexts.has(context) || typeof card !== 'boolean') return null;
+  const contextCard = [...index.cards.values()].find((c) => c.contextKey === context);
+  if (card && contextCard && contextCard.sceneId !== source.sceneId) return null;
+  preset.contextKey = context; preset.cardVisible = card;
+  Object.assign(preset.navigationScenes.find((n) => n.sceneId === preset.sceneId), { contextKey: context, cardVisible: card });
+  return preset;
 }
 
 export function indexContent(data) {
