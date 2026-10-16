@@ -1,6 +1,6 @@
 # 콘텐츠·상태·구현 경계
 
-현재 계약은 **schemaVersion 2**다. [보완 개발 설계 4·5절](FLOW_EXTENSION_DESIGN.md)의 ComparisonCase·Continuation·preset 허용 장면과 N/홈/이력을 구현했다. P03의 후보 C는 case/option/input/reference/target을 함께 검사하고 후보 참고 장면에서 설명·질문을 연다. 다음 관람 카드 UI는 P05의 범위다. 부분 영역 중첩은 거부하고 틀린 후보를 입력 사진의 실제 대상으로 추가하지 않는다.
+현재 계약은 **schemaVersion 2**다. [보완 설계 4·5절](FLOW_EXTENSION_DESIGN.md)의 ComparisonCase·Continuation·preset 허용 장면과 N/홈/이력·다음 관람을 구현했다. 후보 C는 case/option/input/reference/target을 함께 검사하고 참고 장면에서 설명·질문을 연다. 부분 중첩은 거부하고 틀린 후보를 입력 사진의 실제 대상으로 추가하지 않는다.
 
 이관 근거는 [P01 준비 묶음](content-preparation/README.md)이다. 검수 자료를 [런타임 JSON](content/content.json)에 병합했고 P06에서 새 사진3장을 비율 유지 축소 WebP로 변환했다. Asset.original에 원본 보관 경로·해시·크기·용량을 남긴다. P01 packet·정답표·원본은 publicDir 밖에 유지한다. 촬영일은 미상이며 런타임 버전은 `2026-10-16-scenes.3`이다.
 
@@ -127,7 +127,7 @@ ny = (pointerY - containerTop  - offsetY) / renderH
 - nx/ny가 0~1 밖이면 사진 여백이므로 선택하지 않는다.
 - 이미지를 불러오기 전이거나 원본 크기가 없으면 좌표 선택을 비활성화하고 대체 경로를 표시한다.
 - 지정 영역 내부 여부만 판정한다. 영역 밖을 가까운 곳으로 자동 이동시키지 않는다.
-- part 영역의 일치 target ID를 중복 제거해 하나이면 미리보기, 0이면 미지원 부분으로 처리한다. 2~3개가 실제로 모호한 자료는 C가 구현된 버전에서만 사용한다. C를 보류한 버전에서는 중첩을 자료 검사 오류로 처리한다. 3개 초과 중첩은 항상 자료 오류다.
+- part 영역의 일치 target ID가 하나이면 미리보기, 0이면 미지원 부분이다. 서로 다른 부분 영역의 중첩은 거부한다. S4 건물 비교 C가 구현됐다는 이유로 부분 중첩을 허용하지 않는다.
 - wholeTarget은 전체 건물 행동으로 명시적으로 선택한다. part 영역 선택과 자동 경쟁시키지 않는다.
 - `wholeTargetId=null`인 십장생굴뚝 장면에서는 전체 건물 행동을 표시하지 않는다. 사진에 보이는 중앙 문양·배출구를 부분 대상으로 선택한다.
 - 화면 크기·가로세로 변경 때 표시 사각형을 다시 계산한다. 저장 좌표는 바꾸지 않는다. 사진과 overlay가 동일한 변환을 사용한다.

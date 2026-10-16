@@ -10,6 +10,7 @@
     "dev": "vite --host 127.0.0.1",
     "build": "node scripts/check-content.mjs && vite build",
     "preview": "vite preview --host 127.0.0.1",
+    "preview:lan": "vite preview --host 0.0.0.0",
     "test": "node --test",
     "check:content": "node scripts/check-content.mjs"
   },

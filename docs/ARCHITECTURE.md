@@ -27,7 +27,7 @@
 
 ## 구조를 바꿀 때
 
-v2 이동은 [state.js](../prototype/src/state.js)의 `explorationScenes`·`transition`이 preset의 허용 장면에서 목적지 scene/context/card를 함께 선택한다. A→N은 출발 선택을 보존하고 N→V는 이를 초기화한다. 홈은 현재 장면·runId를 유지한다. [main.js](../prototype/src/main.js)의 `rememberView`·`restoreView`는 browser history 항목에 UI snapshot을 보관하며, popstate에서 runId와 `canRestore`의 참조 검사를 통과한 항목만 복원한다. 외부 저장·분석 수집은 추가하지 않았다. 준비 자료와 런타임 복사본의 관계는 [콘텐츠 안내](prototype/content/README.md)를 따른다.
+v2 이동은 [state.js](../prototype/src/state.js)의 `explorationScenes`·`transition`이 허용 목적지 scene/context/card를 함께 선택한다. 후보는 case/option/reference/target, 다음 관람은 `availableContinuation`의 검수·목적지·출처를 함께 검사한다. A→N은 출발 선택을 보존하고 N→V는 초기화한다. 홈은 현재 장면·runId를 유지한다. [main.js](../prototype/src/main.js)의 `rememberView`·`restoreView`는 browser history의 UI snapshot을 runId·`canRestore` 검사 후 복원한다. 화면 ID가 같아도 대상/답변이 달라지면 새 제목으로 포커스·스크롤을 옮긴다. 외부 저장·분석 수집은 추가하지 않았다. 원본·파생본은 [콘텐츠 안내](prototype/content/README.md)를 따른다.
 
 1. 변경할 책임, 입력·출력, 소비자를 적는다.
 2. 기존 상태 전환과 설명의 대상 일치 규칙에 미치는 영향을 확인한다.

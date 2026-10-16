@@ -40,6 +40,7 @@ let data, index, activeIndex, preset, state, runId;
 let imageReady = false, imageFailed = false, zoomed = false, expandedTargets = false, imageRetry = 0;
 let fault = 'none', invalidUrl = false, observer;
 let textScale = 'normal';
+let glassMode = 'auto';
 let homeDesign = 'photo', disposeStory, disposePress, disposeOptics, storyGeneration = 0;
 let restoring = false, restoreGeneration = 0;
 
@@ -108,7 +109,7 @@ function dispatch(action) {
   if (next === state) return;
   restoreGeneration++; restoring = false;
   rememberView();
-  const sameScreen = next.screen === state.screen;
+  const sameScreen = ['point', 'text-target'].includes(action.type) || (next.screen === state.screen && next.sceneId === state.sceneId && next.targetId === state.targetId && next.answerId === state.answerId && next.questionId === state.questionId);
   if (next.sceneId !== state.sceneId) { zoomed = false; expandedTargets = false; imageRetry = 0; }
   state = next;
   history[['point', 'text-target'].includes(action.type) ? 'replaceState' : 'pushState']({ runId, state }, '', urlFor(preset));
@@ -135,7 +136,7 @@ function photo({ interactive = false, compact = false, zoomable = interactive } 
     : `<a href="${escape(asset.sourceUrl)}" target="_blank" rel="noopener noreferrer">사진: ${escape(asset.creatorCredit)}<span class="sr-only"> · 공공누리 제1유형, 새 탭</span> ↗</a>`;
   return `<div class="photo-wrap ${compact ? 'compact-photo' : ''}"><div class="photo-scroll"><${tag} class="photo-canvas ${zoomed && zoomable ? 'zoomed' : ''}" style="--ratio:${asset.width}/${asset.height}" ${interactive ? 'type="button" aria-label="사진에서 궁금한 곳 선택" data-photo-tap' : ''}>
     <img class="scene-photo" data-shared-photo src="${escape(src)}" alt="${escape(asset.alt)}" width="${asset.width}" height="${asset.height}" ${compact ? '' : 'fetchpriority="high"'} /><div class="overlay" aria-hidden="true"></div></${tag}></div>
-    <div class="image-failure" hidden><p>사진을 불러오지 못했어요.</p><button class="text-button" data-action="retry">사진 다시 불러오기</button><p>다른 부분 고르기에서 글로도 선택할 수 있어요.</p></div>
+    <div class="image-failure" hidden><p>사진을 불러오지 못했어요.</p><button class="text-button" data-action="retry">사진 다시 불러오기</button><p>${interactive ? '‘글로 대상 고르기’에서도 선택할 수 있어요.' : '사진 출처를 확인하거나 다시 시도해 주세요.'}</p></div>
     ${zoomable ? `<div class="photo-toolbar">${credit}<button class="text-button" data-action="zoom" aria-pressed="${zoomed}">${zoomed ? '전체 크기로 보기' : '사진 확대'}</button></div>` : ''}
   </div>`;
 }
@@ -166,8 +167,8 @@ function newExploreScreen() {
     <div class="explore-list">${choices.map((choice) => {
       const scene = index.scenes.get(choice.sceneId), asset = index.assets.get(scene.assetId);
       return `<section class="explore-item"><button class="explore-choice" data-scene="${escape(scene.id)}"><img src="${escape(base + asset.localPath)}" alt="${escape(asset.alt)}" width="${asset.width}" height="${asset.height}" loading="lazy"/><span>${escape(scene.title)} ${icon('arrow')}</span></button><a class="explore-credit" href="${escape(asset.sourceUrl)}" target="_blank" rel="noopener noreferrer">${escape(asset.creatorCredit)} · ${escape(asset.licenseLabel)}<span class="sr-only"> (새 탭)</span> ↗</a></section>`;
-    }).join('') || '<p class="empty-questions" role="status">이번 체험에서 더 고를 수 있는 사진이 없어요. 설명으로 돌아가거나 홈에서 다시 살펴볼 수 있어요.</p>'}</div>
-    <button class="secondary" data-action="back">설명으로 돌아가기</button><button class="text-button" data-action="home">홈으로</button>`, '다른 대상 알아보기');
+    }).join('') || '<p class="empty-questions" role="status">이번 체험에서 더 고를 수 있는 사진이 없어요. 이전 화면으로 돌아가거나 홈에서 다시 살펴볼 수 있어요.</p>'}</div>
+    <button class="secondary" data-action="back">이전 화면으로 돌아가기</button><button class="text-button" data-action="home">홈으로</button>`, '다른 대상 알아보기');
 }
 
 function viewScreen() {
@@ -240,8 +241,10 @@ function bindPhoto() {
   const img = app.querySelector('.scene-photo'), canvas = app.querySelector('.photo-canvas');
   imageReady = false; imageFailed = false;
   if (!img) return;
-  const loaded = () => { imageReady = true; app.querySelector('.image-failure').hidden = true; canvas.hidden = false; updateOverlay(); };
-  const failed = () => { imageFailed = true; imageReady = false; canvas.hidden = true; app.querySelector('.image-failure').hidden = false; };
+  const zoom = app.querySelector('[data-action="zoom"]');
+  if (zoom) zoom.disabled = true;
+  const loaded = () => { imageReady = true; imageFailed = false; if (zoom) zoom.disabled = false; app.querySelector('.image-failure').hidden = true; canvas.hidden = false; updateOverlay(); };
+  const failed = () => { imageFailed = true; imageReady = false; if (zoom) zoom.disabled = true; canvas.hidden = true; app.querySelector('.image-failure').hidden = false; };
   img.addEventListener('load', loaded); img.addEventListener('error', failed);
   if (img.complete) img.naturalWidth ? loaded() : failed();
   observer = new ResizeObserver(updateOverlay); observer.observe(canvas);
@@ -299,16 +302,25 @@ function render({ focus = true, snapshot } = {}) {
   app.querySelector('#motion-effects').addEventListener('change', (event) => setMotionPreference(event.target.checked));
   const form = app.querySelector('#test-form');
   if (form) {
+    form.querySelector('[type="submit"]').insertAdjacentHTML('beforebegin', '<label for="glass-mode">재질 대체 리허설</label><select id="glass-mode" name="glassMode"><option value="auto">기본 · 지원되는 재질</option><option value="plain">불투명 대체 · 효과 없이 조작 확인</option></select><p class="form-hint">대체 화면 리허설은 실제 Safari나 실기기 검사 결과가 아니에요.</p>');
+    form.elements.glassMode.value = glassMode;
     form.insertAdjacentHTML('afterbegin', '<label for="home-design">홈 화면</label><select id="home-design" name="homeDesign"><option value="story">1안 · 3D 궁궐</option><option value="photo">2안 · 사진 두 개</option></select>');
     form.elements.homeDesign.value = homeDesign;
     form.elements.fault.value = fault;
     form.elements.textScale.value = textScale;
+    form.elements.preset.addEventListener('change', () => {
+      const nextPreset = index.testPresets.get(form.elements.preset.value);
+      form.elements.context.value = nextPreset.contextKey === 'before-visit' ? 'before-visit' : 'scene';
+      form.elements.card.checked = nextPreset.cardVisible;
+    });
     form.addEventListener('submit', (event) => {
       event.preventDefault();
       const p = index.testPresets.get(form.elements.preset.value);
       configureFault(form.elements.fault.value);
       homeDesign = form.elements.homeDesign.value;
       textScale = form.elements.textScale.value;
+      glassMode = form.elements.glassMode.value;
+      document.documentElement.dataset.glassFallback = glassMode === 'plain' ? 'true' : 'false';
       document.documentElement.style.fontSize = textScale === 'large' ? '200%' : '';
       invalidUrl = false;
       startRun(configurePreset(index, p.id, { contextKey: form.elements.context.value === 'before-visit' ? 'before-visit' : p.contextKey === 'before-visit' ? 'gyeonghoeru-area' : p.contextKey, cardVisible: form.elements.card.checked }));

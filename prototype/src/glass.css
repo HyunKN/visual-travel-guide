@@ -82,6 +82,8 @@
   .glass::before, .glass::after { display: none; }
 }
 @supports not (backdrop-filter:blur(1px)) { .glass, .primary.glass { background: #fff; color: #243247; } }
+:root[data-glass-fallback="true"] .glass { background: #fff; color: #243247; backdrop-filter: none; -webkit-backdrop-filter: none; border-color: #243247; }
+:root[data-glass-fallback="true"] .glass::before, :root[data-glass-fallback="true"] .glass::after { display: none; }
 @media (forced-colors:active) {
   .glass { background: ButtonFace; color: ButtonText; border: 1px solid ButtonText; box-shadow: none; }
   .glass::before, .glass::after { display: none; }

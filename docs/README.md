@@ -36,7 +36,7 @@
 
 보완 사진·질문·구별 단서·다음 관람 연결의 근거는 [P01 자료 준비 묶음](prototype/content-preparation/README.md)에 있다. P02에서 런타임 v2에 병합했다. 진행자 정답·순서는 publicDir 밖의 준비 묶음에 유지한다. P06에서 전체 시나리오·이미지 최적화를 확인한다.
 
-2026-10-16 [프로토타입 보완 개발 설계](prototype/FLOW_EXTENSION_DESIGN.md)는 준비된 후보 비교·설명 이후 탐색·관련 질문의 명세다. v2·N·이력은 P02에서 구현했고 나머지 후속 범위와 구분한다. 진행 상태는 기존 P Issue에서 관리한다.
+2026-10-16 [보완 개발 설계](prototype/FLOW_EXTENSION_DESIGN.md)의 v2·N·이력·후보·질문·다음 관람을 구현했다. 사람과 실행할 때는 [관찰 실행 안내](prototype/OBSERVATION_RUNBOOK.md)와 [빈 기록지](prototype/OBSERVATION_RECORD.md)를 사용한다. [검증 기록](../prototype/VERIFICATION.md)에서 PC 준비와 실기기 미실행을 구분하며 진행 상태는 기존 P Issue에서 관리한다.
 
 [설계 시작점](prototype/README.md)에서 범위를 확인한 뒤 화면 구현은 SCREENS, 자료·상태는 DATA, 관찰은 TESTING, 작업 선택은 TASKS, Sol 인계는 HANDOFF를 읽는다. 기능 상세를 버전 관리하는 부속자료이며 별도의 진행 TODO가 아니다. 발행 전 작업안은 Issue로 옮기고 실제 URL을 연결한다.
 

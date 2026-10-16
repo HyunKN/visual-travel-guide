@@ -6,7 +6,7 @@ let nextId = 0;
 export function bindGlassOptics(root) {
   // CSS.supports alone also returns true in engines that don't render URL backdrop filters.
   const chromium = /Chrome|Chromium|Edg\//.test(navigator.userAgent) && !/CriOS|EdgiOS/.test(navigator.userAgent);
-  if (!chromium || !CSS.supports('backdrop-filter', 'url("#test")')) return () => {};
+  if (!chromium || !CSS.supports('backdrop-filter', 'url("#test")') || document.documentElement.dataset.glassFallback === 'true') return () => {};
   const host = document.createElementNS(svgNS, 'svg');
   host.setAttribute('aria-hidden', 'true'); host.setAttribute('width', '0'); host.setAttribute('height', '0');
   host.style.position = 'absolute'; host.style.pointerEvents = 'none';
