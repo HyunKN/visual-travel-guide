@@ -1,6 +1,22 @@
 # 프로토타입 작업 분할과 Issue 연결
 
-상태: 구현 전 작업 설계. P01~P08은 설계 식별자이며 아래 실제 GitHub Issue에 연결했다. 진행 상태는 Issue에서만 관리한다. 이 문서는 작업 경계와 수용 조건의 설계 근거이며, 수용 범위를 바꾸면 해당 Issue와 함께 갱신한다.
+[보완 개발 설계 7절 R01~R06](FLOW_EXTENSION_DESIGN.md)은 문서 안의 세부 작업 단위다. 별도 활성 이슈를 늘리지 않고 아래 기존 P 작업에 통합했다. 기존 기본 구현과 추가 보완의 미착수 상태를 구분하며, 진행 상태의 원본은 해당 Issue다.
+
+| 설계 단위 | 통합한 기존 Issue |
+| --- | --- |
+| R01 비교·질문·다음 관람 자료 | [P01](https://github.com/HyunKN/visual-travel-guide/issues/6) |
+| R02 콘텐츠 v2 계약·검사, R03 새 탐색·이력 | [P02](https://github.com/HyunKN/visual-travel-guide/issues/7) |
+| R04 건물 후보 확인 | [P03](https://github.com/HyunKN/visual-travel-guide/issues/8) |
+| R05 질문 지원 한계 | [P04](https://github.com/HyunKN/visual-travel-guide/issues/9) |
+| R05 설명 후 다음 관람 | [P05](https://github.com/HyunKN/visual-travel-guide/issues/10) |
+| 기존·추가 실제 콘텐츠 통합 | [P06](https://github.com/HyunKN/visual-travel-guide/issues/11) |
+| R06 통합 검증·관찰 준비 | [P07](https://github.com/HyunKN/visual-travel-guide/issues/12) |
+
+진행 순서는 P01 자료 → P02 계약·탐색·이력 → P03 후보 및 P04 질문·P05 다음 관람 → P06 실제 콘텐츠 통합 → P07 검증·준비 → [P08 사람 관찰·백로그 반영](https://github.com/HyunKN/visual-travel-guide/issues/13)이다. P02는 자료 계약을 기준으로 개발 fixture부터 시작할 수 있다. 구현·자료가 로컬 미커밋 상태인 점은 각 Issue에 명시했다.
+
+통합 이력: 새로 분할했던 [14](https://github.com/HyunKN/visual-travel-guide/issues/14)·[15](https://github.com/HyunKN/visual-travel-guide/issues/15)·[16](https://github.com/HyunKN/visual-travel-guide/issues/16)·[17](https://github.com/HyunKN/visual-travel-guide/issues/17)·[18](https://github.com/HyunKN/visual-travel-guide/issues/18)·[19](https://github.com/HyunKN/visual-travel-guide/issues/19)는 명세를 이전한 뒤 종료했다. 구현 완료가 아니며 과거 분할 이력으로만 남긴다. 현재 작업 목록은 [상위 Issue](https://github.com/HyunKN/visual-travel-guide/issues/4)와 기존 P 이슈를 따른다.
+
+상태: 작업 경계와 수용 조건의 설계. P01~P08은 설계 식별자이며 아래 실제 GitHub Issue에 연결했다. 진행 상태는 Issue에서 관리한다. 실제 로컬 구현은 [실행 안내](../../prototype/README.md)와 [검증 범위](../../prototype/VERIFICATION.md)에 연결했다. 이 문서의 수용 조건만으로 실기기·사람 관찰을 완료 처리하지 않는다.
 
 | 설계 ID | 실제 작업 Issue |
 | --- | --- |

@@ -1,0 +1,384 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": "2026-10-14-scenes.1",
+  "scenes": [
+    {
+      "id": "C01",
+      "title": "연못 앞의 장면",
+      "areaLabel": "경복궁 · 준비된 장면",
+      "assetId": "photo-gyeonghoeru",
+      "wholeTargetId": "gyeonghoeru",
+      "regions": [],
+      "targetIds": [
+        "gyeonghoeru"
+      ]
+    },
+    {
+      "id": "C02",
+      "title": "넓은 앞마당의 장면",
+      "areaLabel": "경복궁 앞마당 · 구역 모사",
+      "assetId": "photo-geunjeongjeon",
+      "wholeTargetId": "geunjeongjeon",
+      "regions": [
+        {
+          "id": "courtyard-floor",
+          "targetIds": [
+            "courtyard-floor"
+          ],
+          "x": 0.32,
+          "y": 0.76,
+          "width": 0.34,
+          "height": 0.23
+        }
+      ],
+      "targetIds": [
+        "geunjeongjeon",
+        "courtyard-floor"
+      ]
+    },
+    {
+      "id": "C03",
+      "title": "문양이 있는 벽의 장면",
+      "areaLabel": "경복궁 뒤뜰 · 구역 모사",
+      "assetId": "photo-ten-longevity-chimney",
+      "wholeTargetId": null,
+      "regions": [
+        {
+          "id": "longevity-panel",
+          "targetIds": [
+            "longevity-panel"
+          ],
+          "x": 0.1,
+          "y": 0.45,
+          "width": 0.8,
+          "height": 0.22
+        },
+        {
+          "id": "smoke-outlets",
+          "targetIds": [
+            "smoke-outlets"
+          ],
+          "x": 0.08,
+          "y": 0.09,
+          "width": 0.81,
+          "height": 0.09
+        }
+      ],
+      "targetIds": [
+        "longevity-panel",
+        "smoke-outlets"
+      ]
+    }
+  ],
+  "targets": [
+    {
+      "id": "gyeonghoeru",
+      "kind": "building",
+      "displayName": "경회루",
+      "neutralLabel": "연못 안의 건물 전체",
+      "sceneIds": [
+        "C01"
+      ],
+      "parentTargetId": null,
+      "overviewAnswerId": "gyeonghoeru-overview",
+      "questionIds": [
+        "gyeonghoeru-rebuilt"
+      ]
+    },
+    {
+      "id": "geunjeongjeon",
+      "kind": "building",
+      "displayName": "근정전",
+      "neutralLabel": "앞마당 뒤의 건물 전체",
+      "sceneIds": [
+        "C02"
+      ],
+      "parentTargetId": null,
+      "overviewAnswerId": "geunjeongjeon-overview",
+      "questionIds": []
+    },
+    {
+      "id": "courtyard-floor",
+      "kind": "part",
+      "displayName": "근정전 앞마당의 돌바닥",
+      "neutralLabel": "사진 아래쪽의 돌바닥",
+      "sceneIds": [
+        "C02"
+      ],
+      "parentTargetId": "geunjeongjeon",
+      "overviewAnswerId": "courtyard-floor-overview",
+      "questionIds": []
+    },
+    {
+      "id": "longevity-panel",
+      "kind": "part",
+      "displayName": "자경전 십장생굴뚝의 문양",
+      "neutralLabel": "벽 가운데의 넓은 문양",
+      "sceneIds": [
+        "C03"
+      ],
+      "parentTargetId": null,
+      "overviewAnswerId": "longevity-panel-overview",
+      "questionIds": [
+        "chimney-wall"
+      ]
+    },
+    {
+      "id": "smoke-outlets",
+      "kind": "part",
+      "displayName": "십장생굴뚝의 연기 배출구",
+      "neutralLabel": "지붕 위에 줄지은 네모난 부분",
+      "sceneIds": [
+        "C03"
+      ],
+      "parentTargetId": null,
+      "overviewAnswerId": "smoke-outlets-overview",
+      "questionIds": []
+    }
+  ],
+  "questions": [
+    {
+      "id": "gyeonghoeru-rebuilt",
+      "targetId": "gyeonghoeru",
+      "label": "지금의 건물은 언제 다시 지었나요?",
+      "answerId": "gyeonghoeru-rebuilt-answer"
+    },
+    {
+      "id": "chimney-wall",
+      "targetId": "longevity-panel",
+      "label": "문양이 있는 벽이 굴뚝이라고요?",
+      "answerId": "chimney-wall-answer"
+    }
+  ],
+  "answers": [
+    {
+      "id": "gyeonghoeru-overview",
+      "targetId": "gyeonghoeru",
+      "questionId": null,
+      "shortText": "경회루는 연못 안에 세운 누각이에요. 나라에 경사가 있을 때 연회를 열던 곳이에요.",
+      "moreText": "근정전의 서북쪽에 자리하고 있어요. 누각과 육지는 돌다리 세 개로 연결돼 있어요.",
+      "sourceIds": [
+        "aks-gyeonghoeru-use"
+      ],
+      "reviewStatus": "reviewed",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "id": "geunjeongjeon-overview",
+      "targetId": "geunjeongjeon",
+      "questionId": null,
+      "shortText": "근정전은 왕이 중요한 공식 행사를 치르던 중심 건물이에요. 신하들의 인사를 받거나 외국 사신을 만나는 데 쓰였어요.",
+      "moreText": "두 단으로 된 돌 기단 위에 서 있어요. 사진에서는 앞마당과 건물 주위의 돌난간을 함께 볼 수 있어요.",
+      "sourceIds": [
+        "royal-geunjeongjeon"
+      ],
+      "reviewStatus": "reviewed",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "id": "courtyard-floor-overview",
+      "targetId": "courtyard-floor",
+      "questionId": null,
+      "shortText": "근정전 앞마당에는 넓고 얇은 돌을 깔았어요. 마당 가운데에는 세 갈래의 길을 두었어요.",
+      "moreText": "길 양쪽에 서 있는 돌 표식은 관리들이 품계에 따라 설 자리를 나타내요. 바닥의 거친 정도나 배수 방식에 대한 설명은 이번 자료에 준비하지 않았어요.",
+      "sourceIds": [
+        "royal-courtyard"
+      ],
+      "reviewStatus": "reviewed",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "id": "longevity-panel-overview",
+      "targetId": "longevity-panel",
+      "questionId": null,
+      "shortText": "이곳은 자경전 십장생굴뚝의 문양이에요. 오래 살기를 바라는 뜻을 담아 해와 소나무, 거북, 사슴, 학 같은 모습을 함께 새겼어요.",
+      "moreText": "각각 만든 무늬 벽돌을 짜 맞추고 회를 발라 넓은 화면을 구성했어요. 문양이 있는 이 벽은 굴뚝의 일부예요.",
+      "sourceIds": [
+        "aks-chimney-panel"
+      ],
+      "reviewStatus": "reviewed",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "id": "smoke-outlets-overview",
+      "targetId": "smoke-outlets",
+      "questionId": null,
+      "shortText": "기와지붕 위에 줄지어 있는 부분은 연기가 빠져나가는 곳이에요. 십장생굴뚝은 문양을 감상하는 벽이면서 굴뚝의 역할도 해요.",
+      "moreText": "굴뚝 위를 지붕 모양으로 꾸민 물건을 ‘연가’라고 해요. 원문은 정상부에 점토로 만든 연가를 두어 연기가 빠지도록 했다고 설명해요.",
+      "sourceIds": [
+        "aks-chimney-outlets"
+      ],
+      "reviewStatus": "reviewed",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "id": "gyeonghoeru-rebuilt-answer",
+      "targetId": "gyeonghoeru",
+      "questionId": "gyeonghoeru-rebuilt",
+      "shortText": "지금의 경회루는 1867년, 고종 때 다시 지었어요. 이전 건물은 임진왜란 때 불탔어요.",
+      "moreText": "경회루는 처음부터 지금의 크기였던 것은 아니에요. 태종 때인 1412년에 연못을 넓히고 큰 규모로 다시 지었어요.",
+      "sourceIds": [
+        "aks-gyeonghoeru-history"
+      ],
+      "reviewStatus": "reviewed",
+      "checkedAt": "2026-10-14"
+    },
+    {
+      "id": "chimney-wall-answer",
+      "targetId": "longevity-panel",
+      "questionId": "chimney-wall",
+      "shortText": "자경전 뒤뜰 담장의 일부를 굴뚝으로 만들었어요. 문양이 있는 벽 위쪽의 배출구로 연기가 빠져나가요.",
+      "moreText": "담장보다 한 단 앞으로 돌출되게 벽돌로 쌓았어요. 굴뚝의 역할을 하면서 넓은 벽면을 문양으로 꾸몄어요.",
+      "sourceIds": [
+        "aks-chimney-panel",
+        "aks-chimney-outlets"
+      ],
+      "reviewStatus": "reviewed",
+      "checkedAt": "2026-10-14"
+    }
+  ],
+  "sources": [
+    {
+      "id": "aks-gyeonghoeru-use",
+      "title": "경복궁 경회루 - 한국민족문화대백과사전",
+      "url": "https://encykorea.aks.ac.kr/Article/E0002438",
+      "publisher": "한국학중앙연구원",
+      "checkedAt": "2026-10-14",
+      "claimNote": "개설: 근정전 서북쪽 연못 안의 연회 건물. 내용: 육지와 연결하는 돌다리 세 개. 짧은 설명과 더 보기의 장소·용도·연결 구조 근거."
+    },
+    {
+      "id": "aks-gyeonghoeru-history",
+      "title": "경복궁 경회루 - 한국민족문화대백과사전",
+      "url": "https://encykorea.aks.ac.kr/Article/E0002438",
+      "publisher": "한국학중앙연구원",
+      "checkedAt": "2026-10-14",
+      "claimNote": "역사적 변천: 1412년 확대 중건, 임진왜란 소실, 1867년 재건. 현재 건물의 재건 시기와 이전 건물의 연혁을 구분."
+    },
+    {
+      "id": "royal-geunjeongjeon",
+      "title": "근정전과 근정문 및 행각 - 궁능유적본부",
+      "url": "https://royal.khs.go.kr/user/board/E101020000_view_storyBoard.ajax?id=20231123030313006700&siteCode=ENG",
+      "publisher": "국가유산청 궁능유적본부",
+      "checkedAt": "2026-10-14",
+      "claimNote": "Geunjeongjeon Hall 설명: 공식 행사, 신하·외국 사신 접견, 두 단의 기단과 주위 돌난간. 관리기관의 공개 영문 설명을 짧게 번역·재서술."
+    },
+    {
+      "id": "royal-courtyard",
+      "title": "근정전 앞마당 설명 - 궁능유적본부",
+      "url": "https://royal.khs.go.kr/user/board/E101020000_view_storyBoard.ajax?id=20231123030313006700&siteCode=ENG",
+      "publisher": "국가유산청 궁능유적본부",
+      "checkedAt": "2026-10-14",
+      "claimNote": "front yard 문단: wide and thin stones, three paths, stone posts that dictate state officials' positions by their ranks. 거친 바닥의 이유·배수 효능·박석 재질을 이 출처만으로 주장하지 않음."
+    },
+    {
+      "id": "aks-chimney-panel",
+      "title": "경복궁 자경전 십장생굴뚝 - 한국민족문화대백과사전",
+      "url": "https://encykorea.aks.ac.kr/Article/E0002449",
+      "publisher": "한국학중앙연구원",
+      "checkedAt": "2026-10-14",
+      "claimNote": "내용: 중앙 장방형 공간의 불로장생 상징 문양 목록과 무늬 벽돌·회벽 구성. 왕후의 장수를 위한 제작이라는 추정이나 상충하는 건축 연도는 답변에서 제외."
+    },
+    {
+      "id": "aks-chimney-outlets",
+      "title": "경복궁 자경전 십장생굴뚝 - 한국민족문화대백과사전",
+      "url": "https://encykorea.aks.ac.kr/Article/E0002449",
+      "publisher": "한국학중앙연구원",
+      "checkedAt": "2026-10-14",
+      "claimNote": "내용: 정상부에 점토 연가를 두어 연기가 빠지도록 함. 사진의 상단 배출구와 대응."
+    }
+  ],
+  "assets": [
+    {
+      "id": "photo-gyeonghoeru",
+      "localPath": "assets/gyeonghoeru.jpg",
+      "alt": "연못 안에 서 있는 누각과 돌다리를 높은 시점에서 내려다본 사진",
+      "width": 2000,
+      "height": 1499,
+      "sourceUrl": "https://royal.khs.go.kr/ENG/contents/E101020000.do?schBdcode=gbg&pageType=story&bdProgramCode=storyCtg3",
+      "downloadUrl": "https://royal.khs.go.kr/afile/preview/5718",
+      "creatorCredit": "경회루 전경 · 국가유산청 궁능유적본부",
+      "licenseLabel": "공공누리 제1유형 · 출처표시",
+      "licenseUrl": "https://www.kogl.or.kr/info/licenseType1.do",
+      "licenseEvidenceUrl": "https://royal.khs.go.kr/user/board/E101020000_view_storyBoard.ajax?id=20231123030313005682&siteCode=ENG",
+      "licenseMarkUrl": "https://royal.khs.go.kr/resource/templete/royal/img/common/nuri_eng.gif",
+      "modificationNote": "제공된 JPEG 바이트 그대로 저장. 크롭·보정·생성형 확대·표식 합성 없음.",
+      "capturedAt": null,
+      "captureDateNote": "촬영일 미상. 사이트의 게시일·파일 수정일을 촬영일로 사용하지 않음.",
+      "checkedAt": "2026-10-14",
+      "sha256": "6f91025494d8e9b260a626427a0a89c6520bdebba63625312cd85c2c028faf54"
+    },
+    {
+      "id": "photo-geunjeongjeon",
+      "localPath": "assets/geunjeongjeon.jpg",
+      "alt": "근정전 정면과 돌이 깔린 앞마당, 길 양쪽의 돌 표식이 보이는 사진",
+      "width": 2000,
+      "height": 1151,
+      "sourceUrl": "https://royal.khs.go.kr/ENG/contents/E101020000.do?schBdcode=gbg&pageType=story&bdProgramCode=storyCtg3",
+      "downloadUrl": "https://royal.khs.go.kr/afile/preview/5680",
+      "creatorCredit": "근정전 전경 · 국가유산청 궁능유적본부",
+      "licenseLabel": "공공누리 제1유형 · 출처표시",
+      "licenseUrl": "https://www.kogl.or.kr/info/licenseType1.do",
+      "licenseEvidenceUrl": "https://royal.khs.go.kr/user/board/E101020000_view_storyBoard.ajax?id=20231123030313006700&siteCode=ENG",
+      "licenseMarkUrl": "https://royal.khs.go.kr/resource/templete/royal/img/common/nuri_eng.gif",
+      "modificationNote": "제공된 JPEG 바이트 그대로 저장. 크롭·보정·생성형 확대·표식 합성 없음.",
+      "capturedAt": null,
+      "captureDateNote": "촬영일 미상. 사이트의 게시일·파일 수정일을 촬영일로 사용하지 않음.",
+      "checkedAt": "2026-10-14",
+      "sha256": "fccf05b39ca410d775ea11b00d2d53877556593d1e38c9babe792a1e94cc51bd"
+    },
+    {
+      "id": "photo-ten-longevity-chimney",
+      "localPath": "assets/ten-longevity-chimney.webp",
+      "alt": "자경전 십장생굴뚝의 중앙 문양과 위쪽 연기 배출구, 앞쪽 난간이 보이는 정면 사진",
+      "width": 1200,
+      "height": 1194,
+      "sourceUrl": "https://encykorea.aks.ac.kr/Article/E0034031",
+      "mediaId": "7b8dca9e",
+      "downloadUrl": "https://devin.aks.ac.kr/image/7b8dca9e-6f0d-4a71-8bb8-82baa66160ab?preset=orig",
+      "creatorCredit": "[경복궁 자경전 십장생 굴뚝] 한국민족문화대백과사전 · 한국학중앙연구원",
+      "licenseLabel": "공공누리 제1유형 · 출처표시",
+      "licenseUrl": "https://www.kogl.or.kr/info/licenseType1.do",
+      "licenseEvidenceUrl": "https://encykorea.aks.ac.kr/Article/E0034031",
+      "modificationNote": "원본 표시 WebP 바이트 그대로 저장. 하단 기관 표기 유지. 크롭·보정·생성형 확대·표식 합성 없음.",
+      "capturedAt": null,
+      "captureDateNote": "선택한 개별 미디어에 촬영일이 없어 미상으로 기록.",
+      "checkedAt": "2026-10-14",
+      "sha256": "69dc67b4e60cbbb2a203eb84e162ffbb7a7065111dd76234bf94edb9ec8f7f38"
+    }
+  ],
+  "cards": [
+    {
+      "id": "chimney-curiosity",
+      "contextKey": "chimney-area",
+      "sceneId": "C03",
+      "targetId": "longevity-panel",
+      "questionId": null,
+      "answerId": "longevity-panel-overview",
+      "assetId": "photo-ten-longevity-chimney",
+      "prompt": "이 벽에는 어떤 소망을 새겼을까요?"
+    }
+  ],
+  "testPresets": [
+    {
+      "id": "S1",
+      "sceneId": "C01",
+      "contextKey": "before-visit",
+      "cardVisible": false,
+      "contentVersion": "2026-10-14-scenes.1"
+    },
+    {
+      "id": "S2",
+      "sceneId": "C02",
+      "contextKey": "courtyard-area",
+      "cardVisible": false,
+      "contentVersion": "2026-10-14-scenes.1"
+    },
+    {
+      "id": "S3",
+      "sceneId": "C03",
+      "contextKey": "chimney-area",
+      "cardVisible": true,
+      "contentVersion": "2026-10-14-scenes.1"
+    }
+  ]
+}

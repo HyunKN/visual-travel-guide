@@ -1,0 +1,22 @@
+{
+  "name": "visual-travel-guide-prototype",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "node scripts/check-content.mjs && vite build",
+    "preview": "vite preview --host 127.0.0.1",
+    "test": "node --test",
+    "check:content": "node scripts/check-content.mjs"
+  },
+  "devDependencies": {
+    "vite": "8.3.4"
+  },
+  "dependencies": {
+    "three": "0.186.1"
+  }
+}

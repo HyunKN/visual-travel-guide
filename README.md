@@ -8,7 +8,7 @@
 
 개발 작업을 시작할 때는 **[개발 문서 안내서](docs/README.md)**를 읽습니다. 첫 클릭형 흐름의 범위는 [PRODUCT](docs/PRODUCT.md), AI 협업은 [DEVELOPMENT](docs/DEVELOPMENT.md), 개별 채팅의 시작·인계는 [THREADS](docs/THREADS.md), 검증 기준은 [QUALITY](docs/QUALITY.md)에서 관리합니다. [개발 Wiki](https://github.com/HyunKN/visual-travel-guide/wiki/Development-Home)는 병합된 문서의 게시본입니다.
 
-**지금 만드는 단위는 [시나리오 기반 프로토타입](docs/prototype/README.md)입니다.** 준비된 장면에서 건물 전체나 문양·구조물을 선택하고 기본 설명·관련 질문을 확인하는 흐름과 작은 호기심 카드를 설계했습니다. [8개 작업안](docs/prototype/TASKS.md)과 [Sol 인계문](docs/prototype/HANDOFF.md)을 마련했으며 앱 구현과 사람 관찰은 아직 하지 않았습니다. 아래의 검색·촬영·모델 실험·성능 목표는 후속 구상이며 첫 프로토타입의 필수 구현이 아닙니다.
+**현재 [시나리오 기반 모바일 웹 프로토타입](prototype/README.md)을 로컬에서 실행할 수 있습니다.** 경회루 전체, 근정전 앞마당의 돌바닥, 십장생굴뚝 문양·배출구를 선택하고 설명·출처·관련 질문을 확인합니다. [실행·검사 방법](prototype/README.md), [검증 범위와 남은 실기기·사람 관찰](prototype/VERIFICATION.md), [8개 작업안](docs/prototype/TASKS.md)을 구분해 관리합니다. 아래의 검색·촬영·모델 실험·성능 목표는 후속 구상이며 이 프로토타입의 구현 결과가 아닙니다.
 
 ## 1. 프로젝트 개요
 

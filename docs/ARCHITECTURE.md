@@ -1,6 +1,6 @@
 # 구조와 데이터 흐름
 
-상태: 구현 전 제안. 첫 프로토타입은 정적 자료와 브라우저 메모리 상태를 사용하는 모바일 웹을 제안한다. 정확한 기술 버전과 실행 명령은 구현 때 확인한다. 아래 책임 구분은 논리적 경계이며 별도 서버·패키지·파일을 요구하지 않는다.
+상태: 첫 프로토타입은 정적 자료와 브라우저 메모리 상태를 사용하는 모바일 웹으로 구현했다. [실행·버전·코드 읽는 순서](../prototype/README.md)와 [검증 범위](../prototype/VERIFICATION.md)를 연결한다. 아래 책임은 별도 서버나 패키지가 아니라 작은 ES 모듈로 나뉜다.
 
 ## 첫 흐름의 책임과 연결
 
@@ -19,7 +19,11 @@
   홈의 호기심 카드
 ```
 
-첫 구현에서는 사전 연결 데이터로 처리한다. 자료 계약·좌표·초기화 불변 조건·구현 제안은 [프로토타입 DATA](prototype/DATA.md)를 따른다. 사진 분석 서비스·데이터베이스·API 서버는 필요가 확인되기 전까지 전제하지 않는다. 실제 구현 이후 이 문서에 담당 파일·공개 인터페이스를 연결한다.
+구현 파일은 [content.js](../prototype/src/content.js)의 `validateContent`·좌표 변환·대상 조회, [state.js](../prototype/src/state.js)의 `transition`·`canRestore`, [main.js](../prototype/src/main.js)의 화면·메모리 이력·복구다. [정적 콘텐츠](prototype/content/content.json)는 Vite `publicDir`에서 제공한다. 자료 계약·좌표·초기화 불변 조건은 [DATA](prototype/DATA.md)를 따른다. 질문 처리 API·데이터베이스·사진 분석 서비스는 없다. 이미지 파일 제공과 질문에 답하는 API를 혼동하지 않는다.
+
+표현 모듈은 [motion.js](../prototype/src/motion.js)의 버튼·사진 이동과 [palace-story.js](../prototype/src/palace-story.js)의 선택적 3D다. 3D는 1안 홈에서만 동적 import하며 콘텐츠의 대상 선택·설명 출처를 변경하지 않는다. 다른 화면으로 이동할 때 pending import의 세대를 확인하고 이미 시작한 RAF·observer·이벤트·GPU 자원을 정리한다. 모형은 장식용 일러스트로, 학습 데이터나 실제 건물 검수의 근거가 아니다.
+
+입력 반응은 [spring.js](../prototype/src/spring.js)의 연속 위치·속도 계산을 사용한다. [glass-map.js](../prototype/src/glass-map.js)는 외곽 14px의 볼록 단면을 SVG gradient 변위 맵으로 만든다. [glass-optics.js](../prototype/src/glass-optics.js)는 작은 조작부의 backdrop에 연결하고 크기 변경 때만 갱신하며 같은 크기의 필터를 공유한다. 유리에는 Canvas·픽셀 버퍼를 사용하지 않는다. 렌더 교체 전 입력 RAF·이벤트와 광학 observer·SVG를 해제한다. 세션의 움직임 설정만 sessionStorage에 저장하며 사용자 관찰 이력은 저장하지 않는다. [재질 비교 화면](../prototype/materials.html)은 별도 Vite 진입점이며 앱의 대상 선택 상태에 연결되지 않는다.
 
 ## 구조를 바꿀 때
 
