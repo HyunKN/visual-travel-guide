@@ -3,7 +3,7 @@ import './app-design.css';
 import './glass.css';
 import { bindGlassOptics } from './glass-optics.js';
 import { validateContent, indexContent, configurePreset, fitImage, pointInImage, reviewedQuestions } from './content.js';
-import { initialState, transition, canRestore, explorationScenes, comparisonForScene } from './state.js';
+import { initialState, transition, canRestore, explorationScenes, comparisonForScene, availableContinuation } from './state.js';
 import { takePhotoSnapshot, animateScreen, bindPressFeedback, motionEnabled, setMotionPreference } from './motion.js';
 
 const app = document.querySelector('#app');
@@ -47,7 +47,7 @@ function rememberView() {
   if (!state || restoring || location.hash === '#test' || history.state?.runId !== runId) return;
   const scroller = app.querySelector('.photo-scroll');
   const focused = document.activeElement;
-  const attribute = ['data-action', 'data-target', 'data-question', 'data-scene', 'data-option'].find((name) => focused?.hasAttribute(name));
+  const attribute = ['data-action', 'data-target', 'data-question', 'data-scene', 'data-option', 'data-continuation'].find((name) => focused?.hasAttribute(name));
   const ui = { y: window.scrollY, zoomed, expandedTargets, photoX: scroller?.scrollLeft ?? 0, photoY: scroller?.scrollTop ?? 0,
     focus: attribute ? { attribute, value: focused.getAttribute(attribute) } : null,
     details: [...app.querySelectorAll('details[open]')].map((d) => d.className) };
@@ -65,7 +65,7 @@ function restoreView(ui = {}) {
     if (generation !== restoreGeneration) return;
     const scroller = app.querySelector('.photo-scroll');
     if (scroller) { scroller.scrollLeft = nonnegative(ui.photoX); scroller.scrollTop = nonnegative(ui.photoY); }
-    const allowed = ['data-action', 'data-target', 'data-question', 'data-scene', 'data-option'];
+    const allowed = ['data-action', 'data-target', 'data-question', 'data-scene', 'data-option', 'data-continuation'];
     const focus = allowed.includes(ui.focus?.attribute) ? [...app.querySelectorAll(`[${ui.focus.attribute}]`)].find((el) => el.getAttribute(ui.focus.attribute) === ui.focus.value) : null;
     (focus ?? app.querySelector('h1') ?? app.querySelector('main'))?.focus({ preventScroll: true });
     window.scrollTo(0, nonnegative(ui.y));
@@ -205,7 +205,14 @@ function answerScreen() {
     ${answer.moreText ? `<details class="more-answer"><summary>더 읽기</summary><p>${escape(answer.moreText)}</p></details>` : ''}
     <div class="sources"><p>설명 출처</p>${sources.map((source) => `<a href="${escape(source.url)}" target="_blank" rel="noopener noreferrer">${escape(source.title)}<span class="sr-only"> (새 탭)</span><span aria-hidden="true">↗</span></a>`).join('')}
     <details class="photo-credit"><summary>사진 출처 · 이용 조건</summary><p>${escape(asset.creatorCredit)}</p><a href="${escape(asset.sourceUrl)}" target="_blank" rel="noopener noreferrer">원본 출처<span class="sr-only"> (새 탭)</span> ↗</a><a href="${escape(asset.licenseUrl)}" target="_blank" rel="noopener noreferrer">${escape(asset.licenseLabel)}<span class="sr-only"> (새 탭)</span> ↗</a><p>촬영일 미상 · 사진 원본 유지</p></details></div>
-    ${state.entryOrigin === 'candidate' ? '<p class="prototype-note">선택한 후보의 비교용 사진과 설명이에요. 처음 사진의 건물로 확정한 것은 아니에요.</p>' : ''}<div class="answer-actions">${questions.length ? `<button class="related-row" data-action="questions">관련 질문 더 보기 ${icon('arrow')}</button>` : '<p class="empty-questions">아직 준비된 추가 질문이 없어요.</p><button class="text-button" data-action="unsupported-question">궁금한 내용이 없어요</button>'}${state.questionId ? '<button class="text-button" data-action="overview">기본 설명으로</button>' : ''}${state.comparisonCaseId ? '<button class="text-button" data-action="compare-again">후보 다시 비교하기</button>' : ''}${index.scenes.get(state.sceneId).regions.length ? `<button class="text-button" data-action="view">${icon('change')}같은 사진에서 다른 부분 보기</button>` : ''}<button class="primary" data-action="new-explore">다른 대상 알아보기 ${icon('arrow')}</button></div></article>`, target.displayName);
+    ${state.entryOrigin === 'candidate' ? '<p class="prototype-note">선택한 후보의 비교용 사진과 설명이에요. 처음 사진의 건물로 확정한 것은 아니에요.</p>' : ''}<div class="answer-actions">${questions.length ? `<button class="related-row" data-action="questions">관련 질문 더 보기 ${icon('arrow')}</button>` : '<p class="empty-questions">아직 준비된 추가 질문이 없어요.</p><button class="text-button" data-action="unsupported-question">궁금한 내용이 없어요</button>'}${state.questionId ? '<button class="text-button" data-action="overview">기본 설명으로</button>' : ''}${state.comparisonCaseId ? '<button class="text-button" data-action="compare-again">후보 다시 비교하기</button>' : ''}${index.scenes.get(state.sceneId).regions.length ? `<button class="text-button" data-action="view">${icon('change')}같은 사진에서 다른 부분 보기</button>` : ''}<button class="primary" data-action="new-explore">다른 대상 알아보기 ${icon('arrow')}</button></div>${continuationCard()}</article>`, target.displayName);
+}
+
+function continuationCard() {
+  const item = availableContinuation(state, preset, activeIndex);
+  if (!item) return '';
+  const scene = index.scenes.get(item.toSceneId), asset = index.assets.get(scene.assetId), target = index.targets.get(item.toTargetId);
+  return `<section class="continuation"><h2>${item.relation === 'nearby' ? '이 근처에서 이어서 볼까요?' : '이런 곳도 살펴보세요'}</h2><p class="form-hint">테스트에서 정한 구역의 예시입니다. 실제 위치 확인·길찾기 기능이 아니에요.</p><button class="continuation-choice" data-continuation="${escape(item.id)}" aria-label="${escape(target.displayName)} 살펴보기"><img src="${escape(base + asset.localPath)}" alt="${escape(asset.alt)}" width="${asset.width}" height="${asset.height}" loading="lazy"/><span class="continuation-name">${escape(target.displayName)}</span><span class="continuation-intro">${escape(item.intro)}</span><span class="card-link">살펴보기 ${icon('arrow')}</span></button><a class="explore-credit" href="${escape(asset.sourceUrl)}" target="_blank" rel="noopener noreferrer">${escape(asset.creatorCredit)} · ${escape(asset.licenseLabel)}<span class="sr-only"> (새 탭)</span> ↗</a>${item.sourceIds.map((id) => `<a class="explore-credit" href="${escape(activeIndex.sources.get(id).url)}" target="_blank" rel="noopener noreferrer">위치·관계 근거: ${escape(activeIndex.sources.get(id).title)}<span class="sr-only"> (새 탭)</span> ↗</a>`).join('')}</section>`;
 }
 
 function questionScreen() {
@@ -282,6 +289,7 @@ function render({ focus = true, snapshot } = {}) {
   for (const el of app.querySelectorAll('[data-question]')) el.addEventListener('click', () => dispatch({ type: 'question', questionId: el.dataset.question }));
   for (const el of app.querySelectorAll('[data-scene]')) el.addEventListener('click', () => dispatch({ type: 'choose-scene', sceneId: el.dataset.scene }));
   for (const el of app.querySelectorAll('[data-option]')) el.addEventListener('click', () => dispatch({ type: 'choose-candidate', optionId: el.dataset.option }));
+  for (const el of app.querySelectorAll('[data-continuation]')) el.addEventListener('click', () => dispatch({ type: 'open-continuation', continuationId: el.dataset.continuation }));
   app.querySelector('.photo-scroll')?.addEventListener('scroll', rememberView, { passive: true });
   for (const detail of app.querySelectorAll('details')) detail.addEventListener('toggle', rememberView);
   for (const el of app.querySelectorAll('[data-design]')) el.addEventListener('click', () => {

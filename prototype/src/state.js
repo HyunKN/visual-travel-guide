@@ -13,6 +13,16 @@ export function comparisonForScene(state, preset, index) {
   return item?.reviewStatus === 'reviewed' && item.inputSceneId === state.sceneId ? item : null;
 }
 
+export function availableContinuation(state, preset, index) {
+  return [...index.continuations.values()].find((item) => {
+    const scene = index.scenes.get(item.toSceneId), target = index.targets.get(item.toTargetId);
+    return item.fromTargetId === state.targetId && item.fromTargetId !== item.toTargetId && item.reviewStatus === 'reviewed'
+      && preset.navigationScenes.some((n) => n.sceneId === item.toSceneId) && scene?.targetIds.includes(item.toTargetId)
+      && !answerProblem(index, target?.id, target?.overviewAnswerId) && item.sourceIds?.length > 0
+      && item.sourceIds.every((id) => index.sources.has(id));
+  });
+}
+
 export function transition(state, action, index, preset = index.testPresets.get(state.presetId)) {
   const scene = index.scenes.get(state.sceneId);
   if (!scene || !preset) return state;
@@ -55,6 +65,13 @@ export function transition(state, action, index, preset = index.testPresets.get(
       if (state.screen !== 'N') return state;
       const destination = explorationScenes(state, preset, index).find((n) => n.sceneId === action.sceneId);
       return destination ? { ...clear, screen: 'V', sceneId: destination.sceneId, contextKey: destination.contextKey, cardVisible: destination.cardVisible } : state;
+    }
+    case 'open-continuation': {
+      if (state.screen !== 'A') return state;
+      const item = availableContinuation(state, preset, index);
+      if (!item || item.id !== action.continuationId) return state;
+      const destination = moveTo(item.toSceneId), target = index.targets.get(item.toTargetId);
+      return destination ? openAnswer(target.id, target.overviewAnswerId, null, 'continuation', destination) : state;
     }
     case 'point': {
       if (inputComparison) return state;
