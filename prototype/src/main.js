@@ -2,7 +2,7 @@ import './style.css';
 import './app-design.css';
 import './glass.css';
 import { bindGlassOptics } from './glass-optics.js';
-import { validateContent, indexContent, configurePreset, fitImage, pointInImage } from './content.js';
+import { validateContent, indexContent, configurePreset, fitImage, pointInImage, reviewedQuestions } from './content.js';
 import { initialState, transition, canRestore, explorationScenes, comparisonForScene } from './state.js';
 import { takePhotoSnapshot, animateScreen, bindPressFeedback, motionEnabled, setMotionPreference } from './motion.js';
 
@@ -195,6 +195,7 @@ function comparisonScreen() {
 
 function answerScreen() {
   const target = index.targets.get(state.targetId), answer = activeIndex.answers.get(state.answerId), q = index.questions.get(state.questionId), asset = index.assets.get(index.scenes.get(state.sceneId).assetId);
+  const questions = reviewedQuestions(activeIndex, state.targetId);
   if (!answer) return errorScreen();
   const sources = [...new Map(answer.sourceIds.map((id) => {
     const source = activeIndex.sources.get(id);
@@ -204,23 +205,24 @@ function answerScreen() {
     ${answer.moreText ? `<details class="more-answer"><summary>더 읽기</summary><p>${escape(answer.moreText)}</p></details>` : ''}
     <div class="sources"><p>설명 출처</p>${sources.map((source) => `<a href="${escape(source.url)}" target="_blank" rel="noopener noreferrer">${escape(source.title)}<span class="sr-only"> (새 탭)</span><span aria-hidden="true">↗</span></a>`).join('')}
     <details class="photo-credit"><summary>사진 출처 · 이용 조건</summary><p>${escape(asset.creatorCredit)}</p><a href="${escape(asset.sourceUrl)}" target="_blank" rel="noopener noreferrer">원본 출처<span class="sr-only"> (새 탭)</span> ↗</a><a href="${escape(asset.licenseUrl)}" target="_blank" rel="noopener noreferrer">${escape(asset.licenseLabel)}<span class="sr-only"> (새 탭)</span> ↗</a><p>촬영일 미상 · 사진 원본 유지</p></details></div>
-    ${state.entryOrigin === 'candidate' ? '<p class="prototype-note">선택한 후보의 비교용 사진과 설명이에요. 처음 사진의 건물로 확정한 것은 아니에요.</p>' : ''}<div class="answer-actions"><button class="related-row" data-action="questions">관련 질문 더 보기 ${icon('arrow')}</button>${state.questionId ? '<button class="text-button" data-action="overview">기본 설명으로</button>' : ''}${state.comparisonCaseId ? '<button class="text-button" data-action="compare-again">후보 다시 비교하기</button>' : ''}${index.scenes.get(state.sceneId).regions.length ? `<button class="text-button" data-action="view">${icon('change')}같은 사진에서 다른 부분 보기</button>` : ''}<button class="primary" data-action="new-explore">다른 대상 알아보기 ${icon('arrow')}</button></div></article>`, target.displayName);
+    ${state.entryOrigin === 'candidate' ? '<p class="prototype-note">선택한 후보의 비교용 사진과 설명이에요. 처음 사진의 건물로 확정한 것은 아니에요.</p>' : ''}<div class="answer-actions">${questions.length ? `<button class="related-row" data-action="questions">관련 질문 더 보기 ${icon('arrow')}</button>` : '<p class="empty-questions">아직 준비된 추가 질문이 없어요.</p><button class="text-button" data-action="unsupported-question">궁금한 내용이 없어요</button>'}${state.questionId ? '<button class="text-button" data-action="overview">기본 설명으로</button>' : ''}${state.comparisonCaseId ? '<button class="text-button" data-action="compare-again">후보 다시 비교하기</button>' : ''}${index.scenes.get(state.sceneId).regions.length ? `<button class="text-button" data-action="view">${icon('change')}같은 사진에서 다른 부분 보기</button>` : ''}<button class="primary" data-action="new-explore">다른 대상 알아보기 ${icon('arrow')}</button></div></article>`, target.displayName);
 }
 
 function questionScreen() {
   const target = index.targets.get(state.targetId);
-  return shell(`<div class="screen-heading"><p class="eyebrow">${escape(target.displayName)}</p><h1 tabindex="-1">더 궁금한 게 있나요?</h1><p>준비된 질문 중에서 골라보세요.</p></div>${photo({ compact: true })}<div class="question-list">${target.questionIds.length ? target.questionIds.map((id) => `<button class="question-row" data-question="${escape(id)}">${escape(index.questions.get(id).label)}${icon('arrow')}</button>`).join('') : '<p class="empty-questions">아직 준비된 관련 질문이 없어요.</p>'}</div><button class="secondary" data-action="unsupported-question">찾는 질문이 없어요</button><button class="text-button" data-action="overview">기본 설명으로</button>`, '관련 질문');
+  const questions = reviewedQuestions(activeIndex, target.id);
+  return shell(`<div class="screen-heading"><p class="eyebrow">${escape(target.displayName)}</p><h1 tabindex="-1">더 궁금한 게 있나요?</h1><p>준비된 질문 중에서 골라보세요.</p></div>${photo({ compact: true })}<div class="question-list">${questions.length ? questions.map((q) => `<button class="question-row" data-question="${escape(q.id)}">${escape(q.label)}${icon('arrow')}</button>`).join('') : '<p class="empty-questions">아직 준비된 추가 질문이 없어요.</p>'}</div><button class="secondary" data-action="unsupported-question">찾는 질문이 없어요</button><button class="text-button" data-action="overview">기본 설명으로</button>${state.comparisonCaseId ? '<button class="text-button" data-action="compare-again">후보 다시 비교하기</button>' : ''}<button class="text-button" data-action="new-explore">다른 대상 알아보기</button>`, '관련 질문');
 }
 
 function errorScreen() {
   if (state.error === 'no-candidate') return shell('<section class="error-content"><h1 tabindex="-1">닮은 건물이 없나요?</h1><p>이번 사진에 준비된 후보가 맞지 않을 수 있어요. 다시 비교하거나 다른 대상을 살펴볼 수 있어요.</p><button class="primary" data-action="compare-again">후보 다시 보기</button><button class="secondary" data-action="retry-comparison-photo">사진 다시 보기</button><button class="text-button" data-action="new-explore">다른 대상 알아보기</button></section>', '해당하는 후보 없음');
   const messages = {
-    'unsupported-question': ['찾는 질문이 없나요?', '이번에는 준비된 설명과 질문만 볼 수 있어요. 궁금한 점은 관찰이 끝난 뒤 진행자에게 알려주세요.'],
+    'unsupported-question': ['이 질문에 대한 설명은 아직 준비되지 않았어요.', '이번에는 준비된 설명과 질문만 볼 수 있어요. 남은 궁금증은 관찰이 끝난 뒤 진행자에게 알려주세요.'],
     'missing-answer': ['설명을 불러올 수 없어요.', '준비된 자료를 확인해야 해요. 다른 부분을 고르거나 홈으로 돌아갈 수 있어요.'],
     'missing-source': ['출처를 확인할 수 없어요.', '근거를 확인하지 못한 설명은 표시하지 않아요. 다른 부분을 고르거나 홈으로 돌아갈 수 있어요.'],
   };
   const [title, text] = messages[state.error] ?? ['이 부분은 아직 준비되지 않았어요.', '다른 부분을 골라보세요.'];
-  return shell(`<section class="error-content"><div class="error-symbol" aria-hidden="true">?</div><h1 tabindex="-1">${title}</h1><p>${text}</p>${state.targetId && !state.error?.startsWith('missing') ? '<button class="primary" data-action="overview">기본 설명으로</button>' : ''}${state.comparisonCaseId ? '<button class="secondary" data-action="compare-again">후보 다시 비교하기</button>' : ''}<button class="secondary" data-action="view">다른 부분 고르기</button><button class="text-button" data-action="home">홈으로</button></section>`, title);
+  return shell(`<section class="error-content"><div class="error-symbol" aria-hidden="true">?</div><h1 tabindex="-1">${title}</h1><p>${text}</p>${state.targetId && !state.error?.startsWith('missing') ? '<button class="primary" data-action="overview">기본 설명으로</button>' : ''}${state.comparisonCaseId ? '<button class="secondary" data-action="compare-again">후보 다시 비교하기</button>' : ''}${index.scenes.get(state.sceneId).regions.length ? '<button class="secondary" data-action="view">같은 사진에서 다른 부분 보기</button>' : ''}<button class="secondary" data-action="new-explore">다른 대상 알아보기</button><button class="text-button" data-action="home">홈으로</button></section>`, title);
 }
 
 function testScreen() {

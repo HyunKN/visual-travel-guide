@@ -181,3 +181,8 @@ export function answerProblem(index, targetId, answerId, questionId = null) {
   if (!answer.sourceIds?.length || answer.sourceIds.some((id) => !webUrl(index.sources.get(id)?.url))) return 'missing-source';
   return null;
 }
+
+export function reviewedQuestions(index, targetId) {
+  return (index.targets.get(targetId)?.questionIds ?? []).map((id) => index.questions.get(id))
+    .filter((q) => q?.targetId === targetId && !answerProblem(index, targetId, q.answerId, q.id));
+}

@@ -1,4 +1,4 @@
-import { answerProblem, hitTarget } from './content.js';
+import { answerProblem, hitTarget, reviewedQuestions } from './content.js';
 
 export function initialState(preset) {
   return { screen: 'H', presetId: preset.id, sceneId: preset.sceneId, contextKey: preset.contextKey, cardVisible: preset.cardVisible, targetId: null, questionId: null, answerId: null, point: null, entryOrigin: null, error: null, comparisonCaseId: null, comparisonOptionId: null };
@@ -73,7 +73,7 @@ export function transition(state, action, index, preset = index.testPresets.get(
       const target = index.targets.get(scene.wholeTargetId);
       return target ? openAnswer(target.id, target.overviewAnswerId, null, 'whole') : state;
     }
-    case 'questions': return state.targetId ? { ...state, screen: 'Q', error: null } : state;
+    case 'questions': return state.targetId && reviewedQuestions(index, state.targetId).length ? { ...state, screen: 'Q', error: null } : state;
     case 'question': {
       const q = index.questions.get(action.questionId);
       return q?.targetId === state.targetId ? openAnswer(q.targetId, q.answerId, q.id) : { ...state, screen: 'E', error: 'unsupported-question' };
