@@ -7,6 +7,7 @@
 | 작업 | 먼저 읽을 문서 |
 | --- | --- |
 | 기능 범위·우선순위 결정 | [PRODUCT](docs/PRODUCT.md), 해당 기능 Issue |
+| 시나리오 프로토타입 구현·관찰·인계 | [프로토타입 설계 시작점](docs/prototype/README.md), 해당 작업 Issue |
 | 구현·수정 시작 | [DEVELOPMENT](docs/DEVELOPMENT.md), [QUALITY](docs/QUALITY.md), 해당 작업 Issue 또는 승인된 작업 요청 |
 | 화면·상호작용 변경 | [DESIGN](docs/DESIGN.md) |
 | 구조·데이터 흐름 변경 | [ARCHITECTURE](docs/ARCHITECTURE.md), 관련 ADR이 있으면 해당 기록 |
@@ -25,6 +26,6 @@
 
 ## Agent skills
 
-- Issue tracker: GitHub Issues. 발행·티켓 분할 전에 [tracker 설정](docs/agents/issue-tracker.md)을 읽는다.
+- Issue tracker: GitHub Issues. 발행·분할·통합, 테스트 발견 사항 정리, 다음 작업 선택 전에 [Issue 운영 규칙](docs/agents/issue-tracker.md)을 읽는다.
 - Domain docs: 단일 도메인. 용어집·ADR을 다루는 스킬은 [문서 경로 설정](docs/agents/domain.md)을 읽는다. 이 프로젝트의 용어집은 `docs/GLOSSARY.md`다.
 - 작업 단계별 스킬과 적용 조건은 [DEVELOPMENT](docs/DEVELOPMENT.md)에 있다. 실제 호출 전에 설치된 해당 `SKILL.md`를 읽는다.

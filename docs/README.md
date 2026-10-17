@@ -6,9 +6,10 @@
 
 - 문서 운영 규칙: 이 문서 묶음에서 정의했다.
 - 제품·UI·구조: 첫 프로토타입을 위한 초안이다. 구현·사용성 검증 결과가 아니다.
-- 앱 코드와 앱 실행 명령: 아직 없다.
+- 앱 코드와 실행 명령: [prototype](../prototype/README.md)의 독립 모바일 웹에 있다. 정적 자료와 메모리 상태로 동작한다.
 - 문서 검사·Wiki 자동 게시: GitHub Actions 설정을 추가했다. 실제 실행 결과와 장애 처리 방법은 [WIKI](WIKI.md)를 확인한다.
-- 기술 스택, 구체적인 시각 스타일, 테스트 기기: 미정이다.
+- 프로토타입: [검토한 모바일 배치](prototype/UI_LAYOUT_REVIEW.html)에 따라 검색·전체 사진 탐색·후보 비교·설명·다음 관람·공통 이동을 연결했다. 시나리오는 관찰 과제이며 앱을 잠그지 않는다. [검증 기록](../prototype/VERIFICATION.md)의 브라우저·자동 검사와 [세 사용자 테스트 결과](prototype/OBSERVATION_RESULTS.md)의 실제 기록·미검증 사항을 구분한다.
+- 기술 구성은 Vanilla JavaScript + Vite다. 흰 바탕·둥근 UI·기와 먹청색 중심을 적용했다. R01·R02·R03 기록을 분석했으며 발견된 모바일·사용성 문제의 수정 후 검증과 현장 효과는 남아 있다.
 
 ## 각 문서는 무엇이고, 언제 쓰는가?
 
@@ -16,6 +17,7 @@
 | --- | --- | --- | --- |
 | [PRODUCT · 제품 목표](PRODUCT.md) | 누구를 위해 무엇을 만들고, 이번에는 어디까지 만들지 정하는 문서 | 첫 기능을 설계하기 전 | 목표, 만들 기능, 먼저 할 일이 바뀔 때 |
 | [DESIGN · 화면 설계](DESIGN.md) | 화면이 어떻게 보이고, 사용자가 누르거나 선택하면 어떻게 바뀌는지 정하는 문서 | 첫 화면을 설계할 때 | 화면 모습이나 사용 방법을 만들고 바꿀 때 |
+| [재질·입력 반응 분류](design/INTERACTION_MATERIALS.md) | Liquid Glass 공식 조사와 재사용 요소·상태·코드 연결 | 공통 조작부를 만들 때 | 재질·hover·누름·전환·접근성 대응을 바꿀 때 |
 | [DEVELOPMENT · 개발 순서](DEVELOPMENT.md) | AI와 설계·구현·확인을 어떤 순서로 진행하고 어디에 기록할지 정한 작업 안내서 | 첫 구현을 시작하기 전 | 작업 순서나 기록 방법이 바뀔 때 |
 | [THREADS · 채팅 사용 안내](THREADS.md) | 채팅마다 맡을 일과 새 채팅으로 넘겨줄 정보를 정리한 안내서 | 여러 채팅으로 작업하기 전 | 채팅을 나누거나 작업을 넘기는 방법이 바뀔 때 |
 | [WIKI · 문서 게시 안내](WIKI.md) | 저장소 문서를 Wiki에 올리고, 게시 결과를 확인하고, 실패하면 다시 올리는 방법 | Wiki 게시를 설정할 때 | 게시 방법이나 문서 위치가 바뀔 때 |
@@ -30,11 +32,28 @@
 
 처음에는 PRODUCT → DESIGN → DEVELOPMENT → QUALITY 순으로 읽는다. 이후에는 [AGENTS.md](../AGENTS.md)의 작업별 조건에 따라 필요한 문서만 읽는다. 이 안내서는 문서 추가·이동·역할 변경 때 함께 갱신한다.
 
+사용자에게 직접 읽거나 작성하도록 전달하는 문서는 간단한 HTML로 제공한다. 개발·AI용 명세와 운영 문서는 기존 Markdown 체계를 유지한다.
+
+이번 사용자 요청에 따라 세 테스트의 분석은 HTML을 추가하지 않고 [관찰 결과·Product Backlog 반영 근거](prototype/OBSERVATION_RESULTS.md) 한 문서에 모았다. 빈 기록지·진행 방법과 실제 결과를 구분하며, 결과 문서는 전체 제출용 Product Backlog를 대체하지 않는다.
+
+## 프로토타입 설계를 읽을 때
+
+사용자가 직접 읽고 작성할 관찰 문서는 [HTML 테스트 안내와 기록지](prototype/TEST_GUIDE.html)를 사용한다. S1~S5 안내·작성란·HTML 저장·인쇄를 한 문서에 제공한다. 개발 명세와 절차 관리는 기존 Markdown에 유지하며, 사용자용 HTML의 내용도 함께 갱신한다.
+
+보완 사진·질문·구별 단서·다음 관람 연결의 근거는 [P01 자료 준비 묶음](prototype/content-preparation/README.md)에 있다. P02에서 런타임 v2에 병합했다. 진행자 정답·순서는 publicDir 밖의 준비 묶음에 유지한다. P06에서 전체 시나리오·이미지 최적화를 확인한다.
+
+2026-10-16 [보완 개발 설계](prototype/FLOW_EXTENSION_DESIGN.md)의 v2·N·이력·후보·질문·다음 관람을 구현했다. 사람과 실행할 때는 [관찰 실행 안내](prototype/OBSERVATION_RUNBOOK.md)와 [빈 기록지](prototype/OBSERVATION_RECORD.md)를 사용한다. [검증 기록](../prototype/VERIFICATION.md)은 제작자 검사를, [관찰 결과](prototype/OBSERVATION_RESULTS.md)는 제공된 R01·R02·R03 및 보충 설명을 다룬다. 실제 작업 상태는 기존 P Issue에서 관리한다.
+
+[설계 시작점](prototype/README.md)에서 범위를 확인한 뒤 화면 구현은 SCREENS, 자료·상태는 DATA, 관찰은 TESTING, 작업 선택은 TASKS, Sol 인계는 HANDOFF를 읽는다. 기능 상세를 버전 관리하는 부속자료이며 별도의 진행 TODO가 아니다. 발행 전 작업안은 Issue로 옮기고 실제 URL을 연결한다.
+
+시각 설계는 [실제 UI·전통 굿즈 참고](prototype/VISUAL_REFERENCES.md)와 [AI slop 방지·Worst 예시](prototype/ANTI_SLOP.md)를 함께 읽는다. 참고 자료와 제외 사례를 누적하며, 합의한 규칙의 원본은 DESIGN으로 유지한다.
+
 ## 기록의 원본
 
 | 기록 | 원본 위치 |
 | --- | --- |
 | 공통 제품·설계·개발 규칙 | `docs/`의 해당 문서 |
+| 버전 관리하는 상세 설계·관찰 절차·인계문 | `docs/prototype/`. 상위 Issue에서 해당 버전을 연결 |
 | 기능 명세와 사용자 과업 | GitHub 상위 Issue |
 | 작은 구현 단위, 완료 기준, 의존 관계 | GitHub 하위 Issue. 지원하지 않는 도구에서는 Issue 간 링크 |
 | 변경 내용, 실행한 검사, 수동 확인, 미확인 사항 | 해당 PR. PR 전에는 작업 완료 보고 |

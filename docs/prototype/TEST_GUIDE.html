@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>궁금한 궁 · 간단 테스트 기록지</title>
+  <style>
+    :root { font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif; color:#243247; background:#fff; line-height:1.75; color-scheme:light; }
+    * { box-sizing:border-box; }
+    body { max-width:760px; margin:auto; padding:32px 22px 56px; }
+    h1 { margin:0 0 12px; font-size:1.7rem; line-height:1.4; }
+    h2 { font-size:1.1rem; margin:0 0 10px; }
+    p { margin:8px 0; }
+    a { color:#294d7a; text-underline-offset:3px; overflow-wrap:anywhere; }
+    .small { color:#59677a; font-size:.875rem; }
+    .actions { display:flex; gap:10px; flex-wrap:wrap; margin:16px 0; }
+    button { font:inherit; color:inherit; background:#fff; border:1px solid #aab4c2; border-radius:8px; padding:8px 14px; cursor:pointer; }
+    button:hover { background:#f3f5f8; }
+    section { padding:22px 0; border-top:1px solid #dce1e8; }
+    .start { font-size:.9375rem; background:#f3f5f8; border-radius:8px; padding:10px 12px; }
+    .memo { min-height:90px; padding:10px; margin:12px 0 0; border:1px dashed #aab4c2; border-radius:6px; white-space:pre-wrap; overflow-wrap:anywhere; }
+    .memo:empty::before { content:attr(data-placeholder); color:#68768a; pointer-events:none; }
+    :focus-visible { outline:3px solid #b45440; outline-offset:3px; }
+    footer { border-top:1px solid #dce1e8; margin-top:20px; padding-top:14px; }
+    @media(max-width:520px) { body { padding:24px 16px 40px; } }
+    @media print { @page { size:A4; margin:16mm; } body { max-width:none; padding:0; font-size:10pt; } .actions,#save-status { display:none; } h2 { break-after:avoid; } .memo:empty::before { content:""; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>궁금한 궁 · 간단 테스트 기록지</h1>
+    <p><a href="http://127.0.0.1:4173/" target="_blank" rel="noopener noreferrer">앱 열기 ↗</a> · 앱 안의 준비된 사진만 사용해요.</p>
+    <p>먼저 홈을 자유롭게 써보고, 아래 다섯 가지를 해보세요. <strong>한 행동, 불편한 점, 좋았던 점</strong>을 편하게 적으면 돼요. 안 해본 것은 ‘안 함’으로 남겨 주세요.</p>
+    <p class="small">함께할 때는 진행자가 시작 화면을 준비하고 ‘해볼 일’만 읽어 주세요. 도와줬다면 메모에 한 줄 적어 주세요.</p>
+    <div class="actions"><button type="button" id="save">기록 저장</button><button type="button" id="print">인쇄 / PDF</button></div>
+    <p class="small" id="save-status" role="status">자동 저장은 안 돼요. 닫기 전에 ‘기록 저장’을 눌러 주세요.</p>
+    <p><strong>날짜 · 참여자 번호 · 사용 기기</strong></p>
+    <div class="memo" contenteditable="true" aria-label="날짜와 사용 환경" data-placeholder="예: 10월 17일 / 사용자2 / PC·Chrome 또는 휴대폰·Safari"></div>
+  </header>
+
+  <section id="free">
+    <h2>먼저 자유롭게 보기</h2>
+    <p class="start"><strong>시작: 홈</strong> — 다른 화면이라면 하단 ‘홈’을 누르세요.</p>
+    <p>어떤 앱인지 자유롭게 둘러보세요. 무엇을 먼저 눌렀고, 어떤 느낌이었나요?</p>
+    <div class="memo" contenteditable="true" aria-label="처음 자유 탐색 기록" data-placeholder="자유롭게 적어 주세요."></div>
+  </section>
+
+  <section id="s1">
+    <h2>S1. 이름 모르는 건물 알아보기</h2>
+    <p class="start"><strong>시작 준비:</strong> 홈 → 하단 ‘사진으로 찾기’ → ‘연못 앞의 장면’<br>‘어디가 궁금한가요?’ 화면에서 시작해요.</p>
+    <p><strong>해볼 일:</strong> 사진 속 건물의 이름과 어떤 곳인지 알아보세요.</p>
+    <div class="memo" contenteditable="true" aria-label="S1 기록" data-placeholder="어떻게 알아봤나요? 헷갈리거나 좋았던 점을 적어 주세요."></div>
+  </section>
+
+  <section id="s2">
+    <h2>S2. 궁금한 부분 알아보기</h2>
+    <p class="start"><strong>시작 준비:</strong> 홈 → ‘사진으로 찾기’ → ‘넓은 앞마당의 장면’<br>‘어디가 궁금한가요?’ 화면에서 시작해요.</p>
+    <p><strong>해볼 일:</strong> 사진에서 궁금한 부분을 골라 알아보세요.</p>
+    <p class="small">먼저 자유롭게 골라요. 그 뒤 더 확인하고 싶으면 돌바닥을 골라보고, 다른 부분으로 바꿔 보세요.</p>
+    <div class="memo" contenteditable="true" aria-label="S2 기록" data-placeholder="궁금했던 부분 / 선택·설명에서 불편하거나 좋았던 점"></div>
+  </section>
+
+  <section id="s3">
+    <h2>S3. 홈에서 관심 가는 것 보기</h2>
+    <p class="start"><strong>시작: 홈</strong> — 하단 ‘홈’을 누르세요.</p>
+    <p><strong>해볼 일:</strong> 홈을 둘러보고 관심 가는 것이 있으면 열어보세요. 없으면 넘어가도 돼요.</p>
+    <div class="memo" contenteditable="true" aria-label="S3 기록" data-placeholder="눈에 들어온 것 / 열어보거나 지나간 이유 / 열어본 뒤 느낌"></div>
+  </section>
+
+  <section id="s4">
+    <h2>S4. 닮은 건물 비교하기</h2>
+    <p class="start"><strong>시작 준비:</strong> 홈 → ‘사진으로 찾기’ → ‘넓은 돌단 위 긴 전각’<br>‘이 건물은 무엇일까요?’ 화면에서 시작해요.</p>
+    <p><strong>해볼 일:</strong> 사진과 특징을 비교해 어떤 건물인지 골라보세요. 맞는 것이 없다고 생각하면 그렇게 선택해도 돼요.</p>
+    <div class="memo" contenteditable="true" aria-label="S4 기록" data-placeholder="고른 건물과 이유 / 비교하거나 선택을 바꿀 때 불편했던 점"></div>
+  </section>
+
+  <section id="s5">
+    <h2>S5. 설명을 읽은 뒤 이어서 보기</h2>
+    <p class="start"><strong>시작: 경회루 기본 설명 화면</strong><br>여는 순서: 홈 → ‘사진으로 찾기’ → ‘연못 앞의 장면’ → ‘건물 전체 알아보기’</p>
+    <p><strong>해볼 일:</strong> 설명을 읽은 뒤 원하는 다음 행동을 해보세요. 더 보거나, 다른 것을 찾아보거나, 끝내도 괜찮아요.</p>
+    <div class="memo" contenteditable="true" aria-label="S5 기록" data-placeholder="다음에 하고 싶었던 것 / 실제로 한 행동 / 돌아가기에서 불편했던 점"></div>
+  </section>
+
+  <section id="last">
+    <h2>마지막으로 한마디</h2>
+    <p>가장 불편했던 점과 가장 좋았던 점은 무엇인가요? 빠진 의견이 있으면 함께 적어 주세요.</p>
+    <div class="memo" contenteditable="true" aria-label="마지막 의견" data-placeholder="자유롭게 적어 주세요."></div>
+  </section>
+
+  <footer>
+    <p class="small"><a href="QA_METHOD.html">진행자가 참고할 자세한 QA 방법</a></p>
+    <p class="small">작성한 내용은 서버로 보내지 않아요. 저장한 HTML을 다시 열어 기록이 남았는지 확인해 주세요.</p>
+  </footer>
+  <script>
+    document.getElementById('print').addEventListener('click', () => window.print());
+    document.getElementById('save').addEventListener('click', () => {
+      const copy = document.documentElement.cloneNode(true);
+      const fields = document.querySelectorAll('[contenteditable]');
+      copy.querySelectorAll('[contenteditable]').forEach((field, index) => { field.textContent = fields[index].innerText; });
+      copy.querySelector('#save-status').textContent = '저장한 기록이에요. 수정한 뒤에는 다시 기록 저장을 눌러 주세요.';
+      const blob = new Blob(['<!doctype html>\n', copy.outerHTML], { type: 'text/html;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      const date = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Seoul' }).format(new Date());
+      link.download = '궁금한궁_테스트안내와기록_' + date + '.html';
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      document.getElementById('save-status').textContent = 'HTML 다운로드를 요청했어요. 내려받은 파일을 열어 기록을 확인해 주세요.';
+    });
+  </script>
+</body>
+</html>
