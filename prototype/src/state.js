@@ -1,15 +1,17 @@
 import { answerProblem, hitTarget, reviewedQuestions } from './content.js';
+import { allowsComparison, searchTargets } from './browse.js';
 
 export function initialState(preset) {
-  return { screen: 'H', presetId: preset.id, sceneId: preset.sceneId, contextKey: preset.contextKey, cardVisible: preset.cardVisible, targetId: null, questionId: null, answerId: null, point: null, entryOrigin: null, error: null, comparisonCaseId: null, comparisonOptionId: null };
+  return { screen: 'H', presetId: preset.id, sceneId: preset.sceneId, contextKey: preset.contextKey, cardVisible: preset.cardVisible, targetId: null, questionId: null, answerId: null, point: null, entryOrigin: null, error: null, comparisonCaseId: null, comparisonOptionId: null, query: '', navTab: 'home' };
 }
 
 export function explorationScenes(state, preset, index) {
-  return preset.navigationScenes.filter((n) => n.sceneId !== state.sceneId && n.selectableInNewExplore && index.scenes.has(n.sceneId)).slice(0, 3);
+  const scenes = preset.navigationScenes.filter((n) => (preset.mode === 'browse' || n.sceneId !== state.sceneId) && n.selectableInNewExplore && index.scenes.has(n.sceneId));
+  return preset.mode === 'browse' ? scenes : scenes.slice(0, 3);
 }
 
 export function comparisonForScene(state, preset, index) {
-  const item = index.comparisonCases.get(preset.comparisonCaseId);
+  const item = preset.mode === 'browse' ? [...index.comparisonCases.values()].find(c => c.inputSceneId === state.sceneId && c.reviewStatus === 'reviewed') : index.comparisonCases.get(preset.comparisonCaseId);
   return item?.reviewStatus === 'reviewed' && item.inputSceneId === state.sceneId ? item : null;
 }
 
@@ -28,7 +30,7 @@ export function transition(state, action, index, preset = index.testPresets.get(
   if (!scene || !preset) return state;
   const clear = { ...state, targetId: null, questionId: null, answerId: null, point: null, entryOrigin: null, error: null, comparisonCaseId: null, comparisonOptionId: null };
   const inputComparison = comparisonForScene(state, preset, index);
-  const currentComparison = state.comparisonCaseId === preset.comparisonCaseId ? index.comparisonCases.get(state.comparisonCaseId) : null;
+  const currentComparison = allowsComparison(preset, state.comparisonCaseId, index) ? index.comparisonCases.get(state.comparisonCaseId) : null;
   const moveTo = (sceneId) => {
     const navigation = preset.navigationScenes.find((n) => n.sceneId === sceneId);
     return navigation ? { ...clear, sceneId, contextKey: navigation.contextKey, cardVisible: navigation.cardVisible } : null;
@@ -40,7 +42,15 @@ export function transition(state, action, index, preset = index.testPresets.get(
   };
   switch (action.type) {
     case 'view': return { ...clear, screen: 'V' };
-    case 'home': return { ...clear, screen: 'H' };
+    case 'home': return preset.mode === 'browse' ? { ...initialState(preset), query: state.query } : { ...clear, screen: 'H' };
+    case 'search': return { ...clear, screen: 'S', navTab: 'search' };
+    case 'search-query': return state.screen === 'S' && typeof action.query === 'string' ? { ...state, query: action.query.slice(0, 120) } : state;
+    case 'open-search-result': {
+      if (state.screen !== 'S') return state;
+      const result = searchTargets(index, state.query).find(r => r.target.id === action.targetId);
+      const destination = result && moveTo(result.sceneId);
+      return destination ? openAnswer(result.target.id, result.target.overviewAnswerId, null, 'search', destination) : state;
+    }
     case 'compare': return state.screen === 'V' && inputComparison ? { ...clear, screen: 'C', comparisonCaseId: inputComparison.id } : state;
     case 'choose-candidate': {
       if (state.screen !== 'C' || !currentComparison || !canRestore(state, preset, index)) return state;
@@ -60,7 +70,7 @@ export function transition(state, action, index, preset = index.testPresets.get(
       const destination = moveTo(currentComparison.inputSceneId);
       return destination ? { ...destination, screen: 'V', comparisonCaseId: currentComparison.id } : state;
     }
-    case 'new-explore': return ['A', 'Q', 'E'].includes(state.screen) ? { ...state, screen: 'N' } : state;
+    case 'new-explore': return preset.mode === 'browse' ? { ...clear, screen: 'N', navTab: 'photo' } : ['A', 'Q', 'E'].includes(state.screen) ? { ...state, screen: 'N' } : state;
     case 'choose-scene': {
       if (state.screen !== 'N') return state;
       const destination = explorationScenes(state, preset, index).find((n) => n.sceneId === action.sceneId);
@@ -101,6 +111,11 @@ export function transition(state, action, index, preset = index.testPresets.get(
     }
     case 'unsupported-question': return { ...state, screen: 'E', error: 'unsupported-question' };
     case 'card': {
+      if (preset.mode === 'browse') {
+        const card = index.cards.get(action.cardId);
+        const destination = card && moveTo(card.sceneId);
+        return state.screen === 'H' && destination ? openAnswer(card.targetId, card.answerId, card.questionId, 'card', destination) : state;
+      }
       const card = [...index.cards.values()].find((item) => item.contextKey === state.contextKey && item.sceneId === state.sceneId);
       return state.cardVisible && card ? openAnswer(card.targetId, card.answerId, card.questionId, 'card') : state;
     }
@@ -109,16 +124,18 @@ export function transition(state, action, index, preset = index.testPresets.get(
 }
 
 export function canRestore(state, preset, index) {
-  if (!state || state.presetId !== preset.id || !['H', 'V', 'A', 'Q', 'E', 'N', 'C'].includes(state.screen)) return false;
+  if (!state || state.presetId !== preset.id || !['H', 'V', 'A', 'Q', 'E', 'N', 'C', 'S'].includes(state.screen)) return false;
+  if (typeof state.query !== 'string' || state.query.length > 120 || !['home', 'search', 'photo'].includes(state.navTab)) return false;
   const start = preset.navigationScenes.find((n) => n.sceneId === preset.sceneId);
   if (start?.contextKey !== preset.contextKey || start?.cardVisible !== preset.cardVisible) return false;
   const navigation = preset.navigationScenes.find((n) => n.sceneId === state.sceneId);
   if (!navigation || state.contextKey !== navigation.contextKey || state.cardVisible !== navigation.cardVisible) return false;
   const scene = index.scenes.get(state.sceneId);
   if (!scene) return false;
+  if (state.screen === 'S' || (preset.mode === 'browse' && state.screen === 'N')) return !state.targetId && !state.questionId && !state.answerId && !state.point && !state.entryOrigin && !state.error && state.comparisonCaseId === null && state.comparisonOptionId === null;
   if (state.comparisonCaseId !== null) {
     const comparison = index.comparisonCases.get(state.comparisonCaseId);
-    if (state.comparisonCaseId !== preset.comparisonCaseId || comparison?.reviewStatus !== 'reviewed') return false;
+    if (!allowsComparison(preset, state.comparisonCaseId, index)) return false;
     const option = comparison.options.find((o) => o.id === state.comparisonOptionId);
     const input = state.screen === 'C' || state.screen === 'V' || state.error === 'no-candidate';
     if (input) {

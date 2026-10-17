@@ -1,5 +1,9 @@
 # 콘텐츠·상태·구현 경계
 
+2026-10-17 runtime 변경: JSON은 v2를 유지한다. `browsePreset`이 전체 장면의 유효한 scene/context/card를 모아 현재 앱의 탐색 목록을 구성한다. 기존 preset의 제외 목록은 회귀 입력이며 제품 탐색 제한으로 적용하지 않는다. 비교는 시작 preset이 아니라 입력 scene에 연결된 검수 case로 찾고 case/option/reference 관계 검증을 유지한다.
+
+검색은 검수된 대상·설명만 로컬 문자열로 조회한다. 검색 결과는 이름을 이미 제공하므로 식별 전 입력 사진 대신 대상의 참고 장면(C06 등)을 열고, 사진 탐색의 C04 입력은 후보 비교로 이어진다. 상태에 `query`(최대120자), `navTab`(home/search/photo), S 화면을 추가한다. history 복원은 query·탐색 맥락·대상·답변·실행 ID를 검증하며 S/N에서 오래된 선택을 남기지 않는다. 홈 카드가 현재 사진과 달라도 명시된 카드 목적지로 이동하고 같은 대상의 검수 답변만 연다. 아래 과거 preset/카드의 동일 장면 전제는 현재 runtime에서 이 규칙으로 대체한다.
+
 현재 계약은 **schemaVersion 2**다. [보완 설계 4·5절](FLOW_EXTENSION_DESIGN.md)의 ComparisonCase·Continuation·preset 허용 장면과 N/홈/이력·다음 관람을 구현했다. 후보 C는 case/option/input/reference/target을 함께 검사하고 참고 장면에서 설명·질문을 연다. 부분 중첩은 거부하고 틀린 후보를 입력 사진의 실제 대상으로 추가하지 않는다.
 
 이관 근거는 [P01 준비 묶음](content-preparation/README.md)이다. 검수 자료를 [런타임 JSON](content/content.json)에 병합했고 P06에서 새 사진3장을 비율 유지 축소 WebP로 변환했다. Asset.original에 원본 보관 경로·해시·크기·용량을 남긴다. P01 packet·정답표·원본은 publicDir 밖에 유지한다. 촬영일은 미상이며 런타임 버전은 `2026-10-16-scenes.3`이다.

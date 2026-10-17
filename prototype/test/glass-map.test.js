@@ -5,7 +5,7 @@ import { BEZEL, REFRACTION, bendAt, edgeVector, convexMapSVG } from '../src/glas
 
 test('convex roundover bends inward only within the outer 14 CSS pixels', () => {
   assert.equal(BEZEL, 14);
-  assert.equal(REFRACTION, 5);
+  assert.equal(REFRACTION, 7);
   assert.ok(Math.abs(bendAt(0) - 1) < 1e-12);
   let previous = 1;
   for (let distance = .1; distance < 14; distance += .1) {

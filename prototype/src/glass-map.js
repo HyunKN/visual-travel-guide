@@ -1,6 +1,6 @@
 // SVG vectors only. Map generation runs on geometry changes, never per frame.
 export const BEZEL = 14;
-export const REFRACTION = 5; // Maximum inward sampling distance in CSS px.
+export const REFRACTION = 7; // Maximum inward sampling distance in CSS px; shared by app and lab.
 
 // Circular convex roundover, with an air/glass refractive index ratio of 1 / 1.5.
 export function bendAt(distance, bezel = BEZEL) {

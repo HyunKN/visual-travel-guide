@@ -8,8 +8,8 @@
 - 제품·UI·구조: 첫 프로토타입을 위한 초안이다. 구현·사용성 검증 결과가 아니다.
 - 앱 코드와 실행 명령: [prototype](../prototype/README.md)의 독립 모바일 웹에 있다. 정적 자료와 메모리 상태로 동작한다.
 - 문서 검사·Wiki 자동 게시: GitHub Actions 설정을 추가했다. 실제 실행 결과와 장애 처리 방법은 [WIKI](WIKI.md)를 확인한다.
-- 시나리오 기반 프로토타입: [상세 설계·작업 분할·인계](prototype/README.md)에 따라 기존 탐색과 새 탐색 N·장면/이력을 구현했다. v2에 6개 장면을 포함하며 후보 UI·다음 관람 등은 후속이다. [검증 기록](../prototype/VERIFICATION.md)의 브라우저·자동 검사와 미실행인 실기기·사람 관찰을 구분한다.
-- 기술 구성은 Vanilla JavaScript + Vite다. 흰 바탕·둥근 UI·기와 먹청색 중심을 적용했으며 시각 선호·실기기·사람 관찰의 판단은 남아 있다.
+- 프로토타입: [검토한 모바일 배치](prototype/UI_LAYOUT_REVIEW.html)에 따라 검색·전체 사진 탐색·후보 비교·설명·다음 관람·공통 이동을 연결했다. 시나리오는 관찰 과제이며 앱을 잠그지 않는다. [검증 기록](../prototype/VERIFICATION.md)의 브라우저·자동 검사와 [세 사용자 테스트 결과](prototype/OBSERVATION_RESULTS.md)의 실제 기록·미검증 사항을 구분한다.
+- 기술 구성은 Vanilla JavaScript + Vite다. 흰 바탕·둥근 UI·기와 먹청색 중심을 적용했다. R01·R02·R03 기록을 분석했으며 발견된 모바일·사용성 문제의 수정 후 검증과 현장 효과는 남아 있다.
 
 ## 각 문서는 무엇이고, 언제 쓰는가?
 
@@ -32,11 +32,17 @@
 
 처음에는 PRODUCT → DESIGN → DEVELOPMENT → QUALITY 순으로 읽는다. 이후에는 [AGENTS.md](../AGENTS.md)의 작업별 조건에 따라 필요한 문서만 읽는다. 이 안내서는 문서 추가·이동·역할 변경 때 함께 갱신한다.
 
+사용자에게 직접 읽거나 작성하도록 전달하는 문서는 간단한 HTML로 제공한다. 개발·AI용 명세와 운영 문서는 기존 Markdown 체계를 유지한다.
+
+이번 사용자 요청에 따라 세 테스트의 분석은 HTML을 추가하지 않고 [관찰 결과·Product Backlog 반영 근거](prototype/OBSERVATION_RESULTS.md) 한 문서에 모았다. 빈 기록지·진행 방법과 실제 결과를 구분하며, 결과 문서는 전체 제출용 Product Backlog를 대체하지 않는다.
+
 ## 프로토타입 설계를 읽을 때
+
+사용자가 직접 읽고 작성할 관찰 문서는 [HTML 테스트 안내와 기록지](prototype/TEST_GUIDE.html)를 사용한다. S1~S5 안내·작성란·HTML 저장·인쇄를 한 문서에 제공한다. 개발 명세와 절차 관리는 기존 Markdown에 유지하며, 사용자용 HTML의 내용도 함께 갱신한다.
 
 보완 사진·질문·구별 단서·다음 관람 연결의 근거는 [P01 자료 준비 묶음](prototype/content-preparation/README.md)에 있다. P02에서 런타임 v2에 병합했다. 진행자 정답·순서는 publicDir 밖의 준비 묶음에 유지한다. P06에서 전체 시나리오·이미지 최적화를 확인한다.
 
-2026-10-16 [보완 개발 설계](prototype/FLOW_EXTENSION_DESIGN.md)의 v2·N·이력·후보·질문·다음 관람을 구현했다. 사람과 실행할 때는 [관찰 실행 안내](prototype/OBSERVATION_RUNBOOK.md)와 [빈 기록지](prototype/OBSERVATION_RECORD.md)를 사용한다. [검증 기록](../prototype/VERIFICATION.md)에서 PC 준비와 실기기 미실행을 구분하며 진행 상태는 기존 P Issue에서 관리한다.
+2026-10-16 [보완 개발 설계](prototype/FLOW_EXTENSION_DESIGN.md)의 v2·N·이력·후보·질문·다음 관람을 구현했다. 사람과 실행할 때는 [관찰 실행 안내](prototype/OBSERVATION_RUNBOOK.md)와 [빈 기록지](prototype/OBSERVATION_RECORD.md)를 사용한다. [검증 기록](../prototype/VERIFICATION.md)은 제작자 검사를, [관찰 결과](prototype/OBSERVATION_RESULTS.md)는 제공된 R01·R02·R03 및 보충 설명을 다룬다. 실제 작업 상태는 기존 P Issue에서 관리한다.
 
 [설계 시작점](prototype/README.md)에서 범위를 확인한 뒤 화면 구현은 SCREENS, 자료·상태는 DATA, 관찰은 TESTING, 작업 선택은 TASKS, Sol 인계는 HANDOFF를 읽는다. 기능 상세를 버전 관리하는 부속자료이며 별도의 진행 TODO가 아니다. 발행 전 작업안은 Issue로 옮기고 실제 URL을 연결한다.
 

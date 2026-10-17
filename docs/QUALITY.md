@@ -12,7 +12,9 @@
 
 ## 첫 흐름의 검사 시나리오
 
-구체적인 기능 판정 F01~F13, 사람 관찰 S1~S3, 개입·미지원 기록은 [프로토타입 TESTING](prototype/TESTING.md)이 상세 원본이다. 기능 검사와 사람 관찰의 완료를 구분한다.
+구체적인 기능 판정 F01~F13와 G01~G10, 사람 관찰 S1~S5, 개입·미지원 기록은 [프로토타입 TESTING](prototype/TESTING.md)과 [보완 설계](prototype/FLOW_EXTENSION_DESIGN.md)가 상세 원본이다. 기능 검사와 사람 관찰의 완료를 구분한다.
+
+반복해서 사용할 제작자 기능 확인→첫 사용 관찰→보조 과업→문제 기록→수정 재확인 절차와 1차 조사 근거는 [QA 방법](prototype/QA_METHOD.md)에 둔다. 사람이 읽을 방법은 [HTML 안내](prototype/QA_METHOD.html), 실제 수행·기록은 [화면 순서별 테스트지](prototype/TEST_GUIDE.html)를 사용한다. 목표와 시작 화면은 명확하게 제시하고, 첫 사용 관찰 중 정확한 조작 순서는 진행자 참고로만 둔다.
 
 | 입력·행동 | 기대 결과 | 확인 방식 |
 | --- | --- | --- |

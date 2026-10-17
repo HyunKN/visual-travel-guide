@@ -167,7 +167,7 @@ WWDC의 초기 Clear 설명과 이후 HIG의 어두운 배경 예외를 동일�
 
 ## 11. CSS + SVG 볼록 컨테이너 적용 (2026-10-16)
 
-사용자 조건은 볼록 표면, 외곽 14px 곡면, 은은하지만 보이는 굴절, 얇은 테두리 하이라이트와 유리용 Canvas 제외다. [glass-map.js](../../prototype/src/glass-map.js)는 직선 가장자리의 linearGradient와 모서리당 16개 radialGradient 부채꼴로 RGB 변위 맵을 만든다. 원형 단면과 굴절률 1/1.5를 참고한 곡선을 gradient stop으로 근사한다. 평평한 중앙은 중립 RGB 50%이며 외곽에서 안쪽을 샘플링한다. `feDisplacementMap scale=10`이므로 각 축 최대 샘플 변위는 5 CSS px다. 곡면 폭 14px와 변위 5px는 다른 값이다.
+사용자 조건은 볼록 표면, 외곽 14px 곡면, 은은하지만 보이는 굴절, 얇은 테두리 하이라이트와 유리용 Canvas 제외다. [glass-map.js](../../prototype/src/glass-map.js)는 직선 가장자리의 linearGradient와 모서리당 16개 radialGradient 부채꼴로 RGB 변위 맵을 만든다. 원형 단면과 굴절률 1/1.5를 참고한 곡선을 gradient stop으로 근사한다. 평평한 중앙은 중립 RGB 50%이며 외곽에서 안쪽을 샘플링한다. 2026-10-17 사용자 요청으로 `REFRACTION`을5→7, `feDisplacementMap scale`을10→14로 높였다. 각 축 최대 샘플 변위는7 CSS px이고 곡면 폭14px와 다르다. 앱·재질 비교 화면에서 같은 구현을 사용한다. 탄성 효과는 후속 보완으로 남기며 이번에 spring·motion을 바꾸지 않는다.
 
 [glass-optics.js](../../prototype/src/glass-optics.js)는 `filterUnits`·`primitiveUnits`·`feImage` 크기를 CSS pixel 좌표로 명시하고 `feImage → feComposite → feDisplacementMap`을 실제 backdrop에 연결한다. Canvas·픽셀 버퍼·사진 복제·추가 라이브러리는 사용하지 않는다. 맵 생성은 최초 연결과 ResizeObserver의 크기 변경 때만 수행하며, 같은 폭·높이·radius는 필터를 공유한다. 누름 스프링은 입력 중 별도 RAF로 동작한다. 브라우저의 필터 합성 비용이 사라지는 것은 아니며 실기기 자원 사용량은 미측정이다.
 

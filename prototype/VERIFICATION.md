@@ -1,5 +1,57 @@
 # 프로토타입 검증 기록
 
+## 2026-10-17 세 번째 인터뷰 통합
+
+R03의 자유 탐색·S1~S5·마지막 의견을 [관찰 결과·백로그 근거](../docs/prototype/OBSERVATION_RESULTS.md)에 통합했다. 질문을 직접 입력한다는 기대, 비교를 퀴즈로 이해한 점, 확대 상태에서 선택 결과가 보이지 않는 문제를 반영하고 기존 Story 후보의 수용 조건을 보완했다. 환경란은 비어 있어 기기·실시일·버전을 추정하지 않았다. 상세 3D·관람 순서는 제안으로 보존했다. 문서 분석이며 앱 수정·재현·추가 기기 검사 결과가 아니다.
+
+## 2026-10-17 두 사용자 관찰 기록 정리
+
+사용자가 제공한 첫 사용 협조자 R01(PC)·경복궁 방문을 가정한 일반인 R02(스마트폰)의 HTML 및 제작자 보충 설명·모바일 화면을 [관찰 결과·백로그 근거](../docs/prototype/OBSERVATION_RESULTS.md)에 정리했다. 확대 사진 내부 이동과 페이지 스크롤의 충돌, 앱·브라우저/기기 하단 공간, 불투명 하단바 방향, 고정 선택 영역의 기대 불일치를 반영했다.
+
+이번 작업은 문서 정리다. 아래 과거 자동·브라우저 검사와 별개로 참여자 보고를 접수했으며, 이 정리에서 결함 재현·코드 수정·수정 후 실기기 검사·사용자 재관찰을 수행하지 않았다. 품질 통과나 전체 Product Backlog 확정으로 해석하지 않는다.
+
+## 2026-10-17 Sites 배포 — 외부 공유 승인 대기
+
+- `npm.cmd test` 39/39, `npm.cmd run build` 통과. 6장면·7대상·13답변·6사진 콘텐츠/이미지 검사 포함. 기존 선택적 3D chunk 크기 경고는 남는다.
+- 앱 런타임 정적 파일18개(4,678,279bytes)를 별도 Sites 소스 저장소에 보관했다. 테스트지·참여자 기록·개발 문서는 제외했다. 원래 작업 저장소의 미커밋 변경은 커밋·푸시하지 않았다.
+- Sites source commit: `e074b76777f32e661705d87d0362885343714ac1`. 공식 소스 helper의 업로드 후 압축에서 WSL Bash가 실패했으며, 공식 packaging helper를 Git Bash와 `/c/...` 압축 경로로 실행해 복구했다.
+- Project: `appgprj_6ad27feee57c8191b12aa8a95c44b10e`. Version: `appgprj_6ad27feee57c8191b12aa8a95c44b10e~appgver_bf5120595fd881919fb5497f160ea955`. Deployment: `appgdep_6ad280c9f5d4819189f9dd29264f6510`. 상태 조회에서 **succeeded** 확인.
+- [실제 배포 주소](https://gunggeumhan-gung-prototype-20261017.milkyape4.chatgpt.site/). 현재 access mode `custom`, owner1명·추가 editor0명·group0개·외부 visitor0명으로 소유자 전용이다. 공개 전환은 자동 승인 검토에서 외부 테스트 요청보다 넓은 공개 범위라는 이유로 거절되었다.
+- In-app Browser에서 로그인 필요 화면을 확인했다. 로그인 진입도 자동 승인 검토에서 별도 로그인 승인 부재로 거절되었다. 인증을 우회하지 않았으며 **배포 주소에서 검색·사진·설명·뒤로 이동 검증은 미수행**이다. 공개 전환 명시 승인 후 같은 URL에서 검증할 예정이다. 실제 스마트폰·외부 참여자 접속도 미확인이다.
+
+## 2026-10-17 사진 페이드·스크롤 위치 표시·상단 배지 제거
+
+대상: `browse.css`의 사진 마스크·표시 재질, `main.js`의 배지 제거·표시 연결, 새 `scroll-indicator.js`. 위치 표시는 실제 문서 높이·스크롤로 계산하며 passive 이벤트와 요청당 한 프레임만 사용한다. 화면 전환 시 이벤트·ResizeObserver·예약 프레임을 정리한다.
+
+- `npm.cmd test` 39/39 및 `npm.cmd run build` 통과. 기존 선택적 3D chunk 크기 경고는 남는다. 기존 자동 검사가 새 표시의 렌더링을 검증하지는 않는다.
+- 최종 빌드4173 Chromium547×884: 사진 아래쪽이 투명해져 흰 바탕으로 이어짐, 상단 배지0개, 폭6px 표시의 공통 SVG 유리 필터 적용을 확인했다. 홈 scroll0→끝44px에서 thumb 이동0→66px. [최종 홈](screenshots/home-fade-scroll.png).
+- 320×734 검색 화면: 가로 넘침 없음, 표시1개, 실제 scroll0→688px에 맞춰 thumb 이동0→66px. 홈 전환 후 scroll0·표시 시작 위치 복귀. 390×1200에서 스크롤 거리0·표시 숨김 확인. 해당 탭 console error0, 임시 viewport 해제.
+- 실제 스마트폰·Safari/Firefox의 재질 렌더링·성능·사람 관찰은 이 변경에서 수행하지 않았다.
+
+## 2026-10-17 글자 가독성 보완
+
+대상: `src/browse.css`의 서체 크기·자간·행간·보조 글자 색과 홈 높이. 원래 Spoqa Han Sans와 문구·탐색 동작·탄성 코드는 유지했다.
+
+- `npm.cmd run build` 통과(콘텐츠·이미지 검사 포함). 기존 선택적 3D chunk 크기 경고는 남는다. 동작 코드 변경이 없어 이 보완에서 Node 기능 검사는 재실행하지 않았다.
+- 최종 빌드4173 Chromium390px에서 computed 검색 입력16px, 홈 설명14px, 버튼16px, 출처10px, 하단 메뉴12px와 제목 자간-.52px를 확인했다. [460px 홈 화면](screenshots/readable-home.png).
+- 320px 기본 3D 홈: stage 하단373px, 본문 시작399.63px, 가로 넘침 없음. 320px·글자200%(root32px) 사진 홈·검색 결과·돌바닥 설명에서도 가로 넘침 없이 Enter 검색→결과 선택→설명 도달을 확인했다. 하단 메뉴128px에 본문 아래144px를 확보했다.
+- 이는 PC Chromium의 배치 검사이며 실제 휴대폰의 글자 렌더링이나 사용자의 읽기 편함을 검증한 결과는 아니다.
+
+## 2026-10-17 자유 탐색 UI·서체·굴절 보완
+
+대상: 기준 `fe6ec2e` 이후 로컬 미커밋 변경. 검토한 배치로 홈 검색·작은 호기심 카드·공통 상단 뒤로/검색·하단 홈/검색/사진 탐색을 구성했다. 시나리오는 관찰 과제이며 앱은 모든6장면을 제공한다. 이전 preset 잠금 검사는 회귀 fixture 검증이고 현재 runtime은 `browsePreset`으로 별도 구성한다.
+
+- Windows Node24.11.1/npm11.6.2/Vite8.3.4. `npm.cmd test` **39/39** 통과. 새5개 검사는 전체 사진 접근, 자유 후보/카드 이동, 이름·부분·복합어 검색·없는 결과·미검수 제외, 검색 history, S5 밖 다음 관람을 다룬다.
+- `npm.cmd run build` 및 콘텐츠·이미지 해시 검사 통과. Spoqa Han Sans 원래 family의 Regular/Bold WOFF2(308.24/309.22KB)·OFL 고지4.57KB 포함. 공식 CSS가 지정한 커밋의 미수정 파일이다. 메뉴의 이용 조건 링크와 computed font-family를 확인했다. FontFaceSet API는 도구에서 조회 불가였다. 선택적 3D558.83KB 크기 경고는 남는다.
+- 문서 검사30문서·282로컬 링크·18게시 입력, `git diff --check` 통과. Wiki 게시·커밋·푸시는 이번 변경에서 수행하지 않았다.
+- Chromium390×844: 홈 ‘바닥’ 검색→부분 설명→뒤로에서 검색어·결과·원래 항목 포커스 복원. 결과0→사진6개→후보 입력→사정전→재비교→수정전→홈 카드→굴뚝 설명을 같은 앱에서 조작했다.
+- Chromium320×734·200%(root32px): 홈/검색/설명에서 가로 넘침 없음. 키보드 Enter로 설명 도달. 하단 메뉴117.59px에 본문 아래133.59px를 확보했다. OS 확대·실기기 검사는 아니다.
+- 최종 빌드4173에서 경회루 검색→설명→다음 수정전→뒤로2회→검색어·결과 복원. 대상 변경 뒤 H1/scrollY0. [홈](screenshots/free-home.png) · [검색](screenshots/free-search.png).
+- 앱·재질 비교의 SVG scale14(최대 각 축7px)·곡면14px. [ON](screenshots/refraction-7-on.png) / [OFF](screenshots/refraction-7-off.png)와 상태 전환을 확인했다. 사진형 홈·재질 비교 Canvas0. spring·motion은 변경하지 않았다. 탄성 표현 완성은 아니다.
+- 3D 홈 canvas1, stage하단373px·본문시작374.81px로 겹침 없음·가로 넘침 없음. 최종 빌드 검사 탭 console error0. viewport override 해제.
+
+실제 스마트폰·Safari/Firefox·OS 접근성·GPU/FPS·장시간 메모리·참여자 관찰은 미실행이다. 기능 검사로 궁금증 해소·AI 인식 성능을 주장하지 않는다. 아래 P별 기록은 당시 버전의 증거다.
+
 ## P07 통합 검증·관찰 인계 — 2026-10-16
 
 검사 대상: P06 `d1539f0` 이후 이 P07 변경과 콘텐츠 `2026-10-16-scenes.3`. 환경: Windows·Node24.11.1/npm11.6.2/Vite8.3.4, Codex In-app Browser Chromium. 아래 PC 판정은 실제 스마트폰·OS 확대·터치·회전·Safari·사람 관찰의 결과가 아니다. **PC/에뮬레이션 리허설 준비, 실기기·최종 콘텐츠 사용자 확인 대기**다. [실행 안내](../docs/prototype/OBSERVATION_RUNBOOK.md)와 [빈 기록지](../docs/prototype/OBSERVATION_RECORD.md)로 P08에 인계하며 기록지는 미시행 템플릿이다.

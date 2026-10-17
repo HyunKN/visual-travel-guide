@@ -2,13 +2,15 @@ import './style.css';
 import './app-design.css';
 import './glass.css';
 import './materials-lab.css';
+import './browse.css';
 import { bindPressFeedback, motionEnabled, setMotionPreference } from './motion.js';
 import { bindGlassOptics } from './glass-optics.js';
+import { REFRACTION } from './glass-map.js';
 
 const root = document.querySelector('#materials');
 root.innerHTML = `<header><a href="./">궁금한 궁으로 돌아가기</a><h1>맑은 유리, 14px의 곡면</h1><p>표면은 볼록하게, 가운데는 맑게. 배경의 선이 가장자리에서 어떻게 휘는지 비교해보세요.</p></header>
   <label class="motion-choice"><span>배경 굴절</span><input type="checkbox" id="optics-effects" checked></label>
-  <p class="lab-note" id="optics-status" aria-live="polite">SVG 굴절 켜짐 · 곡면 14px · 최대 변위 5px · Canvas 없음</p>
+  <p class="lab-note" id="optics-status" aria-live="polite">SVG 굴절 켜짐 · 곡면 14px · 최대 변위 ${REFRACTION}px · Canvas 없음</p>
   <section class="optics-scenes" aria-label="배경 굴절 비교">
     <div class="optics-scene optics-grid"><div class="grid-caption" aria-hidden="true">궁의 선을 따라<br>가까이 들여다보기</div><div class="glass glass-container optics-lens"><strong>같은 선, 다른 깊이</strong><span>테두리를 통과하는 선을 살펴보세요</span></div><span class="scene-caption">격자 위에서</span></div>
     <div class="optics-scene optics-photo"><div class="glass glass-container optics-lens"><strong>기와 끝에 머무는 빛</strong><span>가장자리의 사진을 살펴보세요</span></div><span class="scene-caption">근정전 사진 위에서</span></div>
@@ -29,7 +31,7 @@ const updateOpticsStatus = () => {
   const active = lens.dataset.glassOptics === 'svg-vector' && getComputedStyle(lens).backdropFilter.includes('url(');
   document.querySelector('#optics-status').textContent = !opticsChoice.checked
     ? '굴절 꺼짐 · 색·테두리·하이라이트는 그대로'
-    : active ? 'SVG 굴절 켜짐 · 곡면 14px · 최대 변위 5px · Canvas 없음'
+    : active ? `SVG 굴절 켜짐 · 곡면 14px · 최대 변위 ${REFRACTION}px · Canvas 없음`
       : 'SVG 굴절 미적용 · 브라우저 지원·접근성 설정에 따른 기본 재질';
 };
 opticsChoice.addEventListener('change', updateOpticsStatus);

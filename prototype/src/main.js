@@ -1,7 +1,11 @@
 import './style.css';
 import './app-design.css';
 import './glass.css';
+import './browse.css';
+import fontLicenseUrl from './fonts/LICENSE.txt?url';
+import { browsePreset, searchTargets } from './browse.js';
 import { bindGlassOptics } from './glass-optics.js';
+import { bindScrollIndicator } from './scroll-indicator.js';
 import { validateContent, indexContent, configurePreset, fitImage, pointInImage, reviewedQuestions } from './content.js';
 import { initialState, transition, canRestore, explorationScenes, comparisonForScene, availableContinuation } from './state.js';
 import { takePhotoSnapshot, animateScreen, bindPressFeedback, motionEnabled, setMotionPreference } from './motion.js';
@@ -21,7 +25,6 @@ const icon = (name) => {
   };
   return `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] ?? ''}</svg>`;
 };
-const motif = `<svg class="dancheong-motif" viewBox="0 0 64 64" aria-hidden="true">${Array.from({ length: 8 }, (_, i) => `<path transform="rotate(${i * 45} 32 32)" d="M32 30C21 23 23 11 32 3C41 11 43 23 32 30Z" fill="${i % 2 ? '#263345' : '#e4e5e7'}" stroke="#f8fbf8" stroke-width="1.8"/><path transform="rotate(${i * 45} 32 32)" d="M32 29C27 23 27 17 32 11C37 17 37 23 32 29" fill="#b96251" stroke="#fafbf7" stroke-width="1.2"/>`).join('')}<circle cx="32" cy="32" r="10" fill="#355e70" stroke="#fff" stroke-width="2"/><circle cx="32" cy="32" r="5" fill="#d7b96f"/><circle cx="32" cy="32" r="2" fill="#fff"/></svg>`;
 // Original silhouette: two swept roofs above Gwanghwamun's three archways.
 const gateLogo = `<svg class="gate-logo" viewBox="0 0 80 64" aria-hidden="true">
   <path d="M8 41h64v19H8Z" fill="#e4e5e7" stroke="#343d4c" stroke-width="1.5"/>
@@ -37,22 +40,22 @@ const gateLogo = `<svg class="gate-logo" viewBox="0 0 80 64" aria-hidden="true">
 </svg>`;
 const brand = `${gateLogo}<span>궁금한 궁</span>`;
 let data, index, activeIndex, preset, state, runId;
-let imageReady = false, imageFailed = false, zoomed = false, expandedTargets = false, imageRetry = 0;
+let imageReady = false, imageFailed = false, zoomed = false, expandedTargets = false, imageRetry = 0, navObserver;
 let fault = 'none', invalidUrl = false, observer;
 let textScale = 'normal';
 let glassMode = 'auto';
-let homeDesign = 'photo', disposeStory, disposePress, disposeOptics, storyGeneration = 0;
+let homeDesign = 'photo', disposeStory, disposePress, disposeOptics, disposeScrollIndicator, storyGeneration = 0;
 let restoring = false, restoreGeneration = 0;
 
 function rememberView() {
   if (!state || restoring || location.hash === '#test' || history.state?.runId !== runId) return;
   const scroller = app.querySelector('.photo-scroll');
   const focused = document.activeElement;
-  const attribute = ['data-action', 'data-target', 'data-question', 'data-scene', 'data-option', 'data-continuation'].find((name) => focused?.hasAttribute(name));
+  const attribute = ['data-action', 'data-target', 'data-question', 'data-scene', 'data-option', 'data-continuation', 'data-result', 'id'].find((name) => focused?.hasAttribute(name));
   const ui = { y: window.scrollY, zoomed, expandedTargets, photoX: scroller?.scrollLeft ?? 0, photoY: scroller?.scrollTop ?? 0,
     focus: attribute ? { attribute, value: focused.getAttribute(attribute) } : null,
     details: [...app.querySelectorAll('details[open]')].map((d) => d.className) };
-  history.replaceState({ runId, state, ui }, '', urlFor(preset));
+  history.replaceState({ ...history.state, runId, state, ui }, '', urlFor(preset));
 }
 
 function restoreView(ui = {}) {
@@ -66,7 +69,7 @@ function restoreView(ui = {}) {
     if (generation !== restoreGeneration) return;
     const scroller = app.querySelector('.photo-scroll');
     if (scroller) { scroller.scrollLeft = nonnegative(ui.photoX); scroller.scrollTop = nonnegative(ui.photoY); }
-    const allowed = ['data-action', 'data-target', 'data-question', 'data-scene', 'data-option', 'data-continuation'];
+    const allowed = ['data-action', 'data-target', 'data-question', 'data-scene', 'data-option', 'data-continuation', 'data-result', 'id'];
     const focus = allowed.includes(ui.focus?.attribute) ? [...app.querySelectorAll(`[${ui.focus.attribute}]`)].find((el) => el.getAttribute(ui.focus.attribute) === ui.focus.value) : null;
     (focus ?? app.querySelector('h1') ?? app.querySelector('main'))?.focus({ preventScroll: true });
     window.scrollTo(0, nonnegative(ui.y));
@@ -88,11 +91,11 @@ function urlFor(p, test = false) {
 
 function startRun(nextPreset) {
   restoreGeneration++; restoring = false;
-  preset = { ...nextPreset };
+  preset = browsePreset(index, nextPreset);
   runId = crypto.randomUUID();
   state = initialState(preset);
   zoomed = false; expandedTargets = false; imageRetry = 0;
-  history.replaceState({ runId, state }, '', urlFor(preset));
+  history.replaceState({ runId, state, depth: 0 }, '', urlFor(preset));
   render();
 }
 
@@ -112,7 +115,9 @@ function dispatch(action) {
   const sameScreen = ['point', 'text-target'].includes(action.type) || (next.screen === state.screen && next.sceneId === state.sceneId && next.targetId === state.targetId && next.answerId === state.answerId && next.questionId === state.questionId);
   if (next.sceneId !== state.sceneId) { zoomed = false; expandedTargets = false; imageRetry = 0; }
   state = next;
-  history[['point', 'text-target'].includes(action.type) ? 'replaceState' : 'pushState']({ runId, state }, '', urlFor(preset));
+  const replace = ['point', 'text-target', 'search-query'].includes(action.type);
+  const depth = (history.state?.depth ?? 0) + (replace ? 0 : 1);
+  history[replace ? 'replaceState' : 'pushState']({ runId, state, depth }, '', urlFor(preset));
   render({ focus: !sameScreen, snapshot: sameScreen ? null : snapshot });
   rememberView();
   if (['point', 'text-target'].includes(action.type)) {
@@ -122,8 +127,11 @@ function dispatch(action) {
 }
 
 function shell(content, title, home = false) {
-  return `<div class="app-shell ${home ? 'home-shell' : ''}"><header class="topbar">${home ? `<div class="brand">${brand}</div><span class="site-label">경복궁</span>` : `<button class="icon-button glass" data-action="back" aria-label="뒤로">${icon('back')}</button><div class="brand compact">${brand}</div><button class="icon-button glass" data-action="home" aria-label="홈으로">${icon('home')}</button>`}</header><main id="main" tabindex="-1" aria-label="${escape(title)}">${content}</main><footer class="app-footer"><span class="red-dot" aria-hidden="true"></span>준비된 사진과 설명을 사용하는 프로토타입</footer>
-  <dialog class="design-menu" aria-labelledby="design-menu-title"><div class="menu-heading"><h2 id="design-menu-title">화면 둘러보기</h2><button class="icon-button" data-action="close-menu" aria-label="메뉴 닫기">×</button></div><p>같은 흐름을 두 가지 화면으로 살펴보세요.</p><div class="design-options"><button data-design="story" aria-pressed="${homeDesign === 'story'}">1안 · 3D 궁궐</button><button data-design="photo" aria-pressed="${homeDesign === 'photo'}">2안 · 사진 두 개</button></div><label class="check-label motion-choice"><span>움직임 효과</span><input type="checkbox" id="motion-effects" ${motionEnabled() ? 'checked' : ''}/></label><p class="form-hint">처음에는 기기의 동작 줄이기 설정을 따라요. 여기서 원하는 쪽으로 바꿀 수 있어요.</p><a class="materials-link" href="./materials.html" target="_blank" rel="noopener noreferrer">색과 버튼 반응 비교 ↗<span class="sr-only"> 새 탭</span></a><p class="form-hint">준비된 장면을 쓰며 실제 위치나 카메라는 사용하지 않아요.</p></dialog></div>`;
+  const nav = state && location.hash !== '#test';
+  const tab = state?.screen === 'H' ? 'home' : state?.screen === 'S' ? 'search' : state?.navTab;
+  const headerTitle = state?.screen === 'N' ? '사진으로 찾기' : state?.screen === 'S' ? '검색' : title;
+  return `<div class="app-shell ${home ? 'home-shell' : ''}"><header class="topbar">${home ? `<div class="brand">${brand}</div><button class="icon-button glass" data-action="menu" aria-label="메뉴">${icon('menu')}</button>` : `<button class="icon-button glass" data-action="back" aria-label="뒤로가기">${icon('back')}</button><span class="topbar-title">${escape(headerTitle)}</span><button class="icon-button glass" data-action="${state?.screen === 'S' ? 'new-explore' : 'search'}" aria-label="${state?.screen === 'S' ? '사진으로 찾기' : '검색 열기'}">${icon(state?.screen === 'S' ? 'camera' : 'look')}</button>`}</header><main id="main" tabindex="-1" aria-label="${escape(title)}">${content}</main><footer class="app-footer"><span class="red-dot" aria-hidden="true"></span>준비된 사진과 설명을 사용하는 프로토타입</footer>${nav ? `<nav class="bottom-nav glass" aria-label="하단 탐색">${[['home', 'home', '홈'], ['search', 'look', '검색'], ['new-explore', 'camera', '사진으로 찾기']].map(([action, name, label]) => `<button data-action="${action}" ${tab === (action === 'new-explore' ? 'photo' : action) ? 'aria-current="page"' : ''}>${icon(name)}<span>${label}</span></button>`).join('')}</nav><div class="scroll-position" aria-hidden="true"><div class="scroll-position-thumb glass"></div></div>` : ''}
+  <dialog class="design-menu" aria-labelledby="design-menu-title"><div class="menu-heading"><h2 id="design-menu-title">화면 둘러보기</h2><button class="icon-button" data-action="close-menu" aria-label="메뉴 닫기">×</button></div><p>같은 흐름을 두 가지 화면으로 살펴보세요.</p><div class="design-options"><button data-design="story" aria-pressed="${homeDesign === 'story'}">1안 · 3D 궁궐</button><button data-design="photo" aria-pressed="${homeDesign === 'photo'}">2안 · 사진 두 개</button></div><label class="check-label motion-choice"><span>움직임 효과</span><input type="checkbox" id="motion-effects" ${motionEnabled() ? 'checked' : ''}/></label><p class="form-hint">처음에는 기기의 동작 줄이기 설정을 따라요. 여기서 원하는 쪽으로 바꿀 수 있어요.</p><a class="materials-link" href="./materials.html" target="_blank" rel="noopener noreferrer">색과 버튼 반응 비교 ↗<span class="sr-only"> 새 탭</span></a><a class="materials-link" href="${escape(fontLicenseUrl)}" target="_blank" rel="noopener noreferrer">서체: 스포카 한 산스 · 이용 조건 ↗<span class="sr-only"> 새 탭</span></a><p class="form-hint">준비된 장면을 쓰며 실제 위치나 카메라는 사용하지 않아요.</p></dialog></div>`;
 }
 
 function photo({ interactive = false, compact = false, zoomable = interactive } = {}) {
@@ -141,34 +149,73 @@ function photo({ interactive = false, compact = false, zoomable = interactive } 
   </div>`;
 }
 
+function searchForm(home = false) {
+  return `<form class="search-form ${home ? 'home-search' : ''}" role="search" aria-label="콘텐츠 검색"><button type="submit" class="search-submit" aria-label="검색 실행">${icon('look')}</button><label class="sr-only" for="search-input">건물이나 궁금한 부분 검색</label><input id="search-input" name="query" type="search" maxlength="120" autocomplete="off" value="${escape(state.query)}" placeholder="${home ? '건물·문양·궁금한 부분 검색' : '건물 이름이나 궁금한 단어'}"/>${home ? `<button class="search-camera" type="button" data-action="new-explore" aria-label="사진으로 찾기">${icon('camera')}</button>` : ''}</form>`;
+}
+
 function homeScreen() {
-  const card = [...index.cards.values()].find((item) => item.contextKey === state.contextKey && item.sceneId === state.sceneId);
-  const context = state.contextKey === 'before-visit' ? '경복궁을 미리 둘러보기' : `${index.scenes.get(state.sceneId).areaLabel}에서 살펴보기`;
-  const asset = card && index.assets.get(card.assetId);
-  const scene = index.scenes.get(state.sceneId);
-  const heroAsset = index.assets.get('photo-geunjeongjeon');
-  const story = homeDesign === 'story';
-  return shell(`${invalidUrl ? '<p class="notice" role="status">설정을 확인할 수 없어 첫 장면으로 돌아왔어요.</p>' : ''}${fault !== 'none' ? '<p class="notice">오류 복구 리허설 중이에요. 사람 관찰에 사용하지 마세요.</p>' : ''}
-    <section class="home-hero ${story ? 'story-hero' : 'photo-hero'}">
-      ${story ? `<div class="palace-stage" role="img" aria-label="경복궁 건축에서 영감을 받은 단순화된 3D 일러스트"><img class="story-fallback" src="${escape(base + heroAsset.localPath)}" alt=""/><span class="model-note">궁궐을 그린 3D 일러스트</span></div><div class="story-progress" aria-hidden="true"><span></span><span></span><span></span></div><div class="story-controls"><button class="glass story-pause" aria-label="이야기 멈추기">Ⅱ</button><button class="glass story-next" aria-label="다음 장면">${icon('arrow')}</button></div>` : `<img class="hero-photo" data-shared-photo src="${escape(base + heroAsset.localPath)}" alt="${escape(heroAsset.alt)}" width="${heroAsset.width}" height="${heroAsset.height}" fetchpriority="high"/>`}
-      <div class="context"><span class="context-dot" aria-hidden="true"></span>${escape(context)}</div><button class="hero-menu glass icon-button" data-action="menu" aria-label="메뉴">${icon('menu')}</button>
-      <div class="hero-copy"><p class="eyebrow">눈앞의 궁궐, 조금 더 가까이</p><h1 tabindex="-1">그냥 지나치기엔<br>궁금한 것들.</h1><p class="home-copy ${story ? 'story-caption' : ''}">${story ? '이 건물은 어떤 곳일까요?' : '이 건물은 어떤 곳일까요?<br>작은 문양에는 어떤 뜻이 담겼을까요?'}</p>
-      <button class="primary glass home-action" data-action="view"><span class="camera-orb">${icon('camera')}</span><span>궁금한 부분 알아보기</span>${icon('arrow')}</button></div>
-    </section>
-    <p class="home-hint">${scene.assetId !== heroAsset.id ? `이번 탐색: ${escape(scene.title.replace(/의 장면$/, ''))} 사진` : '사진에서 궁금한 곳을 직접 골라보세요.'}</p>
-    <a class="hero-credit" href="${escape(heroAsset.sourceUrl)}" target="_blank" rel="noopener noreferrer">${story ? '일러스트는 실제 조사·복원 자료가 아니에요. 사진 출처' : `사진: ${heroAsset.id === 'photo-ten-longevity-chimney' ? '한국민족문화대백과사전 · 한국학중앙연구원' : '궁능유적본부'}`}<span class="sr-only"> (새 탭)</span> ↗</a>
-    ${state.cardVisible && card ? `<section class="curiosity"><div class="section-label"><span>잠깐, 이런 것도 있어요</span>${motif}</div><button class="curiosity-card" data-action="card"><div class="discovery-photo"><img src="${escape(base + asset.localPath)}" alt="" width="1200" height="1194" /><span class="discovery-icon glass">${icon('look')}</span></div><span class="curiosity-text"><span>${escape(card.prompt)}</span><span class="card-link">더 알아보기 ${icon('arrow')}</span></span></button><a class="card-credit" href="${escape(asset.sourceUrl)}" target="_blank" rel="noopener noreferrer">사진: 한국민족문화대백과사전 · 한국학중앙연구원<span class="sr-only"> (새 탭)</span> ↗</a></section>` : ''}
-    <p class="prototype-note">사진 인식과 현재 위치 확인은 하지 않아요.<br>준비된 사진으로 사용 흐름을 체험해요.</p>`, '홈', true);
+  const card = [...index.cards.values()][0], asset = card && index.assets.get(card.assetId);
+  const heroAsset = index.assets.get('photo-geunjeongjeon'), story = homeDesign === 'story';
+  return shell(`${invalidUrl ? '<p class="notice">설정을 확인할 수 없어 첫 화면으로 돌아왔어요.</p>' : ''}${fault !== 'none' ? '<p class="notice">오류 복구 리허설 중이에요. 사람 관찰에 사용하지 마세요.</p>' : ''}
+    ${searchForm(true)}<section class="home-hero ${story ? 'story-hero' : 'photo-hero'}">
+      ${story ? `<div class="palace-stage" role="img" aria-label="경복궁 건축에서 영감을 받은 3D 일러스트"><img class="story-fallback" src="${escape(base + heroAsset.localPath)}" alt=""/><span class="model-note">궁궐을 그린 3D 일러스트</span></div><div class="story-progress" aria-hidden="true"><span></span><span></span><span></span></div><div class="story-controls"><button class="glass story-pause" aria-label="이야기 멈추기">Ⅱ</button><button class="glass story-next" aria-label="다음 장면">${icon('arrow')}</button></div>` : `<img class="hero-photo" data-shared-photo src="${escape(base + heroAsset.localPath)}" alt="${escape(heroAsset.alt)}" width="${heroAsset.width}" height="${heroAsset.height}" fetchpriority="high"/>`}
+      <div class="context">눈앞의 궁궐, 조금 더 가까이</div><div class="hero-copy"><h1 tabindex="-1">그냥 지나치기엔<br>궁금한 것들.</h1><p class="home-copy ${story ? 'story-caption' : ''}">이 건물은 어떤 곳일까요?<br>작은 문양에는 어떤 뜻이 담겼을까요?</p>
+      <button class="primary glass home-action" data-action="new-explore"><span class="camera-orb">${icon('camera')}</span><span>사진으로 궁금한 곳 알아보기</span>${icon('arrow')}</button></div>
+    </section><a class="hero-credit" href="${escape(heroAsset.sourceUrl)}" target="_blank" rel="noopener noreferrer">${story ? '직접 그린 일러스트 · 실제 조사·복원 모형이 아니에요. 사진 출처' : '사진: 국가유산청 궁능유적본부'} ↗<span class="sr-only"> 새 탭</span></a>
+    ${card ? `<section class="curiosity"><h2 class="section-label">잠깐, 이런 것도 있어요</h2><button class="curiosity-card" data-action="card" data-card="${escape(card.id)}"><img src="${escape(base + asset.localPath)}" alt="" width="${asset.width}" height="${asset.height}"/><span class="curiosity-text"><span>${escape(card.prompt)}</span><span class="card-link">더 알아보기 ${icon('arrow')}</span></span></button><a class="card-credit" href="${escape(asset.sourceUrl)}" target="_blank" rel="noopener noreferrer">사진: 한국민족문화대백과사전 · 한국학중앙연구원<span class="sr-only"> (새 탭)</span> ↗</a></section>` : ''}<p class="prototype-note">촬영·인식 대신 준비된 사진과 설명으로 둘러봐요.</p>`, '홈', true);
+}
+
+function searchResults() {
+  const query = state.query.trim(), all = searchTargets(activeIndex, query);
+  const results = query ? all : all.filter(r => r.target.kind === 'building');
+  return `<p class="result-count" role="status">${query ? `검색 결과 ${results.length}개` : '둘러볼 수 있는 곳'}</p><div class="search-list">${results.map(({ target, sceneId, answer }) => {
+    const asset = index.assets.get(index.scenes.get(sceneId).assetId);
+    return `<article class="search-item"><button class="search-result" data-result="${escape(target.id)}"><img src="${escape(base + asset.localPath)}" alt="" width="${asset.width}" height="${asset.height}" loading="lazy"/><span><strong>${escape(target.displayName)}</strong><span>${escape(answer.shortText.slice(0, 76))}${answer.shortText.length > 76 ? '…' : ''}</span></span>${icon('arrow')}</button><a class="search-credit" href="${escape(asset.sourceUrl)}" target="_blank" rel="noopener noreferrer">${escape(asset.creatorCredit)} · ${escape(asset.licenseLabel)}<span class="sr-only"> (새 탭)</span> ↗</a></article>`;
+  }).join('') || '<section class="search-empty"><h2>아직 준비된 설명이 없어요.</h2><p>다른 단어로 검색하거나 사진에서 찾아보세요.</p><button class="secondary" data-search-photo>사진으로 찾아보기</button></section>'}</div>`;
+}
+
+function searchScreen() {
+  return shell(`${searchForm()}<div class="screen-heading"><h1 tabindex="-1">무엇이 궁금한가요?</h1><p>이름을 알면 검색하고,<br>이름을 모르면 사진으로 찾아보세요.</p></div><div class="search-topics" aria-label="검색어 예시">${['경회루', '문양', '바닥'].map(word => `<button data-query="${word}">${word}</button>`).join('')}</div><p class="search-scope">준비된 건물·부분 설명 안에서 검색해요.</p><section id="search-results" aria-label="검색 결과">${searchResults()}</section>`, '검색');
+}
+
+function bindSearch() {
+  const form = app.querySelector('.search-form'), input = form?.elements.query;
+  const results = app.querySelector('#search-results');
+  const update = () => {
+    state = transition(state, { type: 'search-query', query: input.value }, activeIndex, preset);
+    rememberView();
+    if (results) results.innerHTML = searchResults();
+  };
+  form?.addEventListener('submit', event => {
+    event.preventDefault();
+    if (state.screen === 'H') {
+      const query = input.value;
+      dispatch({ type: 'search' });
+      const next = app.querySelector('#search-input');
+      next.value = query;
+      next.dispatchEvent(new Event('input', { bubbles: true }));
+      next.focus();
+    } else update();
+  });
+  if (state.screen !== 'S') return;
+  input.addEventListener('input', event => { if (!event.isComposing) update(); });
+  input.addEventListener('compositionend', update);
+  for (const button of app.querySelectorAll('[data-query]')) button.addEventListener('click', () => {
+    input.value = button.dataset.query; update(); input.focus();
+  });
+  results.addEventListener('click', event => {
+    const result = event.target.closest('[data-result]');
+    if (result) dispatch({ type: 'open-search-result', targetId: result.dataset.result });
+    if (event.target.closest('[data-search-photo]')) dispatch({ type: 'new-explore' });
+  });
 }
 
 function newExploreScreen() {
   const choices = explorationScenes(state, preset, index);
-  return shell(`<div class="screen-heading"><p class="eyebrow">다른 대상 알아보기</p><h1 tabindex="-1">무엇을 더 살펴볼까요?</h1><p>촬영 대신 준비된 사진으로 체험해요.</p></div>
-    <div class="explore-list">${choices.map((choice) => {
-      const scene = index.scenes.get(choice.sceneId), asset = index.assets.get(scene.assetId);
-      return `<section class="explore-item"><button class="explore-choice" data-scene="${escape(scene.id)}"><img src="${escape(base + asset.localPath)}" alt="${escape(asset.alt)}" width="${asset.width}" height="${asset.height}" loading="lazy"/><span>${escape(scene.title)} ${icon('arrow')}</span></button><a class="explore-credit" href="${escape(asset.sourceUrl)}" target="_blank" rel="noopener noreferrer">${escape(asset.creatorCredit)} · ${escape(asset.licenseLabel)}<span class="sr-only"> (새 탭)</span> ↗</a></section>`;
-    }).join('') || '<p class="empty-questions" role="status">이번 체험에서 더 고를 수 있는 사진이 없어요. 이전 화면으로 돌아가거나 홈에서 다시 살펴볼 수 있어요.</p>'}</div>
-    <button class="secondary" data-action="back">이전 화면으로 돌아가기</button><button class="text-button" data-action="home">홈으로</button>`, '다른 대상 알아보기');
+  return shell(`<div class="screen-heading"><p class="eyebrow">사진으로 찾기</p><h1 tabindex="-1">눈앞의 무엇이<br>궁금한가요?</h1><p>건물 전체도, 작은 문양도 살펴보세요.</p></div><p class="photo-input-note">${icon('camera')}촬영 대신 아래 예시 사진을 골라 체험해요.</p><h2 class="photo-list-title">준비된 사진</h2><div class="explore-list">${choices.map(choice => {
+    const scene = index.scenes.get(choice.sceneId), asset = index.assets.get(scene.assetId);
+    return `<section class="explore-item"><button class="explore-choice" data-scene="${escape(scene.id)}"><img src="${escape(base + asset.localPath)}" alt="${escape(asset.alt)}" width="${asset.width}" height="${asset.height}" loading="lazy"/><span>${escape(scene.title)} ${icon('arrow')}</span></button><a class="explore-credit" href="${escape(asset.sourceUrl)}" target="_blank" rel="noopener noreferrer">${escape(asset.creatorCredit)} · ${escape(asset.licenseLabel)}<span class="sr-only"> (새 탭)</span> ↗</a></section>`;
+  }).join('')}</div>`, '사진으로 찾기');
 }
 
 function viewScreen() {
@@ -269,30 +316,40 @@ function updateOverlay() {
 function render({ focus = true, snapshot } = {}) {
   const oldPhoto = snapshot === undefined && focus ? takePhotoSnapshot(app) : snapshot;
   disposeStory?.(); disposeStory = null;
-  disposePress?.(); disposeOptics?.();
+  disposePress?.(); disposeOptics?.(); disposeScrollIndicator?.();
   const generation = ++storyGeneration;
   const previousScroll = app.querySelector('.photo-scroll');
   const photoScroll = previousScroll ? { x: previousScroll.scrollLeft, y: previousScroll.scrollTop } : null;
   observer?.disconnect();
   const isTest = location.hash === '#test';
-  app.innerHTML = isTest ? testScreen() : ({ H: homeScreen, V: viewScreen, A: answerScreen, Q: questionScreen, E: errorScreen, N: newExploreScreen, C: comparisonScreen }[state.screen] ?? errorScreen)();
+  app.innerHTML = isTest ? testScreen() : ({ H: homeScreen, S: searchScreen, V: viewScreen, A: answerScreen, Q: questionScreen, E: errorScreen, N: newExploreScreen, C: comparisonScreen }[state.screen] ?? errorScreen)();
   document.title = `${isTest ? '테스트 준비' : app.querySelector('h1')?.textContent.replace(/\s+/g, ' ') ?? '경복궁'} · 궁금한 궁`;
+  navObserver?.disconnect();
+  const nav = app.querySelector('.bottom-nav');
+  if (nav) {
+    const reserve = () => document.documentElement.style.setProperty('--nav-height', `${nav.getBoundingClientRect().height}px`);
+    navObserver = new ResizeObserver(reserve); navObserver.observe(nav); reserve();
+  }
   if (focus) { app.querySelector('h1')?.focus(); window.scrollTo(0, 0); }
   for (const el of app.querySelectorAll('[data-action]')) el.addEventListener('click', () => {
     const type = el.dataset.action;
     if (type === 'menu') { app.querySelector('.design-menu').showModal(); return; }
     if (type === 'close-menu') { app.querySelector('.design-menu').close(); return; }
-    if (type === 'back') { rememberView(); history.back(); return; }
+    if (type === 'back') { rememberView(); if ((history.state?.depth ?? 0) > 0 && location.hash !== '#test') history.back(); else dispatch({ type: 'home' }); return; }
+    if ((type === 'home' && state.screen === 'H') || (type === 'new-explore' && state.screen === 'N')) return;
+    if (type === 'search' && state.screen === 'S') { app.querySelector('#search-input')?.focus(); return; }
     if (type === 'targets') { expandedTargets = !expandedTargets; render({ focus: false }); app.querySelector('[data-action="targets"]')?.focus(); return; }
     if (type === 'zoom') { zoomed = !zoomed; render({ focus: false }); app.querySelector('[data-action="zoom"]')?.focus(); return; }
     if (type === 'retry') { imageRetry++; render({ focus: false }); return; }
-    dispatch({ type });
+    dispatch({ type, cardId: el.dataset.card });
+    if (type === 'search') app.querySelector('#search-input')?.focus();
   });
   for (const el of app.querySelectorAll('[data-target]')) el.addEventListener('click', () => dispatch({ type: 'text-target', targetId: el.dataset.target }));
   for (const el of app.querySelectorAll('[data-question]')) el.addEventListener('click', () => dispatch({ type: 'question', questionId: el.dataset.question }));
   for (const el of app.querySelectorAll('[data-scene]')) el.addEventListener('click', () => dispatch({ type: 'choose-scene', sceneId: el.dataset.scene }));
   for (const el of app.querySelectorAll('[data-option]')) el.addEventListener('click', () => dispatch({ type: 'choose-candidate', optionId: el.dataset.option }));
   for (const el of app.querySelectorAll('[data-continuation]')) el.addEventListener('click', () => dispatch({ type: 'open-continuation', continuationId: el.dataset.continuation }));
+  bindSearch();
   app.querySelector('.photo-scroll')?.addEventListener('scroll', rememberView, { passive: true });
   for (const detail of app.querySelectorAll('details')) detail.addEventListener('toggle', rememberView);
   for (const el of app.querySelectorAll('[data-design]')) el.addEventListener('click', () => {
@@ -339,6 +396,7 @@ function render({ focus = true, snapshot } = {}) {
   }
   // Apply the shared control material consistently across primary actions and navigation.
   app.querySelectorAll('button.primary, button.icon-button').forEach((button) => button.classList.add('glass'));
+  disposeScrollIndicator = bindScrollIndicator(app);
   disposePress = bindPressFeedback(app);
   disposeOptics = bindGlassOptics(app);
   if (focus) animateScreen(app, oldPhoto);
@@ -379,16 +437,16 @@ async function init() {
     }
     const configured = configurePreset(index, selectedPreset.id, overrides);
     if (!configured) invalidUrl = true;
-    const p = configured ?? configurePreset(index, selectedPreset.id);
+    const p = browsePreset(index, configured ?? configurePreset(index, selectedPreset.id));
     const test = location.hash === '#test';
     preset = p; state = initialState(p); runId = crypto.randomUUID();
-    history.replaceState({ runId, state }, '', urlFor(p, test));
+    history.replaceState({ runId, state, depth: 0 }, '', urlFor(p, test));
     history.scrollRestoration = 'manual';
     window.addEventListener('scroll', rememberView, { passive: true });
     app.addEventListener('focusin', rememberView);
     window.addEventListener('popstate', (event) => {
       if (event.state?.runId === runId && canRestore(event.state.state, preset, activeIndex) && location.hash !== '#test') { state = event.state.state; restoreView(event.state.ui); }
-      else { state = initialState(preset); zoomed = false; expandedTargets = false; history.replaceState({ runId, state }, '', urlFor(preset)); render(); }
+      else { state = initialState(preset); zoomed = false; expandedTargets = false; history.replaceState({ runId, state, depth: 0 }, '', urlFor(preset)); render(); }
     });
     window.addEventListener('hashchange', () => { if (location.hash === '#test') render(); });
     render();

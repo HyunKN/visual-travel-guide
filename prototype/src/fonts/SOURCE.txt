@@ -1,0 +1,14 @@
+Spoqa Han Sans (original family, not Spoqa Han Sans Neo)
+Requested reference: https://noonnu.cc/font_page/25
+Official CSS: https://spoqa.github.io/spoqa-han-sans/css/SpoqaHanSans-kr.css
+Official repository: https://github.com/spoqa/spoqa-han-sans
+Pinned upstream commit: 01ff0283e4f36e159ffbf744b36e16ef742da6d8
+
+Regular and Bold WOFF2 are unmodified upstream Subset/SpoqaHanSans files.
+LICENSE.txt is the same commit's SIL Open Font License 1.1 and copyright notice.
+The app bundles that notice and links to it from the menu.
+
+SHA-256:
+SpoqaHanSansRegular.woff2 745d16ab5a42c81cfd456d11cd5c0acf29628691803944ba54ace13a0d93c886
+SpoqaHanSansBold.woff2 1f307071646b069c7d34d5d617c942eae498b18281f37630c5c350d3f2ff22b6
+LICENSE.txt 240d8d836e78d6ca9a38876cfd492a3399de9b1c2b48f08d459b9860788eb162
