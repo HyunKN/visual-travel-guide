@@ -36,6 +36,10 @@
 
 이번 사용자 요청에 따라 세 테스트의 분석은 HTML을 추가하지 않고 [관찰 결과·Product Backlog 반영 근거](prototype/OBSERVATION_RESULTS.md) 한 문서에 모았다. 빈 기록지·진행 방법과 실제 결과를 구분하며, 결과 문서는 전체 제출용 Product Backlog를 대체하지 않는다.
 
+제출 요구사항을 검토할 때는 [궁금한 궁 Product Backlog 초안](PRODUCT_BACKLOG_DRAFT.md)을 읽는다. 양식 5의 구조에 작성된 문제정의서의 개발 범위·목표, 기존 사용자 이야기, 세 관찰을 연결한 검토본이다. MoSCoW는 제안이고 SP·담당·Sprint 배치·DoD 합의는 미정이며, 제품 구현 상태나 Issue 진행표를 대체하지 않는다. 사용자 요청에 따라 HTML을 추가하지 않는다.
+
+진행 상태와 남은 일은 [프로토타입 상위 Issue](https://github.com/HyunKN/visual-travel-guide/issues/4), [사람 관찰·백로그 반영 Issue](https://github.com/HyunKN/visual-travel-guide/issues/13), [변경·검증 PR](https://github.com/HyunKN/visual-travel-guide/pull/5)에서 확인한다. Wiki에서는 이 안내서와 익명 관찰 결과·백로그 검토 초안·QA 방법을 탐색할 수 있다. 원본 참여자 기록·개인정보가 있는 제출 보고서는 공개 문서와 게시 대상에 포함하지 않는다.
+
 ## 프로토타입 설계를 읽을 때
 
 사용자가 직접 읽고 작성할 관찰 문서는 [HTML 테스트 안내와 기록지](prototype/TEST_GUIDE.html)를 사용한다. S1~S5 안내·작성란·HTML 저장·인쇄를 한 문서에 제공한다. 개발 명세와 절차 관리는 기존 Markdown에 유지하며, 사용자용 HTML의 내용도 함께 갱신한다.
