@@ -36,9 +36,9 @@
 
 이번 사용자 요청에 따라 세 테스트의 분석은 HTML을 추가하지 않고 [관찰 결과·Product Backlog 반영 근거](prototype/OBSERVATION_RESULTS.md) 한 문서에 모았다. 빈 기록지·진행 방법과 실제 결과를 구분하며, 결과 문서는 전체 제출용 Product Backlog를 대체하지 않는다.
 
-제출 요구사항을 검토할 때는 [궁금한 궁 Product Backlog 초안](PRODUCT_BACKLOG_DRAFT.md)을 읽는다. 양식 5의 구조에 작성된 문제정의서의 개발 범위·목표, 기존 사용자 이야기, 세 관찰을 연결한 검토본이다. MoSCoW는 제안이고 SP·담당·Sprint 배치·DoD 합의는 미정이며, 제품 구현 상태나 Issue 진행표를 대체하지 않는다. 사용자 요청에 따라 HTML을 추가하지 않는다.
+제품 개발 범위·우선순위를 검토할 때는 [Product Backlog 4차 작성본 공개 요약](PRODUCT_BACKLOG_DRAFT.md)을 읽는다. 「PPT 구성 이어가기」에서 수정·검수한 5개 Epic·12개 Story·46 SP와 Sprint 배치·공통 DoD를 반영한다. SP는 상대 추정 가안이며, 계획·규칙 채택과 제품 구현·AC 통과를 구분한다. 기존 파일명과 Wiki 주소는 링크 호환을 위해 유지한다. 개인정보가 있는 Word 원본·개별 US 제출 문서는 공개하지 않으며 HTML을 추가하지 않는다.
 
-진행 상태와 남은 일은 [프로토타입 상위 Issue](https://github.com/HyunKN/visual-travel-guide/issues/4), [사람 관찰·백로그 반영 Issue](https://github.com/HyunKN/visual-travel-guide/issues/13), [변경·검증 PR](https://github.com/HyunKN/visual-travel-guide/pull/5)에서 확인한다. Wiki에서는 이 안내서와 익명 관찰 결과·백로그 검토 초안·QA 방법을 탐색할 수 있다. 원본 참여자 기록·개인정보가 있는 제출 보고서는 공개 문서와 게시 대상에 포함하지 않는다.
+프로토타입 단계의 수행·종료 근거는 [프로토타입 상위 Issue](https://github.com/HyunKN/visual-travel-guide/issues/4), [사람 관찰·백로그 반영 Issue](https://github.com/HyunKN/visual-travel-guide/issues/13), [구현·검증 PR](https://github.com/HyunKN/visual-travel-guide/pull/5)에서 확인한다. Wiki에서는 이 안내서와 익명 관찰 결과·최신 백로그 공개 요약·QA 방법을 탐색할 수 있다. 원본 참여자 기록·개인정보가 있는 제출 보고서는 공개 문서와 게시 대상에 포함하지 않는다. 이후 실제 개발은 최신 백로그에 따라 별도 작업으로 추적하며, 프로토타입 Issue를 계속 확장하지 않는다.
 
 ## 프로토타입 설계를 읽을 때
 
