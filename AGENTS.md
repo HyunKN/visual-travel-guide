@@ -16,6 +16,10 @@
 | 새 작업 채팅 시작·작업 인계 | [THREADS](docs/THREADS.md), 해당 Issue, 기준 브랜치·커밋 |
 | Wiki 게시·문서 자동화 변경 | [WIKI](docs/WIKI.md) |
 
+## 사용자 가치 확인
+
+기능 선정·설계·구현·리뷰에서는 [PRODUCT의 개발 핵심 원칙](docs/PRODUCT.md#개발-핵심-원칙-사용자가-선택할-이유)을 읽고, 기존 앱·상용 AI·검색 대신 선택할 이유와 그 근거를 되묻는다. [DEVELOPMENT](docs/DEVELOPMENT.md)의 단계별 점검과 [QUALITY](docs/QUALITY.md)의 비교 검증 기준에 따라 가설·증거·미검증 사항·다음 확인을 작업 기록에 남긴다.
+
 ## 작업 완료
 
 - 변경한 동작에 영향을 받는 문서를 같은 변경 묶음에서 갱신한다. 문서 영향이 없으면 완료 보고나 PR에 이유를 한 줄 남긴다.
@@ -26,6 +30,7 @@
 
 ## Agent skills
 
+- PPT → PDF 변환 시 전역 `ppt-to-pdf-images` 스킬(`~/.codex/skills/ppt-to-pdf-images/SKILL.md`)을 읽고 적용한다.
 - Issue tracker: GitHub Issues. 발행·분할·통합, 테스트 발견 사항 정리, 다음 작업 선택 전에 [Issue 운영 규칙](docs/agents/issue-tracker.md)을 읽는다.
 - Domain docs: 단일 도메인. 용어집·ADR을 다루는 스킬은 [문서 경로 설정](docs/agents/domain.md)을 읽는다. 이 프로젝트의 용어집은 `docs/GLOSSARY.md`다.
 - 작업 단계별 스킬과 적용 조건은 [DEVELOPMENT](docs/DEVELOPMENT.md)에 있다. 실제 호출 전에 설치된 해당 `SKILL.md`를 읽는다.
