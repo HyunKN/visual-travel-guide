@@ -1,0 +1,8 @@
+# Local build and publication scratch files
+/.codex-build/
+/.presentation-build/
+/output/
+**/__pycache__/
+
+# Private source report: preserve locally, exclude from public repository
+/Visual_Travel_Guide_양식3_아이디에이션_결과보고서_수정본.docx

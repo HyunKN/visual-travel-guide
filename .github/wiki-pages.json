@@ -1,6 +1,7 @@
 {
   "docs/README.md": "Development-Home",
   "docs/PRODUCT.md": "PRODUCT",
+  "docs/PRODUCT_BACKLOG_DRAFT.md": "Product-Backlog-Draft",
   "docs/DESIGN.md": "DESIGN",
   "docs/DEVELOPMENT.md": "DEVELOPMENT",
   "docs/THREADS.md": "THREADS",
@@ -8,5 +9,15 @@
   "docs/QUALITY.md": "QUALITY",
   "docs/ARCHITECTURE.md": "ARCHITECTURE",
   "docs/GLOSSARY.md": "GLOSSARY",
-  "docs/CODING_STANDARDS.md": "CODING_STANDARDS"
+  "docs/CODING_STANDARDS.md": "CODING_STANDARDS",
+  "docs/prototype/README.md": "Prototype",
+  "docs/prototype/SCREENS.md": "Prototype-Screens",
+  "docs/prototype/DATA.md": "Prototype-Data",
+  "docs/prototype/TESTING.md": "Prototype-Testing",
+  "docs/prototype/OBSERVATION_RESULTS.md": "Prototype-Observations",
+  "docs/prototype/QA_METHOD.md": "Prototype-QA-Method",
+  "docs/prototype/TASKS.md": "Prototype-Tasks",
+  "docs/prototype/HANDOFF.md": "Prototype-Handoff",
+  "docs/prototype/VISUAL_REFERENCES.md": "Prototype-Visual-References",
+  "docs/prototype/ANTI_SLOP.md": "Prototype-Anti-Slop"
 }

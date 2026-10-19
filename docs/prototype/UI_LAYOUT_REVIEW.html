@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>궁금한 궁 · 모바일 화면 배치 검토안</title>
+<style>
+:root{font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;color:#243247;background:#fff;line-height:1.6;font-synthesis:none}
+*{box-sizing:border-box}body{margin:0}h1,h2,h3,p{margin:0}a{color:inherit;text-underline-offset:4px}svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}img{max-width:100%;display:block}.symbols{position:absolute;width:0;height:0;overflow:hidden}.document{max-width:1020px;margin:auto;padding:44px 28px 64px}.kicker{font-size:12px;letter-spacing:.1em;color:#6b7585}h1{font-size:30px;letter-spacing:-.045em;margin:9px 0 14px}.intro{max-width:760px;font-size:15px;color:#4e5c70}.notice{border-left:3px solid #b45440;padding:10px 16px;margin:24px 0;font-size:14px}.flow{padding:18px 0;border-block:1px solid #dce1e8;font-size:15px;line-height:2}.flow strong{margin-right:12px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:40px 50px;margin:34px 0}.review h2{font-size:19px;letter-spacing:-.025em}.review>p{font-size:13px;color:#5c697c;margin:6px 0 17px;min-height:42px}.phone{width:100%;max-width:390px;margin:auto;border:1px solid #c9cfd8;border-radius:32px;overflow:hidden;background:#fff;box-shadow:0 12px 32px #24324709}.status{padding:12px 22px 5px;display:flex;justify-content:space-between;font-size:11px;font-weight:650;letter-spacing:.03em}.phone-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 18px;min-height:58px}.brand{display:flex;align-items:center;gap:7px;font-size:17px;font-weight:700;letter-spacing:-.04em}.gate{width:39px;height:32px;stroke:none}.location{font-size:11px;color:#69758a;display:flex;align-items:center;gap:7px}.location svg{width:15px;height:15px}.round{display:flex;align-items:center;justify-content:center;border:1px solid #dce1e8;border-radius:50%;width:40px;height:40px;flex-shrink:0;background:#ffffffee}.round svg{width:19px;height:19px}.bar-title{font-size:16px;font-weight:650}.searchbar{display:flex;align-items:center;gap:10px;padding:11px 15px;margin:3px 18px 14px;background:#f2f4f7;border:1px solid #e6e9ee;border-radius:16px;min-height:48px;color:#647086;font-size:13px}.searchbar svg{width:19px;height:19px}.searchbar .camera{margin-left:auto;color:#ad513f;border-left:1px solid #ccd3dd;padding-left:10px;display:flex}.searchbar .camera svg{width:20px;height:20px}.hero{position:relative}.hero>img{width:100%;height:236px;object-fit:cover;object-position:center 60%}.hero::after{content:"";position:absolute;inset:auto 0 0;height:70px;background:linear-gradient(transparent,#fff)}.hero-mark{position:absolute;top:15px;left:18px;font-size:10px;background:#fffffff0;border:1px solid #ffffffbb;padding:5px 10px;border-radius:20px}.home-copy{padding:0 20px 19px;position:relative;margin-top:-4px}.eyebrow{font-size:11px;color:#6b7585;margin-bottom:7px}.home-copy h3{font-size:26px;letter-spacing:-.055em;line-height:1.38}.home-copy p:not(.eyebrow){font-size:12px;color:#5d687b;margin:8px 0 15px}.cta{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 16px;border:1px solid #c6cdd8;border-radius:28px;background:linear-gradient(155deg,#fff,#f5f6f8);box-shadow:inset 0 1px 0 #fff,0 4px 12px #24324710;font-size:14px;font-weight:620;min-height:50px}.cta svg:first-child{color:#ad513f}.cta span{margin-right:auto}.mini-heading{font-size:15px;font-weight:650;padding:10px 20px 14px}.curiosity-img{width:100%;height:auto}.curiosity-text{font-size:17px;line-height:1.55;letter-spacing:-.03em;padding:12px 20px 4px}.inline-link{font-size:12px;display:flex;align-items:center;gap:5px;color:#53667f;padding:3px 20px 16px}.inline-link svg{width:15px;height:15px}.tabbar{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #e0e4eb;background:#ffffffee;padding:10px 8px 8px}.tab{display:flex;flex-direction:column;align-items:center;gap:3px;color:#737e90;font-size:10px}.tab svg{width:21px;height:21px}.tab.active{color:#243247;font-weight:700}.tab.active::after{content:"";width:4px;height:4px;background:#b45440;border-radius:50%}.home-line{height:4px;background:#263345;width:100px;border-radius:4px;margin:8px auto 10px}.body{padding:16px 20px 22px}.section-title{font-size:22px;letter-spacing:-.04em;line-height:1.4;margin:4px 0 8px}.sub{font-size:12px;color:#657187;line-height:1.75}.topics{display:flex;gap:8px;flex-wrap:wrap;margin:13px 0 22px}.topic{border:1px solid #d8dfe8;border-radius:20px;padding:5px 13px;font-size:12px}.result{display:flex;align-items:center;gap:12px;border-bottom:1px solid #e6e9ee;padding:15px 0}.result img{width:78px;height:72px;object-fit:cover;border-radius:13px}.result>div{flex:1;min-width:0}.result strong{font-size:14px}.result p{font-size:11px;color:#647187;margin-top:4px}.result>svg{width:15px;height:15px}.sample{font-size:11px;color:#707c8f;margin:14px 0 8px}.search-example{border-top:1px solid #e4e8ee;padding-top:22px;margin-top:20px}.divider{border-top:1px solid #e5e9ee;margin:22px 0}.photo-input{padding:16px;border:1px dashed #a4aebe;border-radius:20px;background:#fafbfc;text-align:center;margin:20px 0 16px}.photo-input>svg{color:#ad513f;width:30px;height:30px;margin:7px auto 10px}.photo-input strong{display:block;font-size:15px}.photo-input p{font-size:12px;color:#6e7a8d;margin:7px 0 12px}.photo-input .cta{justify-content:center;background:#fff;font-size:13px}.photo-options{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}.photo-options img{width:100%;height:100px;object-fit:cover;border-radius:14px}.photo-options p{font-size:11px;margin:8px 2px;color:#536176}.detail-photo{width:100%;height:225px;object-fit:contain;background:#f6f7f9}.detail-text{font-size:14px;line-height:1.9;margin:12px 0}.source{font-size:10px;color:#758196;text-decoration:underline;text-underline-offset:4px}.row-action{padding:15px 0;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #e4e8ee;font-size:13px}.row-action svg{width:16px;height:16px}.next{padding:13px 0 0}.next img{width:100%;height:148px;object-fit:cover;border-radius:18px}.next h3{font-size:16px;margin:9px 0 5px}.next p{font-size:12px;color:#5f6c80}.note-list{padding:0 0 0 20px;font-size:14px;line-height:1.85}.note-list li{margin:10px 0}.review-points{border-top:2px solid #243247;padding-top:24px}.review-points h2{font-size:21px;margin-bottom:15px}.review-points p{font-size:14px;margin:10px 0}.credits{font-size:11px;color:#68758a;border-top:1px solid #dce1e8;padding-top:20px;margin-top:25px}.credits p{margin:6px 0}.hold{font-size:13px;color:#984b3b;font-weight:600;margin:18px 0}.blank-space{min-height:80px}
+.curiosity-secondary{margin:2px 20px 10px;padding-top:10px;border-top:1px solid #e5e9ee}.curiosity-secondary .mini-heading{padding:0 0 8px;font-size:12px;line-height:1.35;font-weight:550;color:#69758a}.curiosity-summary{display:flex;align-items:center;gap:12px}.curiosity-summary .curiosity-img{width:88px;height:88px;object-fit:contain;flex-shrink:0;border-radius:10px}.curiosity-summary>div{flex:1;min-width:0}.curiosity-summary .curiosity-text{font-size:14px;padding:0;line-height:1.6}.curiosity-summary .inline-link{font-size:11px;padding:6px 0 0;color:#6b778a}
+.phone{height:820px;display:flex;flex-direction:column}.phone-content{overflow-y:auto;min-height:0;flex:1;scrollbar-width:thin;scrollbar-color:#d4dbe5 transparent}.phone>.status,.phone>.phone-top,.phone>.searchbar,.phone>.tabbar,.phone>.home-line{flex-shrink:0}.phone-content:focus-visible{outline:3px solid #b45440;outline-offset:-3px}.phone>.home-line{margin-bottom:10px}
+@media(max-width:680px){.document{padding:28px 16px 42px}.grid{grid-template-columns:1fr;gap:34px}.review>p{min-height:0}h1{font-size:25px}.flow{font-size:13px}.phone{max-width:390px}}
+@media print{.document{max-width:none;padding:0}.grid{gap:20px}.phone{box-shadow:none}.review{break-inside:avoid}.review-points{break-before:page}}
+</style>
+</head>
+<body>
+<svg class="symbols" aria-hidden="true"><defs>
+<symbol id="back" viewBox="0 0 24 24"><path d="m14 6-6 6 6 6"/></symbol>
+<symbol id="arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
+<symbol id="search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></symbol>
+<symbol id="home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10h-6v-6H9v6H3Z"/></symbol>
+<symbol id="camera" viewBox="0 0 24 24"><path d="M4 7h4l2-3h4l2 3h4v13H4Z"/><circle cx="12" cy="13" r="4"/></symbol>
+<symbol id="dots" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></symbol>
+<symbol id="pin" viewBox="0 0 24 24"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2"/></symbol>
+<symbol id="gate" viewBox="0 0 80 64"><path d="M8 41h64v19H8Z" fill="#e4e5e7" stroke="#343d4c"/><path d="M18 60V51a5 5 0 0 1 10 0v9m6 0V49a6 6 0 0 1 12 0v11m6 0V51a5 5 0 0 1 10 0v9" fill="#fff" stroke="#343d4c" stroke-width="1.6"/><path d="M17 28h46v11H17Zm6-17h34v12H23Z" fill="#8c3f39"/><path d="M20 29v9m10-9v9m10-9v9m10-9v9m10-9v9M26 12v10m14-10v10m14-10v10" stroke="#b76150" stroke-width="3"/><path d="M12 9q8 4 15-5h26q7 9 15 5l-5 9H17ZM5 24q9 6 17-3h36q8 9 17 3l-6 11H11Z" fill="#263345"/><path d="M16 18h48M10 35h60" stroke="#8c3f39" stroke-width="2.5"/><path d="M6 41h68M6 61h68" stroke="#343d4c" stroke-width="2"/></symbol>
+</defs></svg>
+<main class="document">
+<p class="kicker">궁금한 궁 / UI 배치 검토 / 2026.10.17</p>
+<h1>하나의 앱 안에서 자유롭게 탐색하기</h1>
+<p class="intro">시나리오는 관찰할 과제와 순서를 정한다. 앱은 같은 홈·검색·사진 탐색·설명 화면을 계속 사용하며, 사용자가 원하는 곳으로 이동한다. 아래는 네 검토를 받기 위한 화면 배치 제안이다.</p>
+<p class="notice"><strong>검토한 배치의 정적 기록.</strong> 2026-10-17 사용자 구현 요청에 따라 실제 앱에 적용했다. 이 문서의 버튼·검색창은 배치 그림이며 실제 동작은 <a href="http://127.0.0.1:4173/">프로토타입 앱</a>에서 확인한다.</p>
+<div class="flow"><strong>자유로운 이동</strong>홈 ↔ 검색 ↔ 설명 / 홈 ↔ 사진으로 찾기 ↔ 대상 선택·후보 확인 ↔ 설명<br><strong>설명 다음</strong>같은 사진 다시 보기 · 새 대상 검색 · 다음 관람 제안 · 종료</div>
+
+<div class="grid">
+<section class="review" aria-labelledby="home-title">
+<h2 id="home-title">01. 홈 — 검색과 사진 탐색을 바로 시작</h2>
+<p>주 탐색 80 : 보조 호기심 20을 목표로 둔다. 상단 검색·대표 콘텐츠·주 행동을 중심으로, 아래에는 작은 사진과 문구의 보조 경로를 둔다.</p>
+<div class="phone">
+<div class="status"><span>9:41</span><span>••• ▰</span></div>
+<div class="phone-top"><div class="brand"><svg class="gate"><use href="#gate"/></svg>궁금한 궁</div><span class="location"><svg><use href="#pin"/></svg>경복궁</span><span class="round"><svg><use href="#dots"/></svg></span></div>
+<div class="searchbar"><svg><use href="#search"/></svg><span>건물·문양·궁금한 부분 검색</span><span class="camera"><svg><use href="#camera"/></svg></span></div>
+<div class="phone-content" tabindex="0" role="region" aria-label="홈 배치 예시 스크롤">
+<div class="hero"><img src="content/assets/geunjeongjeon.jpg" alt="근정전과 앞마당 대표 사진"><span class="hero-mark">눈앞의 궁궐, 조금 더 가까이</span></div>
+<div class="home-copy"><h3>그냥 지나치기엔<br>궁금한 것들.</h3><p>이 건물은 어떤 곳일까요?<br>작은 문양에는 어떤 뜻이 담겼을까요?</p><div class="cta"><svg><use href="#camera"/></svg><span>사진으로 궁금한 곳 알아보기</span><svg><use href="#arrow"/></svg></div></div>
+<section class="curiosity-secondary" aria-label="보조 탐색 제안">
+<p class="mini-heading">잠깐, 이런 것도 있어요</p>
+<div class="curiosity-summary">
+<img class="curiosity-img" src="content/assets/ten-longevity-chimney.webp" alt="자경전 십장생굴뚝의 문양과 기관 표기를 포함한 전체 사진">
+<div><p class="curiosity-text">이 벽에는 어떤 소망을 새겼을까요?</p><span class="inline-link">더 알아보기<svg><use href="#arrow"/></svg></span></div>
+</div>
+</section>
+</div>
+<nav class="tabbar" aria-label="홈 화면 하단 배치 예시"><span class="tab active"><svg><use href="#home"/></svg>홈</span><span class="tab"><svg><use href="#search"/></svg>검색</span><span class="tab"><svg><use href="#camera"/></svg>사진으로 찾기</span></nav><div class="home-line"></div>
+</div>
+</section>
+
+<section class="review" aria-labelledby="search-title">
+<h2 id="search-title">02. 검색 — 이름·관심 단어로 탐색</h2>
+<p>이름을 아는 경우에도 사용할 입구를 마련한다. 검색은 준비된 콘텐츠 안에서 동작하도록 제안하며 자유 질문 답변과 구분한다.</p>
+<div class="phone">
+<div class="status"><span>9:41</span><span>••• ▰</span></div>
+<div class="phone-top"><span class="round"><svg><use href="#back"/></svg></span><span class="bar-title">검색</span><span class="round"><svg><use href="#camera"/></svg></span></div>
+<div class="searchbar"><svg><use href="#search"/></svg><span>건물 이름이나 궁금한 단어</span></div>
+<div class="phone-content" tabindex="0" role="region" aria-label="검색 배치 예시 스크롤">
+<div class="body"><h3 class="section-title">무엇이 궁금한가요?</h3><p class="sub">이름을 알면 검색하고,<br>이름을 모르면 사진으로 찾아보세요.</p><div class="topics"><span class="topic">경회루</span><span class="topic">문양</span><span class="topic">바닥</span></div>
+<p class="mini-heading" style="padding:0">둘러볼 수 있는 곳</p>
+<div class="result"><img src="content/assets/gyeonghoeru.jpg" alt="경회루 전경"><div><strong>경회루</strong><p>연못 안의 누각</p></div><svg><use href="#arrow"/></svg></div>
+<div class="result"><img src="content/assets/geunjeongjeon.jpg" alt="근정전 전경"><div><strong>근정전</strong><p>건물과 앞마당 살펴보기</p></div><svg><use href="#arrow"/></svg></div>
+<div class="search-example"><p class="sample">검색어를 입력한 상태의 배치 예시 · “바닥”</p><div class="result"><img src="content/assets/geunjeongjeon.jpg" alt="돌바닥이 있는 근정전 앞마당"><div><strong>근정전 앞마당의 돌바닥</strong><p>이 바닥은 왜 이렇게 되어 있을까요?</p></div><svg><use href="#arrow"/></svg></div><p class="sample">결과가 없을 때: “아직 준비된 설명이 없어요.”<br>다른 단어로 검색 / 사진으로 찾아보기</p></div>
+</div>
+</div>
+<nav class="tabbar" aria-label="검색 화면 하단 배치 예시"><span class="tab"><svg><use href="#home"/></svg>홈</span><span class="tab active"><svg><use href="#search"/></svg>검색</span><span class="tab"><svg><use href="#camera"/></svg>사진으로 찾기</span></nav><div class="home-line"></div>
+</div>
+</section>
+
+<section class="review" aria-labelledby="photo-title">
+<h2 id="photo-title">03. 사진으로 찾기 — 시나리오 선택 없이 진입</h2>
+<p>모든 화면의 사진 탐색 입구를 하나로 모은다. 촬영을 대신하는 예시 사진을 자유롭게 고르고, 해당 사진에서 전체·부분·후보를 확인한다.</p>
+<div class="phone">
+<div class="status"><span>9:41</span><span>••• ▰</span></div>
+<div class="phone-top"><span class="round"><svg><use href="#back"/></svg></span><span class="bar-title">사진으로 찾기</span><span class="round"><svg><use href="#search"/></svg></span></div>
+<div class="phone-content" tabindex="0" role="region" aria-label="사진 탐색 배치 예시 스크롤">
+<div class="body"><h3 class="section-title">눈앞의 무엇이<br>궁금한가요?</h3><p class="sub">건물 전체도, 작은 문양도 살펴보세요.</p>
+<div class="photo-input"><svg><use href="#camera"/></svg><strong>사진에서 궁금한 곳 찾기</strong><p>이번 프로토타입은 촬영 대신<br>준비된 사진을 사용해요.</p><div class="cta">예시 사진 둘러보기<svg><use href="#arrow"/></svg></div></div>
+<p class="mini-heading" style="padding:8px 0 0">준비된 사진</p><div class="photo-options"><div><img src="content/assets/gyeonghoeru.jpg" alt="연못 앞 장면"><p>연못 앞의 장면</p></div><div><img src="content/assets/geunjeongjeon.jpg" alt="넓은 앞마당 장면"><p>넓은 앞마당의 장면</p></div></div>
+<p class="sub">사진을 고른 뒤 궁금한 부분을 선택해요.<br>다른 사진으로 언제든 바꿀 수 있어요.</p><div class="blank-space"></div>
+</div>
+</div>
+<nav class="tabbar" aria-label="사진 탐색 화면 하단 배치 예시"><span class="tab"><svg><use href="#home"/></svg>홈</span><span class="tab"><svg><use href="#search"/></svg>검색</span><span class="tab active"><svg><use href="#camera"/></svg>사진으로 찾기</span></nav><div class="home-line"></div>
+</div>
+</section>
+
+<section class="review" aria-labelledby="detail-title">
+<h2 id="detail-title">04. 설명 — 뒤로가기와 다음 탐색을 유지</h2>
+<p>왼쪽 위 뒤로가기는 실제 직전 화면으로 돌아간다. 검색어·선택·스크롤을 유지하고, 설명을 읽은 자리에서 새 탐색을 시작할 수 있게 한다.</p>
+<div class="phone">
+<div class="status"><span>9:41</span><span>••• ▰</span></div>
+<div class="phone-top"><span class="round"><svg><use href="#back"/></svg></span><span class="bar-title">경회루</span><span class="round"><svg><use href="#search"/></svg></span></div>
+<div class="phone-content" tabindex="0" role="region" aria-label="설명 배치 예시 스크롤">
+<img class="detail-photo" src="content/assets/gyeonghoeru.jpg" alt="경회루 전경 전체 사진">
+<div class="body"><p class="eyebrow">선택한 곳 알아보기</p><h3 class="section-title">경회루</h3><p class="detail-text">경회루는 연못 안에 세운 누각이에요. 나라에 경사가 있을 때 연회를 열던 곳이에요.</p><span class="source">더 읽기 · 설명 및 사진 출처</span><div class="divider"></div>
+<div class="row-action">관련 질문 더 보기<svg><use href="#arrow"/></svg></div><div class="row-action">다른 대상 알아보기<svg><use href="#search"/></svg></div>
+<div class="next"><p class="mini-heading" style="padding:8px 0 13px">이 근처에서 이어서 볼까요?</p><img src="content/assets/sujeongjeon-reference.webp" alt="수정전 전경"><h3>수정전</h3><p>연못 남쪽의 긴 전각에서는 어떤 나랏일을 했을까요?</p><span class="inline-link" style="padding-left:0">살펴보기<svg><use href="#arrow"/></svg></span></div>
+</div>
+</div>
+<nav class="tabbar" aria-label="설명 화면 하단 배치 예시"><span class="tab"><svg><use href="#home"/></svg>홈</span><span class="tab"><svg><use href="#search"/></svg>검색</span><span class="tab"><svg><use href="#camera"/></svg>사진으로 찾기</span></nav><div class="home-line"></div>
+</div>
+</section>
+</div>
+
+<section class="review-points">
+<h2>사진 선택 다음 화면의 배치</h2>
+<p><strong>전체·부분 선택:</strong> 상단 뒤로 / 제목 / 검색 → 선택한 사진(전체가 보이게, 확대 가능) → 고른 부분의 미리보기·확인 → 건물 전체 알아보기 → 글로 대상 고르기. 하단 이동은 유지한다. 아직 아무것도 고르지 않았다면 정답 표시를 미리 그리지 않는다.</p>
+<p><strong>후보 확인:</strong> 상단 뒤로 / 제목 / 검색 → 알아보는 사진 → 후보별 참고 사진·이름·구별 근거·선택 → 둘 다 아닌 것 같아요 / 사진 다시 보기. 선택 후에도 뒤로 또는 후보 재비교로 수정한다. 후보가 필요한 사진에서만 보이며, 일반 탐색을 가로막지 않는다.</p>
+<p class="small">위 두 화면의 세부 시안은 이 4개 기본 화면의 배치 검토에 맞춰 함께 다듬는다. 아직 확정된 명세가 아니다.</p>
+<div class="divider"></div>
+<h2>먼저 검토받을 배치와 이동 규칙</h2>
+<ol class="note-list">
+<li><strong>홈 상단 검색창:</strong> 건물 이름·문양·바닥 같은 단어로 준비된 자료를 찾는다. 카메라 아이콘은 사진 탐색으로 간다.</li>
+<li><strong>주 탐색 80 : 보조 호기심 20:</strong> 공통 헤더·하단 이동을 제외한 첫 화면 콘텐츠의 대략적인 비중이다. ‘잠깐, 이런 것도 있어요’는 작은 제목·88×88px 사진·14px 문구의 가로 구성으로 줄이고 전체 높이는 약 130px를 목표로 한다. 글자가 커지거나 문구가 길어지면 높이는 자연스럽게 늘린다. 비율을 맞추려고 텍스트를 자르지 않는다.</li>
+<li><strong>하단 세 입구:</strong> 홈 / 검색 / 사진으로 찾기. 모든 주요 화면에서 유지하고 작은 화면에서도 조작부를 가리지 않게 배치한다. 이 세 개가 중복되거나 복잡한지는 검토받는다.</li>
+<li><strong>뒤로가기:</strong> 검색에서 열었으면 검색 결과로, 사진에서 열었으면 사진 선택으로 돌아간다. 설명에서 갑자기 홈으로 보내지 않는다. 뒤로 갈 화면이 없는 직접 진입은 홈으로 안전하게 연결한다.</li>
+<li><strong>기존 홈 디자인:</strong> 사진형 홈을 위에 표시했다. 3D형도 같은 검색창·하단 이동을 사용하고 대표 사진 자리만 궁궐 이야기로 바꾼다. 승인 전 새 3D·유리 효과를 구현하지 않는다.</li>
+<li><strong>설명 이후:</strong> 같은 사진의 다른 부분 / 새 검색·사진 탐색 / 다음 관람 제안을 선택한다. 지원 부분이 없는 사진에는 ‘다른 부분 보기’를 숨긴다.</li>
+<li><strong>시나리오:</strong> 같은 앱에서 건물 찾기 → 부분 탐색 → 호기심 카드 → 후보 확인 → 다음 탐색 과제를 순서대로 관찰한다. 과제 순서가 앱의 사진·기능·이동을 잠그지 않는다. 사전 노출이 있었다면 관찰 기록에 남긴다.</li>
+</ol>
+<p class="hold">이 문서는 배치 검토 기록이다. 현재 앱은 자유 탐색·준비된 자료 검색·스포카 한 산스를 적용하며 실제 사용성 관찰은 별도로 진행한다.</p>
+</section>
+<footer class="credits">
+<p>사진은 기존에 확보한 프로젝트 자료를 재사용했다. 시안에서 화면 비율에 맞춘 표시 크롭을 포함하며 원본 파일은 변경하지 않았다. 십장생굴뚝은 하단 기관 표기를 포함한 전체 사진을 표시했다.</p>
+<p>근정전·경회루: 국가유산청 궁능유적본부 · <a href="https://royal.khs.go.kr/ENG/contents/E101020000.do?schBdcode=gbg&amp;pageType=story&amp;bdProgramCode=storyCtg3" target="_blank" rel="noopener">원본 안내</a></p>
+<p>십장생굴뚝: 한국민족문화대백과사전 · 한국학중앙연구원 · <a href="https://encykorea.aks.ac.kr/Article/E0034031" target="_blank" rel="noopener">원본 안내</a></p>
+<p>수정전: 국가유산청 국가유산포털 제공 · 긴 변1600px 축소·WebP 변환 · <a href="https://www.heritage.go.kr/heri/cul/culSelectDetail.do?ccbaCpno=1121117600000&amp;pageNo=1_1_1_1" target="_blank" rel="noopener">원본 안내</a></p>
+<p>위 사진 이용 조건: <a href="https://www.kogl.or.kr/info/licenseType1.do" target="_blank" rel="noopener">공공누리 제1유형 · 출처표시</a>. 광화문 형상은 기존 앱의 직접 작성 SVG를 사용했다. 재질·검색 결과 문구·기기 상태 표시는 배치 제안이며 구현·검증 결과가 아니다.</p>
+</footer>
+</main>
+</body>
+</html>
