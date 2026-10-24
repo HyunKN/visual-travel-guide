@@ -1,0 +1,916 @@
+{
+  "protocol_version": "1.2 exploratory follow-up",
+  "run_at_utc": "2026-10-23T11:23:46.774086+00:00",
+  "manifest_sha256": "f765fdd3dfe20a4dea44bbf1368e00d059121c8e0e626e3494ad5db3195baf33",
+  "code_sha256": {
+    "compare_mobilenet.py": "c6b5a2f31c78fabbe3120271b5b1afea1423824a6a711965a3c29921a8743cd4",
+    "run.py": "d64b1e1b41485591d8b175f1afe1111850b406dbb89da81a57e70ce576b8e394",
+    "prepare.py": "d179f2a950bd7d369a50e145bfe2534b40db5190333bf1c56972425f5d1a7b89"
+  },
+  "environment": {
+    "python": "3.12.14",
+    "platform": "Windows",
+    "machine": "AMD64",
+    "processor": "Intel64 Family 6 Model 140 Stepping 1, GenuineIntel",
+    "onnxruntime": "1.31.0",
+    "numpy": "2.5.4",
+    "providers": [
+      "CPUExecutionProvider"
+    ],
+    "intra_op_threads": 2,
+    "inter_op_threads": 1
+  },
+  "model": {
+    "repository": "onnx/models",
+    "revision": "c5cae0f1942c8d7727372c7b1f6b485aa39e4421",
+    "url": "https://media.githubusercontent.com/media/onnx/models/c5cae0f1942c8d7727372c7b1f6b485aa39e4421/validated/vision/classification/mobilenet/model/mobilenetv2-12.onnx",
+    "source_sha256": "c0c3f76d93fa3fd6580652a45618618a220fced18babf65774ed169de0432ad5",
+    "source_bytes": 13964571,
+    "derived_sha256": "4a6230ba637f63593511f264270b80b9cb9e5937e337944a9e06228f63889352",
+    "derived_bytes": 8844641,
+    "feature_output": "472",
+    "feature_dimensions": 1280,
+    "onnx": "1.23.2",
+    "license": "Apache-2.0 per pinned Model Zoo README"
+  },
+  "preprocessing": {
+    "size": {
+      "shortest_edge": 256
+    },
+    "crop_size": {
+      "width": 224,
+      "height": 224
+    },
+    "resample": "bilinear",
+    "round_resize": true,
+    "rescale_factor": 0.00392156862745098,
+    "image_mean": [
+      0.485,
+      0.456,
+      0.406
+    ],
+    "image_std": [
+      0.229,
+      0.224,
+      0.225
+    ],
+    "interpolation": "Pillow BILINEAR",
+    "crop": "center; pinned Model Zoo imagenet_preprocess.py geometry/mean/std"
+  },
+  "classifier_reconstruction_max_abs_error": 2.86102294921875e-06,
+  "summary": {
+    "all": {
+      "n": 17,
+      "top1_hits": 6,
+      "top3_hits": 11
+    },
+    "day": {
+      "n": 9,
+      "top1_hits": 3,
+      "top3_hits": 7
+    },
+    "night": {
+      "n": 7,
+      "top1_hits": 3,
+      "top3_hits": 4
+    },
+    "ambiguous": {
+      "n": 1,
+      "top1_hits": 0,
+      "top3_hits": 0
+    }
+  },
+  "predictions": [
+    {
+      "id": "5678",
+      "truth": "geunjeongjeon",
+      "role": "probe",
+      "lighting": "day",
+      "top1_correct": false,
+      "top3_correct": true,
+      "ranking": [
+        {
+          "label": "gyeonghoeru",
+          "similarity": 0.8133100271224976
+        },
+        {
+          "label": "geunjeongjeon",
+          "similarity": 0.7369478344917297
+        },
+        {
+          "label": "gangnyeongjeon",
+          "similarity": 0.7282017469406128
+        },
+        {
+          "label": "sajeongjeon",
+          "similarity": 0.720007598400116
+        },
+        {
+          "label": "sujeongjeon",
+          "similarity": 0.7193506956100464
+        },
+        {
+          "label": "gyotaejeon",
+          "similarity": 0.7127336859703064
+        }
+      ]
+    },
+    {
+      "id": "5677",
+      "truth": "geunjeongjeon",
+      "role": "probe",
+      "lighting": "day",
+      "top1_correct": false,
+      "top3_correct": true,
+      "ranking": [
+        {
+          "label": "sajeongjeon",
+          "similarity": 0.7715620398521423
+        },
+        {
+          "label": "geunjeongjeon",
+          "similarity": 0.7063504457473755
+        },
+        {
+          "label": "gyotaejeon",
+          "similarity": 0.6953388452529907
+        },
+        {
+          "label": "gyeonghoeru",
+          "similarity": 0.694908618927002
+        },
+        {
+          "label": "sujeongjeon",
+          "similarity": 0.6446424722671509
+        },
+        {
+          "label": "gangnyeongjeon",
+          "similarity": 0.6409252882003784
+        }
+      ]
+    },
+    {
+      "id": "5676",
+      "truth": "geunjeongjeon",
+      "role": "probe",
+      "lighting": "night",
+      "top1_correct": true,
+      "top3_correct": true,
+      "ranking": [
+        {
+          "label": "geunjeongjeon",
+          "similarity": 0.7613816857337952
+        },
+        {
+          "label": "sujeongjeon",
+          "similarity": 0.6663901209831238
+        },
+        {
+          "label": "gangnyeongjeon",
+          "similarity": 0.6523002982139587
+        },
+        {
+          "label": "gyotaejeon",
+          "similarity": 0.6469598412513733
+        },
+        {
+          "label": "gyeonghoeru",
+          "similarity": 0.6441057920455933
+        },
+        {
+          "label": "sajeongjeon",
+          "similarity": 0.5029007196426392
+        }
+      ]
+    },
+    {
+      "id": "5679",
+      "truth": "geunjeongjeon",
+      "role": "probe",
+      "lighting": "night",
+      "top1_correct": true,
+      "top3_correct": true,
+      "ranking": [
+        {
+          "label": "geunjeongjeon",
+          "similarity": 0.8138819932937622
+        },
+        {
+          "label": "gyotaejeon",
+          "similarity": 0.6767647862434387
+        },
+        {
+          "label": "sujeongjeon",
+          "similarity": 0.6582710146903992
+        },
+        {
+          "label": "gangnyeongjeon",
+          "similarity": 0.6495153903961182
+        },
+        {
+          "label": "gyeonghoeru",
+          "similarity": 0.6460374593734741
+        },
+        {
+          "label": "sajeongjeon",
+          "similarity": 0.5145636796951294
+        }
+      ]
+    },
+    {
+      "id": "5673",
+      "truth": null,
+      "role": "out_of_scope",
+      "lighting": "day",
+      "top1_correct": null,
+      "top3_correct": null,
+      "ranking": [
+        {
+          "label": "sajeongjeon",
+          "similarity": 0.7583416700363159
+        },
+        {
+          "label": "gyeonghoeru",
+          "similarity": 0.6485198736190796
+        },
+        {
+          "label": "gyotaejeon",
+          "similarity": 0.645298421382904
+        },
+        {
+          "label": "geunjeongjeon",
+          "similarity": 0.6234972476959229
+        },
+        {
+          "label": "gangnyeongjeon",
+          "similarity": 0.6190013885498047
+        },
+        {
+          "label": "sujeongjeon",
+          "similarity": 0.5719754695892334
+        }
+      ]
+    },
+    {
+      "id": "5716",
+      "truth": "gyeonghoeru",
+      "role": "probe",
+      "lighting": "day",
+      "top1_correct": true,
+      "top3_correct": true,
+      "ranking": [
+        {
+          "label": "gyeonghoeru",
+          "similarity": 0.7702364921569824
+        },
+        {
+          "label": "sajeongjeon",
+          "similarity": 0.6773675680160522
+        },
+        {
+          "label": "geunjeongjeon",
+          "similarity": 0.6662407517433167
+        },
+        {
+          "label": "gyotaejeon",
+          "similarity": 0.6616525650024414
+        },
+        {
+          "label": "gangnyeongjeon",
+          "similarity": 0.6202780604362488
+        },
+        {
+          "label": "sujeongjeon",
+          "similarity": 0.6175092458724976
+        }
+      ]
+    },
+    {
+      "id": "5717",
+      "truth": "gyeonghoeru",
+      "role": "probe",
+      "lighting": "day",
+      "top1_correct": true,
+      "top3_correct": true,
+      "ranking": [
+        {
+          "label": "gyeonghoeru",
+          "similarity": 0.7657899856567383
+        },
+        {
+          "label": "sajeongjeon",
+          "similarity": 0.7095364928245544
+        },
+        {
+          "label": "geunjeongjeon",
+          "similarity": 0.6815015077590942
+        },
+        {
+          "label": "gyotaejeon",
+          "similarity": 0.6735098361968994
+        },
+        {
+          "label": "sujeongjeon",
+          "similarity": 0.6324767470359802
+        },
+        {
+          "label": "gangnyeongjeon",
+          "similarity": 0.623072624206543
+        }
+      ]
+    },
+    {
+      "id": "5719",
+      "truth": "gyeonghoeru",
+      "role": "probe",
+      "lighting": "night",
+      "top1_correct": false,
+      "top3_correct": false,
+      "ranking": [
+        {
+          "label": "geunjeongjeon",
+          "similarity": 0.6590776443481445
+        },
+        {
+          "label": "gyotaejeon",
+          "similarity": 0.6539353728294373
+        },
+        {
+          "label": "sujeongjeon",
+          "similarity": 0.651960551738739
+        },
+        {
+          "label": "gyeonghoeru",
+          "similarity": 0.6296907663345337
+        },
+        {
+          "label": "gangnyeongjeon",
+          "similarity": 0.6242698431015015
+        },
+        {
+          "label": "sajeongjeon",
+          "similarity": 0.5092881321907043
+        }
+      ]
+    },
+    {
+      "id": "5720",
+      "truth": "gyeonghoeru",
+      "role": "probe",
+      "lighting": "ambiguous",
+      "top1_correct": false,
+      "top3_correct": false,
+      "ranking": [
+        {
+          "label": "gyotaejeon",
+          "similarity": 0.7922229766845703
+        },
+        {
+          "label": "sujeongjeon",
+          "similarity": 0.7653577327728271
+        },
+        {
+          "label": "gangnyeongjeon",
+          "similarity": 0.7322893142700195
+        },
+        {
+          "label": "geunjeongjeon",
+          "similarity": 0.6978774070739746
+        },
+        {
+          "label": "gyeonghoeru",
+          "similarity": 0.6771883964538574
+        },
+        {
+          "label": "sajeongjeon",
+          "similarity": 0.5313341617584229
+        }
+      ]
+    },
+    {
+      "id": "5694",
+      "truth": "sajeongjeon",
+      "role": "probe",
+      "lighting": "night",
+      "top1_correct": false,
+      "top3_correct": false,
+      "ranking": [
+        {
+          "label": "sujeongjeon",
+          "similarity": 0.7354203462600708
+        },
+        {
+          "label": "gangnyeongjeon",
+          "similarity": 0.7289984226226807
+        },
+        {
+          "label": "gyotaejeon",
+          "similarity": 0.727047324180603
+        },
+        {
+          "label": "geunjeongjeon",
+          "similarity": 0.7227683067321777
+        },
+        {
+          "label": "gyeonghoeru",
+          "similarity": 0.634418785572052
+        },
+        {
+          "label": "sajeongjeon",
+          "similarity": 0.5269603729248047
+        }
+      ]
+    },
+    {
+      "id": "5691",
+      "truth": null,
+      "role": "out_of_scope",
+      "lighting": "day",
+      "top1_correct": null,
+      "top3_correct": null,
+      "ranking": [
+        {
+          "label": "sujeongjeon",
+          "similarity": 0.7989962100982666
+        },
+        {
+          "label": "gangnyeongjeon",
+          "similarity": 0.7691186666488647
+        },
+        {
+          "label": "gyotaejeon",
+          "similarity": 0.7655338644981384
+        },
+        {
+          "label": "gyeonghoeru",
+          "similarity": 0.7004417181015015
+        },
+        {
+          "label": "geunjeongjeon",
+          "similarity": 0.6702141761779785
+        },
+        {
+          "label": "sajeongjeon",
+          "similarity": 0.5648418664932251
+        }
+      ]
+    },
+    {
+      "id": "5704",
+      "truth": "sujeongjeon",
+      "role": "probe",
+      "lighting": "day",
+      "top1_correct": false,
+      "top3_correct": false,
+      "ranking": [
+        {
+          "label": "gyeonghoeru",
+          "similarity": 0.7775130867958069
+        },
+        {
+          "label": "gyotaejeon",
+          "similarity": 0.6769972443580627
+        },
+        {
+          "label": "sajeongjeon",
+          "similarity": 0.6641638875007629
+        },
+        {
+          "label": "geunjeongjeon",
+          "similarity": 0.6324235796928406
+        },
+        {
+          "label": "sujeongjeon",
+          "similarity": 0.6248919367790222
+        },
+        {
+          "label": "gangnyeongjeon",
+          "similarity": 0.6068545579910278
+        }
+      ]
+    },
+    {
+      "id": "5706",
+      "truth": "sujeongjeon",
+      "role": "probe",
+      "lighting": "night",
+      "top1_correct": true,
+      "top3_correct": true,
+      "ranking": [
+        {
+          "label": "sujeongjeon",
+          "similarity": 0.7938958406448364
+        },
+        {
+          "label": "geunjeongjeon",
+          "similarity": 0.7630704641342163
+        },
+        {
+          "label": "gangnyeongjeon",
+          "similarity": 0.7622499465942383
+        },
+        {
+          "label": "gyotaejeon",
+          "similarity": 0.7620090246200562
+        },
+        {
+          "label": "gyeonghoeru",
+          "similarity": 0.7344458103179932
+        },
+        {
+          "label": "sajeongjeon",
+          "similarity": 0.5662450790405273
+        }
+      ]
+    },
+    {
+      "id": "5733",
+      "truth": "gangnyeongjeon",
+      "role": "probe",
+      "lighting": "day",
+      "top1_correct": false,
+      "top3_correct": false,
+      "ranking": [
+        {
+          "label": "sajeongjeon",
+          "similarity": 0.7569180727005005
+        },
+        {
+          "label": "gyeonghoeru",
+          "similarity": 0.6909453868865967
+        },
+        {
+          "label": "gyotaejeon",
+          "similarity": 0.650812029838562
+        },
+        {
+          "label": "gangnyeongjeon",
+          "similarity": 0.6051028966903687
+        },
+        {
+          "label": "sujeongjeon",
+          "similarity": 0.5982893705368042
+        },
+        {
+          "label": "geunjeongjeon",
+          "similarity": 0.5867189168930054
+        }
+      ]
+    },
+    {
+      "id": "5735",
+      "truth": "gangnyeongjeon",
+      "role": "probe",
+      "lighting": "day",
+      "top1_correct": true,
+      "top3_correct": true,
+      "ranking": [
+        {
+          "label": "gangnyeongjeon",
+          "similarity": 0.859883189201355
+        },
+        {
+          "label": "sujeongjeon",
+          "similarity": 0.8247449398040771
+        },
+        {
+          "label": "gyotaejeon",
+          "similarity": 0.8182733058929443
+        },
+        {
+          "label": "geunjeongjeon",
+          "similarity": 0.695818305015564
+        },
+        {
+          "label": "gyeonghoeru",
+          "similarity": 0.6822493672370911
+        },
+        {
+          "label": "sajeongjeon",
+          "similarity": 0.5944876670837402
+        }
+      ]
+    },
+    {
+      "id": "5736",
+      "truth": "gangnyeongjeon",
+      "role": "probe",
+      "lighting": "night",
+      "top1_correct": false,
+      "top3_correct": true,
+      "ranking": [
+        {
+          "label": "sujeongjeon",
+          "similarity": 0.745103657245636
+        },
+        {
+          "label": "gangnyeongjeon",
+          "similarity": 0.7336086630821228
+        },
+        {
+          "label": "geunjeongjeon",
+          "similarity": 0.6929097771644592
+        },
+        {
+          "label": "gyotaejeon",
+          "similarity": 0.6872758865356445
+        },
+        {
+          "label": "gyeonghoeru",
+          "similarity": 0.6227055788040161
+        },
+        {
+          "label": "sajeongjeon",
+          "similarity": 0.5192978382110596
+        }
+      ]
+    },
+    {
+      "id": "5739",
+      "truth": "gyotaejeon",
+      "role": "probe",
+      "lighting": "day",
+      "top1_correct": false,
+      "top3_correct": true,
+      "ranking": [
+        {
+          "label": "gyeonghoeru",
+          "similarity": 0.7369065284729004
+        },
+        {
+          "label": "sajeongjeon",
+          "similarity": 0.6193819046020508
+        },
+        {
+          "label": "gyotaejeon",
+          "similarity": 0.6069425940513611
+        },
+        {
+          "label": "geunjeongjeon",
+          "similarity": 0.5713279247283936
+        },
+        {
+          "label": "sujeongjeon",
+          "similarity": 0.5617274641990662
+        },
+        {
+          "label": "gangnyeongjeon",
+          "similarity": 0.560488224029541
+        }
+      ]
+    },
+    {
+      "id": "5741",
+      "truth": "gyotaejeon",
+      "role": "probe",
+      "lighting": "day",
+      "top1_correct": false,
+      "top3_correct": true,
+      "ranking": [
+        {
+          "label": "sujeongjeon",
+          "similarity": 0.8443235158920288
+        },
+        {
+          "label": "gangnyeongjeon",
+          "similarity": 0.831950306892395
+        },
+        {
+          "label": "gyotaejeon",
+          "similarity": 0.8055456876754761
+        },
+        {
+          "label": "gyeonghoeru",
+          "similarity": 0.7492945194244385
+        },
+        {
+          "label": "geunjeongjeon",
+          "similarity": 0.6742823719978333
+        },
+        {
+          "label": "sajeongjeon",
+          "similarity": 0.5945446491241455
+        }
+      ]
+    },
+    {
+      "id": "5742",
+      "truth": "gyotaejeon",
+      "role": "probe",
+      "lighting": "night",
+      "top1_correct": false,
+      "top3_correct": false,
+      "ranking": [
+        {
+          "label": "sujeongjeon",
+          "similarity": 0.7374716997146606
+        },
+        {
+          "label": "geunjeongjeon",
+          "similarity": 0.7317718863487244
+        },
+        {
+          "label": "gangnyeongjeon",
+          "similarity": 0.7113333940505981
+        },
+        {
+          "label": "gyotaejeon",
+          "similarity": 0.6923726797103882
+        },
+        {
+          "label": "gyeonghoeru",
+          "similarity": 0.6417966485023499
+        },
+        {
+          "label": "sajeongjeon",
+          "similarity": 0.561342179775238
+        }
+      ]
+    },
+    {
+      "id": "5744",
+      "truth": null,
+      "role": "out_of_scope",
+      "lighting": "day",
+      "top1_correct": null,
+      "top3_correct": null,
+      "ranking": [
+        {
+          "label": "gyeonghoeru",
+          "similarity": 0.7068830728530884
+        },
+        {
+          "label": "gyotaejeon",
+          "similarity": 0.6996179819107056
+        },
+        {
+          "label": "sujeongjeon",
+          "similarity": 0.6947373747825623
+        },
+        {
+          "label": "geunjeongjeon",
+          "similarity": 0.6492704153060913
+        },
+        {
+          "label": "gangnyeongjeon",
+          "similarity": 0.642082691192627
+        },
+        {
+          "label": "sajeongjeon",
+          "similarity": 0.5985604524612427
+        }
+      ]
+    }
+  ],
+  "session_load_ms": 59.30380000791047,
+  "warm_inference_10_ms": [
+    3.6866000009467825,
+    3.795600001467392,
+    3.8050000002840534,
+    3.698499989695847,
+    3.675699990708381,
+    3.7201999948592857,
+    3.6853000055998564,
+    3.7068999954499304,
+    3.6896000092383474,
+    3.7053999985801056
+  ],
+  "warm_median_ms": 3.7019499941379763,
+  "timings": [
+    {
+      "id": "5678",
+      "preprocessing_ms": 83.36810000764672,
+      "inference_ms": 4.207899997709319
+    },
+    {
+      "id": "5677",
+      "preprocessing_ms": 51.84980000194628,
+      "inference_ms": 4.1335999994771555
+    },
+    {
+      "id": "5680",
+      "preprocessing_ms": 44.771000000764616,
+      "inference_ms": 4.211999999824911
+    },
+    {
+      "id": "5676",
+      "preprocessing_ms": 58.688599994638935,
+      "inference_ms": 4.171000007772818
+    },
+    {
+      "id": "5679",
+      "preprocessing_ms": 47.31220001121983,
+      "inference_ms": 4.137799987802282
+    },
+    {
+      "id": "5673",
+      "preprocessing_ms": 83.61539999896195,
+      "inference_ms": 4.689599998528138
+    },
+    {
+      "id": "5716",
+      "preprocessing_ms": 44.960699990042485,
+      "inference_ms": 4.063100001076236
+    },
+    {
+      "id": "5717",
+      "preprocessing_ms": 44.91839998809155,
+      "inference_ms": 4.1277000127593055
+    },
+    {
+      "id": "5718",
+      "preprocessing_ms": 74.6489000011934,
+      "inference_ms": 4.2754000023705885
+    },
+    {
+      "id": "5719",
+      "preprocessing_ms": 40.176499998779036,
+      "inference_ms": 6.502500007627532
+    },
+    {
+      "id": "5720",
+      "preprocessing_ms": 77.40039999771398,
+      "inference_ms": 4.157799994572997
+    },
+    {
+      "id": "5693",
+      "preprocessing_ms": 79.1484999936074,
+      "inference_ms": 4.293799996958114
+    },
+    {
+      "id": "5694",
+      "preprocessing_ms": 45.2411000005668,
+      "inference_ms": 3.9496000099461526
+    },
+    {
+      "id": "5691",
+      "preprocessing_ms": 48.59770000621211,
+      "inference_ms": 4.491400002734736
+    },
+    {
+      "id": "5704",
+      "preprocessing_ms": 74.69660000060685,
+      "inference_ms": 4.111000002012588
+    },
+    {
+      "id": "5705",
+      "preprocessing_ms": 51.698299997951835,
+      "inference_ms": 4.098700010217726
+    },
+    {
+      "id": "5706",
+      "preprocessing_ms": 42.55790000024717,
+      "inference_ms": 4.04109999362845
+    },
+    {
+      "id": "5733",
+      "preprocessing_ms": 67.43939999432769,
+      "inference_ms": 4.171099993982352
+    },
+    {
+      "id": "5734",
+      "preprocessing_ms": 46.43940000096336,
+      "inference_ms": 3.9798000070732087
+    },
+    {
+      "id": "5735",
+      "preprocessing_ms": 47.044600010849535,
+      "inference_ms": 4.053799988469109
+    },
+    {
+      "id": "5736",
+      "preprocessing_ms": 41.96610000508372,
+      "inference_ms": 3.9943000010680407
+    },
+    {
+      "id": "5739",
+      "preprocessing_ms": 60.01539999851957,
+      "inference_ms": 4.480600007809699
+    },
+    {
+      "id": "5740",
+      "preprocessing_ms": 59.48899999202695,
+      "inference_ms": 4.186200007097796
+    },
+    {
+      "id": "5741",
+      "preprocessing_ms": 45.10779998963699,
+      "inference_ms": 3.9972000085981563
+    },
+    {
+      "id": "5742",
+      "preprocessing_ms": 39.122399990446866,
+      "inference_ms": 4.128300002776086
+    },
+    {
+      "id": "5744",
+      "preprocessing_ms": 47.510799995507114,
+      "inference_ms": 3.9868000021670014
+    }
+  ],
+  "limitations": [
+    "Development photos; same collection and references as prior CLIP run, not a holdout.",
+    "Only a fixed pretrained feature retrieval baseline; no training or calibrated rejection.",
+    "Python CPU only; not browser/Android performance."
+  ]
+}

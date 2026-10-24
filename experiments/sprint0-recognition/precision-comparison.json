@@ -1,0 +1,447 @@
+{
+  "diagnostic": "post-INT8-result precision comparison, not a new held-out evaluation",
+  "code_sha256": {
+    "check_precision.py": "d1defffba11202dc865468c277e62892e29cdf8a8bc26eec61b34500d5920269",
+    "run.py": "d64b1e1b41485591d8b175f1afe1111850b406dbb89da81a57e70ce576b8e394",
+    "prepare.py": "d179f2a950bd7d369a50e145bfe2534b40db5190333bf1c56972425f5d1a7b89"
+  },
+  "model_fp32": {
+    "url": "https://huggingface.co/Xenova/clip-vit-base-patch32/resolve/d15189d7028b43f1d3e65039190477f6af591c2a/onnx/vision_model.onnx",
+    "sha256": "fd6e1402a588279d1723c7534d4bcba5bc0b14b47dfab0e46f8c47b8270d7d40",
+    "bytes": 351685709
+  },
+  "manifest_sha256": "f765fdd3dfe20a4dea44bbf1368e00d059121c8e0e626e3494ad5db3195baf33",
+  "summary": {
+    "fp32": {
+      "n": 17,
+      "top1_hits": 5,
+      "top3_hits": 13
+    },
+    "int8": {
+      "n": 17,
+      "top1_hits": 2,
+      "top3_hits": 11
+    }
+  },
+  "paired_feature_cosine_min": 0.911504328250885,
+  "paired_feature_cosine_mean": 0.9543893337249756,
+  "top1_agreement_count": 11,
+  "session_load_ms": {
+    "fp32": 519.8494999931427,
+    "int8": 188.07940000260714
+  },
+  "predictions": {
+    "fp32": [
+      {
+        "id": "5678",
+        "truth": "geunjeongjeon",
+        "ranking": [
+          "gyeonghoeru",
+          "sujeongjeon",
+          "gyotaejeon",
+          "geunjeongjeon",
+          "gangnyeongjeon",
+          "sajeongjeon"
+        ]
+      },
+      {
+        "id": "5677",
+        "truth": "geunjeongjeon",
+        "ranking": [
+          "sajeongjeon",
+          "gyotaejeon",
+          "geunjeongjeon",
+          "gangnyeongjeon",
+          "sujeongjeon",
+          "gyeonghoeru"
+        ]
+      },
+      {
+        "id": "5676",
+        "truth": "geunjeongjeon",
+        "ranking": [
+          "geunjeongjeon",
+          "gyotaejeon",
+          "sujeongjeon",
+          "gangnyeongjeon",
+          "gyeonghoeru",
+          "sajeongjeon"
+        ]
+      },
+      {
+        "id": "5679",
+        "truth": "geunjeongjeon",
+        "ranking": [
+          "geunjeongjeon",
+          "gyotaejeon",
+          "gangnyeongjeon",
+          "sujeongjeon",
+          "gyeonghoeru",
+          "sajeongjeon"
+        ]
+      },
+      {
+        "id": "5716",
+        "truth": "gyeonghoeru",
+        "ranking": [
+          "sujeongjeon",
+          "gyeonghoeru",
+          "geunjeongjeon",
+          "gyotaejeon",
+          "gangnyeongjeon",
+          "sajeongjeon"
+        ]
+      },
+      {
+        "id": "5717",
+        "truth": "gyeonghoeru",
+        "ranking": [
+          "gyeonghoeru",
+          "geunjeongjeon",
+          "sajeongjeon",
+          "gyotaejeon",
+          "gangnyeongjeon",
+          "sujeongjeon"
+        ]
+      },
+      {
+        "id": "5719",
+        "truth": "gyeonghoeru",
+        "ranking": [
+          "gyotaejeon",
+          "sujeongjeon",
+          "gyeonghoeru",
+          "geunjeongjeon",
+          "gangnyeongjeon",
+          "sajeongjeon"
+        ]
+      },
+      {
+        "id": "5720",
+        "truth": "gyeonghoeru",
+        "ranking": [
+          "gyotaejeon",
+          "gangnyeongjeon",
+          "sujeongjeon",
+          "geunjeongjeon",
+          "gyeonghoeru",
+          "sajeongjeon"
+        ]
+      },
+      {
+        "id": "5694",
+        "truth": "sajeongjeon",
+        "ranking": [
+          "gangnyeongjeon",
+          "gyotaejeon",
+          "sujeongjeon",
+          "geunjeongjeon",
+          "gyeonghoeru",
+          "sajeongjeon"
+        ]
+      },
+      {
+        "id": "5704",
+        "truth": "sujeongjeon",
+        "ranking": [
+          "gyeonghoeru",
+          "gyotaejeon",
+          "sujeongjeon",
+          "gangnyeongjeon",
+          "geunjeongjeon",
+          "sajeongjeon"
+        ]
+      },
+      {
+        "id": "5706",
+        "truth": "sujeongjeon",
+        "ranking": [
+          "sujeongjeon",
+          "geunjeongjeon",
+          "gyotaejeon",
+          "gangnyeongjeon",
+          "gyeonghoeru",
+          "sajeongjeon"
+        ]
+      },
+      {
+        "id": "5733",
+        "truth": "gangnyeongjeon",
+        "ranking": [
+          "sajeongjeon",
+          "gangnyeongjeon",
+          "gyotaejeon",
+          "geunjeongjeon",
+          "sujeongjeon",
+          "gyeonghoeru"
+        ]
+      },
+      {
+        "id": "5735",
+        "truth": "gangnyeongjeon",
+        "ranking": [
+          "sujeongjeon",
+          "gangnyeongjeon",
+          "gyotaejeon",
+          "geunjeongjeon",
+          "gyeonghoeru",
+          "sajeongjeon"
+        ]
+      },
+      {
+        "id": "5736",
+        "truth": "gangnyeongjeon",
+        "ranking": [
+          "gangnyeongjeon",
+          "sujeongjeon",
+          "gyotaejeon",
+          "sajeongjeon",
+          "geunjeongjeon",
+          "gyeonghoeru"
+        ]
+      },
+      {
+        "id": "5739",
+        "truth": "gyotaejeon",
+        "ranking": [
+          "sajeongjeon",
+          "gyotaejeon",
+          "gangnyeongjeon",
+          "gyeonghoeru",
+          "geunjeongjeon",
+          "sujeongjeon"
+        ]
+      },
+      {
+        "id": "5741",
+        "truth": "gyotaejeon",
+        "ranking": [
+          "sujeongjeon",
+          "gangnyeongjeon",
+          "geunjeongjeon",
+          "gyotaejeon",
+          "sajeongjeon",
+          "gyeonghoeru"
+        ]
+      },
+      {
+        "id": "5742",
+        "truth": "gyotaejeon",
+        "ranking": [
+          "gangnyeongjeon",
+          "gyotaejeon",
+          "sujeongjeon",
+          "geunjeongjeon",
+          "gyeonghoeru",
+          "sajeongjeon"
+        ]
+      }
+    ],
+    "int8": [
+      {
+        "id": "5678",
+        "truth": "geunjeongjeon",
+        "ranking": [
+          "gyeonghoeru",
+          "gyotaejeon",
+          "gangnyeongjeon",
+          "sujeongjeon",
+          "geunjeongjeon",
+          "sajeongjeon"
+        ]
+      },
+      {
+        "id": "5677",
+        "truth": "geunjeongjeon",
+        "ranking": [
+          "sajeongjeon",
+          "gyotaejeon",
+          "gangnyeongjeon",
+          "geunjeongjeon",
+          "sujeongjeon",
+          "gyeonghoeru"
+        ]
+      },
+      {
+        "id": "5676",
+        "truth": "geunjeongjeon",
+        "ranking": [
+          "gyotaejeon",
+          "gangnyeongjeon",
+          "geunjeongjeon",
+          "sujeongjeon",
+          "gyeonghoeru",
+          "sajeongjeon"
+        ]
+      },
+      {
+        "id": "5679",
+        "truth": "geunjeongjeon",
+        "ranking": [
+          "gyotaejeon",
+          "geunjeongjeon",
+          "gangnyeongjeon",
+          "sujeongjeon",
+          "gyeonghoeru",
+          "sajeongjeon"
+        ]
+      },
+      {
+        "id": "5716",
+        "truth": "gyeonghoeru",
+        "ranking": [
+          "gyeonghoeru",
+          "sujeongjeon",
+          "gyotaejeon",
+          "gangnyeongjeon",
+          "geunjeongjeon",
+          "sajeongjeon"
+        ]
+      },
+      {
+        "id": "5717",
+        "truth": "gyeonghoeru",
+        "ranking": [
+          "gyotaejeon",
+          "gangnyeongjeon",
+          "gyeonghoeru",
+          "sajeongjeon",
+          "geunjeongjeon",
+          "sujeongjeon"
+        ]
+      },
+      {
+        "id": "5719",
+        "truth": "gyeonghoeru",
+        "ranking": [
+          "gyotaejeon",
+          "gyeonghoeru",
+          "gangnyeongjeon",
+          "sujeongjeon",
+          "geunjeongjeon",
+          "sajeongjeon"
+        ]
+      },
+      {
+        "id": "5720",
+        "truth": "gyeonghoeru",
+        "ranking": [
+          "gyotaejeon",
+          "gangnyeongjeon",
+          "sujeongjeon",
+          "geunjeongjeon",
+          "gyeonghoeru",
+          "sajeongjeon"
+        ]
+      },
+      {
+        "id": "5694",
+        "truth": "sajeongjeon",
+        "ranking": [
+          "gyotaejeon",
+          "gangnyeongjeon",
+          "sujeongjeon",
+          "geunjeongjeon",
+          "gyeonghoeru",
+          "sajeongjeon"
+        ]
+      },
+      {
+        "id": "5704",
+        "truth": "sujeongjeon",
+        "ranking": [
+          "gyeonghoeru",
+          "gyotaejeon",
+          "sajeongjeon",
+          "gangnyeongjeon",
+          "sujeongjeon",
+          "geunjeongjeon"
+        ]
+      },
+      {
+        "id": "5706",
+        "truth": "sujeongjeon",
+        "ranking": [
+          "gyotaejeon",
+          "sujeongjeon",
+          "gangnyeongjeon",
+          "geunjeongjeon",
+          "gyeonghoeru",
+          "sajeongjeon"
+        ]
+      },
+      {
+        "id": "5733",
+        "truth": "gangnyeongjeon",
+        "ranking": [
+          "sajeongjeon",
+          "gyotaejeon",
+          "gangnyeongjeon",
+          "sujeongjeon",
+          "geunjeongjeon",
+          "gyeonghoeru"
+        ]
+      },
+      {
+        "id": "5735",
+        "truth": "gangnyeongjeon",
+        "ranking": [
+          "sujeongjeon",
+          "gangnyeongjeon",
+          "gyotaejeon",
+          "geunjeongjeon",
+          "gyeonghoeru",
+          "sajeongjeon"
+        ]
+      },
+      {
+        "id": "5736",
+        "truth": "gangnyeongjeon",
+        "ranking": [
+          "gangnyeongjeon",
+          "gyotaejeon",
+          "sujeongjeon",
+          "gyeonghoeru",
+          "geunjeongjeon",
+          "sajeongjeon"
+        ]
+      },
+      {
+        "id": "5739",
+        "truth": "gyotaejeon",
+        "ranking": [
+          "sajeongjeon",
+          "gangnyeongjeon",
+          "gyotaejeon",
+          "gyeonghoeru",
+          "sujeongjeon",
+          "geunjeongjeon"
+        ]
+      },
+      {
+        "id": "5741",
+        "truth": "gyotaejeon",
+        "ranking": [
+          "sujeongjeon",
+          "gangnyeongjeon",
+          "geunjeongjeon",
+          "gyotaejeon",
+          "gyeonghoeru",
+          "sajeongjeon"
+        ]
+      },
+      {
+        "id": "5742",
+        "truth": "gyotaejeon",
+        "ranking": [
+          "gangnyeongjeon",
+          "gyotaejeon",
+          "sujeongjeon",
+          "geunjeongjeon",
+          "gyeonghoeru",
+          "sajeongjeon"
+        ]
+      }
+    ]
+  }
+}

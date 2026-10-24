@@ -5,11 +5,13 @@
 ## 현재 상태
 
 - 문서 운영 규칙: 이 문서 묶음에서 정의했다.
-- 제품·UI·구조: 첫 프로토타입을 위한 초안이다. 구현·사용성 검증 결과가 아니다.
+- 제품·UI는 프로토타입 기준과 후속 제품 계획을 구분한다. [구조 문서](ARCHITECTURE.md)는 현재 프로토타입 구현과 양식 6 기반 실제 제품 설계 초안을 함께 담는다. 2026-10-23 공식 사진 확보·PC 후보 모델 실행 근거를 연결했으며 제품의 기술 선정·구현·성능 검증 완료를 뜻하지 않는다.
 - 앱 코드와 실행 명령: [prototype](../prototype/README.md)의 독립 모바일 웹에 있다. 정적 자료와 메모리 상태로 동작한다.
+- 실제 제품 방향: 2026-10-24 설치형 Android 앱·기기 내 추론 우선, TypeScript + React Native + Expo 시작 구성을 선택했다. 작은 Android 모델 연결 실험을 먼저 수행한다. [구조 초안](ARCHITECTURE.md)에 결정과 미정 항목을 기록했다. 현재 웹 프로토타입과 별개이며 Android 앱 구현·실기기 검증은 아직 없다.
+- 초기 제품 데이터: 앱에 포함한 검수 JSON과 별도 이미지·모델 파일을 채택했다. DB는 초기 구성에서 사용하지 않는다. [저장·조회 기준](ARCHITECTURE.md#31-데이터-관계와-무결성)과 [데이터·입출력 상세 설계](experiments/form6-data-contract-review.md)에 필드·갱신 정책·정상/오류 계약·2단계 설계 검수를 기록했다. 스키마·앱 구현과 실기기 검증은 남아 있다.
 - 문서 검사·Wiki 자동 게시: GitHub Actions 설정을 추가했다. 실제 실행 결과와 장애 처리 방법은 [WIKI](WIKI.md)를 확인한다.
 - 프로토타입: [검토한 모바일 배치](prototype/UI_LAYOUT_REVIEW.html)에 따라 검색·전체 사진 탐색·후보 비교·설명·다음 관람·공통 이동을 연결했다. 시나리오는 관찰 과제이며 앱을 잠그지 않는다. [검증 기록](../prototype/VERIFICATION.md)의 브라우저·자동 검사와 [세 사용자 테스트 결과](prototype/OBSERVATION_RESULTS.md)의 실제 기록·미검증 사항을 구분한다.
-- 기술 구성은 Vanilla JavaScript + Vite다. 흰 바탕·둥근 UI·기와 먹청색 중심을 적용했다. R01·R02·R03 기록을 분석했으며 발견된 모바일·사용성 문제의 수정 후 검증과 현장 효과는 남아 있다.
+- 기존 웹 프로토타입의 기술 구성은 Vanilla JavaScript + Vite다. 흰 바탕·둥근 UI·기와 먹청색 중심을 적용했다. R01·R02·R03 기록을 분석했으며 발견된 모바일·사용성 문제의 수정 후 검증과 현장 효과는 남아 있다.
 
 ## 각 문서는 무엇이고, 언제 쓰는가?
 
@@ -23,6 +25,10 @@
 | [WIKI · 문서 게시 안내](WIKI.md) | 저장소 문서를 Wiki에 올리고, 게시 결과를 확인하고, 실패하면 다시 올리는 방법 | Wiki 게시를 설정할 때 | 게시 방법이나 문서 위치가 바뀔 때 |
 | [QUALITY · 완료 점검표](QUALITY.md) | 무엇을 확인하고 어떤 결과를 남겨야 작업을 끝냈다고 말할 수 있는지 정하는 문서 | 작업의 완료 조건을 정할 때 | 기능을 만들고 확인하거나, 완료 조건이 바뀔 때 |
 | [ARCHITECTURE · 프로그램 구조](ARCHITECTURE.md) | 각 개발 파트가 무엇을 맡고 어떤 정보를 서로 주고받는지 설명하는 설계도 | 첫 구현의 구조를 정할 때 | 개발 파트의 역할이나 연결 방식이 바뀔 때 |
+| [Sprint 0 자료·모델 실험](experiments/sprint0-recognition.md) | 확보한 사진·후보 모델 실행 결과·재현 환경과 남은 한계. [모바일 웹 실행 조사](experiments/mobile-web-inference-options.md) 연결 | 제품 인식 구조를 선택하기 전 | 자료·모델·전처리·실행 환경을 바꿔 비교할 때 |
+| [React Native 구성 선택 조사](experiments/react-native-adoption-research.md) | 실제 개발팀·1인 개발 사례와 Expo·네이티브 추론 연동 위험, 후속 시작 구성 채택 기록 | React 계열 앱 구성을 정하기 전 | 호환 버전·실기기 검증·선택 근거가 달라질 때 |
+| [양식 6 데이터·입출력 설계](experiments/form6-data-contract-review.md) | JSON 필드·ID 관계·로컬 함수·취소/복귀 계약의 대안 비교와 1차·2차 설계 검수 | 제품 데이터·호출 계약을 구현하기 전 | 지원 범위·계약·자료 갱신 정책을 바꿀 때 |
+| [양식 6 개발 환경 조사](experiments/form6-environment-research.md) | 공식 배포물 기준 버전 조합·빌드 방식 비교와 설치/실행 미확인 경계 | Android 개발 환경을 구성하기 전 | SDK·네이티브 런타임·빌드 도구를 바꿀 때 |
 | [GLOSSARY · 용어 사전](GLOSSARY.md) | 프로젝트에서 쓰는 단어와 줄임말의 뜻을 정리한 사전 | 주요 단어의 뜻을 정할 때 | 새 단어가 생기거나 이름·뜻이 바뀔 때 |
 | [CODING_STANDARDS · 코드 작성 약속](CODING_STANDARDS.md) | 코드를 작성하고 검토할 때 함께 지킬 약속 | 첫 코드 작성 규칙을 정할 때 | 자주 나온 검토 의견을 공통 약속으로 정할 때 |
 | ADR · 설계 결정 기록 (`docs/adr/`) | 여러 방법 중 왜 이 방법을 골랐는지, 어떤 점을 고려했는지 남기는 기록 | 중요한 설계 방법을 선택할 때 | 그 결정과 관련된 설계를 바꿀 때. 첫 결정 전에는 폴더를 만들지 않는다. |
@@ -37,6 +43,8 @@
 이번 사용자 요청에 따라 세 테스트의 분석은 HTML을 추가하지 않고 [관찰 결과·Product Backlog 반영 근거](prototype/OBSERVATION_RESULTS.md) 한 문서에 모았다. 빈 기록지·진행 방법과 실제 결과를 구분하며, 결과 문서는 전체 제출용 Product Backlog를 대체하지 않는다.
 
 제품 개발 범위·우선순위를 검토할 때는 [Product Backlog 4차 작성본 공개 요약](PRODUCT_BACKLOG_DRAFT.md)을 읽는다. 「PPT 구성 이어가기」에서 수정·검수한 5개 Epic·12개 Story·46 SP와 Sprint 배치·공통 DoD를 반영한다. SP는 상대 추정 가안이며, 계획·규칙 채택과 제품 구현·AC 통과를 구분한다. 기존 파일명과 Wiki 주소는 링크 호환을 위해 유지한다. 개인정보가 있는 Word 원본·개별 US 제출 문서는 공개하지 않으며 HTML을 추가하지 않는다.
+
+양식 6 설계·PC 실험 근거와 이후 실제 Android 연결 검증은 [Sprint 0 이슈](https://github.com/HyunKN/visual-travel-guide/issues/21)에서 추적한다. 설계·조사 완료와 도구 설치·앱 빌드·실기기 검증을 구분하며, 다음 행동·실행 증거는 해당 이슈에서 갱신한다.
 
 프로토타입 단계의 수행·종료 근거는 [프로토타입 상위 Issue](https://github.com/HyunKN/visual-travel-guide/issues/4), [사람 관찰·백로그 반영 Issue](https://github.com/HyunKN/visual-travel-guide/issues/13), [구현·검증 PR](https://github.com/HyunKN/visual-travel-guide/pull/5)에서 확인한다. Wiki에서는 이 안내서와 익명 관찰 결과·최신 백로그 공개 요약·QA 방법을 탐색할 수 있다. 원본 참여자 기록·개인정보가 있는 제출 보고서는 공개 문서와 게시 대상에 포함하지 않는다. 이후 실제 개발은 최신 백로그에 따라 별도 작업으로 추적하며, 프로토타입 Issue를 계속 확장하지 않는다.
 

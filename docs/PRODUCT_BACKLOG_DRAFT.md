@@ -1,6 +1,6 @@
 # Product Backlog — 4차 작성본 공개 요약
 
-기준: 사용자가 작성·수정한 Product Backlog 4차 작성본과 「PPT 구성 이어가기」에서 최종 검수한 12개 개별 User Story. 공개 요약 갱신일: 2026-10-19.
+기준: 사용자가 작성·수정한 Product Backlog 4차 작성본과 「PPT 구성 이어가기」에서 최종 검수한 12개 개별 User Story. 공개 요약 갱신일: 2026-10-23(Sprint 0 기술 실험 근거 연결, Story·SP·Sprint 배치 유지).
 
 이 문서는 초기 AI 검토 초안을 대체한다. 기존 링크와 Wiki 주소를 유지하기 위해 파일명 `PRODUCT_BACKLOG_DRAFT.md`와 페이지명 `Product-Backlog-Draft`를 유지하지만, 아래 Story ID·우선순위·배치는 **4차 작성본 기준**이다. 초기 4 Epic·16 Story·SP 미정 상태를 현재 계획으로 사용하지 않는다. 이전 내용은 [초기 초안의 Git 이력](https://github.com/HyunKN/visual-travel-guide/blob/21ecc3c95907ee03905ea248c650f86171c0c74a/docs/PRODUCT_BACKLOG_DRAFT.md)에서 확인한다.
 
@@ -296,7 +296,7 @@ Epic: E5 세부 요소 탐색과 의미 이해 · Priority: Should · 추정: 5 
 
 3. 해당 Story의 모든 AC를 Given/When/Then 기준으로 실행해 통과 증거를 남깁니다. 실패하거나 실행하지 않은 AC가 남으면 Done으로 표시하지 않습니다.
 
-4. 모바일 웹에서 정상 흐름과 해당 Story에 관련된 예외 흐름(입력 취소·권한 거부·미확정·오류·복귀 등)을 확인합니다.
+4. 설치형 Android 앱에서 정상 흐름과 해당 Story에 관련된 예외 흐름(입력 취소·권한 거부·미확정·오류·복귀 등)을 확인합니다. 2026-10-24 사용자 결정에 따른 제품 검증 대상 변경이며 기존 모바일 웹 프로토타입 검사는 제품 앱 검증을 대신하지 않습니다.
 
 5. 미구현 기능을 제공 중인 것처럼 표시하지 않습니다. 사진과 관련성이 확인되지 않은 위치는 보정에 사용하지 않고, 미확정 결과나 검증되지 않은 설명을 정답처럼 표시하지 않습니다.
 
@@ -307,6 +307,8 @@ Epic: E5 세부 요소 탐색과 의미 이해 · Priority: Should · 추정: 5 
 - 정기 검토: 10/25(Sprint 0 결과), 11/8·11/16(Sprint 1 중간·Review), 12/6·12/14(Sprint 2 중간·Review). 기술 차질·요구 변경 시 추가한다.
 - 수행자 1인이 우선순위·완료를 결정하고 AI는 정합성·위험 점검을 보조한다. 여러 명이 동시 투표한 Planning Poker를 수행했다고 바꾸어 기록하지 않는다.
 - PoC·데이터 확보, F01~F10/B01~B06 관찰, 실제 Issue·PR·Commit, AC·모바일 검사·Review를 근거로 미완료 원인과 다음 행동을 정한다.
+- 2026-10-23 [Sprint 0 자료·모델 실행 기록](experiments/sprint0-recognition.md): 공식 소량 사진과 PC 후보 모델 실행을 확인했지만 현재 참조 방식의 식별 품질이 부족했다. 학습셋·독립 평가·Android 검증은 남아 있으며 US-05 완료나 목표 성능 달성으로 처리하지 않는다. 기존 SP·Sprint 배치는 유지하고 자료·실기기 근거를 보완한 뒤 재검토한다.
+- 2026-10-24 사용자 결정: 제품은 설치형 Android 앱·기기 내 추론을 우선하며 TypeScript + React Native + Expo로 시작한다. 초기 콘텐츠는 앱에 포함한 검수 JSON, 이미지·모델은 별도 파일로 두고 DB는 사용하지 않는다. [구조 초안](ARCHITECTURE.md)과 [데이터·입출력 검수](experiments/form6-data-contract-review.md)에 필드·계약·앱 배포 단위 콘텐츠 갱신을 반영했다. 도구 선정과 실행 확인은 [환경 조사](experiments/form6-environment-research.md)에서 구분하며 모델 런타임·모델 전달·설치 배포 확정은 남아 있다. 설계 채택이며 제품 구현·실기기 검증 완료를 뜻하지 않는다. Story ID·기능 범위·SP·Sprint 배치는 유지하고 앱 전환에 필요한 환경 구축·설치 검증 작업량은 후속 재추정한다. 제출 Word의 이전 모바일 웹 표현도 다음 개정에서 일치시켜야 한다.
 - 12개 Story·SP·배치는 현재 계획을 유지한다. 범위·우선순위·추정·배치 변경이 필요하면 사용자 판단을 확인하고 Backlog·개별 US·Revision History를 함께 수정한다.
 - 문서 자가점검의 체크만으로 외부 제출, 제품 AC 통과, Capacity 실측을 독립 확인한 것으로 보지 않는다. 개인정보가 있는 원본 제출 체크리스트는 공개하지 않는다.
 
