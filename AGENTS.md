@@ -12,7 +12,7 @@
 | 화면·상호작용 변경 | [DESIGN](docs/DESIGN.md) |
 | 구조·데이터 흐름 변경 | [ARCHITECTURE](docs/ARCHITECTURE.md), 관련 ADR이 있으면 해당 기록 |
 | 도메인 개념·명칭 변경 | [GLOSSARY](docs/GLOSSARY.md) |
-| 코드 리뷰 | [CODING_STANDARDS](docs/CODING_STANDARDS.md), 해당 명세, 실제 변경 전체 |
+| 코드 리뷰 | [CODING_STANDARDS](docs/CODING_STANDARDS.md), [구현 전 통과 조건](docs/DEVELOPMENT.md#구현-전-통과-조건), [QUALITY](docs/QUALITY.md), 해당 명세, 실제 변경 전체 |
 | 새 작업 채팅 시작·작업 인계 | [THREADS](docs/THREADS.md), 해당 Issue, 기준 브랜치·커밋 |
 | Wiki 게시·문서 자동화 변경 | [WIKI](docs/WIKI.md) |
 

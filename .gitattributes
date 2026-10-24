@@ -1,0 +1,3 @@
+# Preserve experiment provenance bytes across Windows and Linux checkouts.
+experiments/sprint0-recognition/*.py text eol=lf
+experiments/sprint0-recognition/*.json -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol
