@@ -1,0 +1,84 @@
+erDiagram
+    Area {
+        string id PK
+        string name
+        string parentAreaId FK "nullable"
+        string photoAssetId FK "nullable"
+        string mapAssetId FK "nullable"
+    }
+    Target {
+        string id PK
+        string kind "building or part"
+        string name
+        string areaId FK
+        string parentBuildingId FK "part only"
+        string overviewEntryId FK "nullable"
+        string heroAssetId FK "nullable"
+        object position "lat lon sourceIds nullable"
+    }
+    Entry {
+        string id PK
+        string targetId FK
+        string kind
+        string title
+        string summary
+        string_array sourceIds FK
+        string_array assetIds FK
+        string_array paragraphs
+        string reviewStatus
+    }
+    Source {
+        string id PK
+        string title
+        string publisher
+        string url
+        string checkedAt
+        string claimNote
+    }
+    Asset {
+        string id PK
+        string assetKey
+        string_array targetIds FK
+        string sourceId FK
+        string alt
+        int width
+        int height
+        string sha256
+    }
+    Question {
+        string id PK
+        string label
+        string targetId FK
+        string answerEntryId FK
+    }
+    Region {
+        string id PK
+        string assetId FK
+        string partId FK
+        object rect "normalized 0 to 1"
+    }
+    Example {
+        string id PK
+        string label
+        string assetId FK
+        string targetId FK
+    }
+    Area ||--o{ Target : areaId
+    Area o|--o{ Area : parentAreaId
+    Target o|--o{ Target : parentBuildingId
+    Target ||--o{ Entry : targetId
+    Entry o|--o| Target : overviewEntryId
+    Source }|--o{ Entry : sourceIds
+    Source ||--o{ Asset : sourceId
+    Target }o--o{ Asset : targetIds
+    Asset }o--o{ Entry : assetIds
+    Asset o|--o{ Target : heroAssetId
+    Asset o|--o{ Area : photoAssetId
+    Asset o|--o{ Area : mapAssetId
+    Source }o--o{ Target : position_sourceIds
+    Target ||--o{ Question : targetId
+    Entry ||--o{ Question : answerEntryId
+    Asset ||--o{ Region : assetId
+    Target ||--o{ Region : partId
+    Asset ||--o{ Example : assetId
+    Target ||--o{ Example : targetId

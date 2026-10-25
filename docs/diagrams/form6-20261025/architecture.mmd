@@ -1,0 +1,8 @@
+flowchart LR
+ U[방문객] --> P[Presentation 화면과 입력]
+ P --> A[Application 탐색과 결과 판단]
+ A --> M[인식 연결부 기기 내 모델 실행]
+ A --> C[Repository JSON 콘텐츠 조회]
+ A --> D[Domain 대상 후보 탐색 상태]
+ C --> J[검수된 설명 출처 이미지 참조]
+ T[별도 학습 평가 환경] --> M

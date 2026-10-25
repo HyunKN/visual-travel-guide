@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1720" viewBox="0 0 1600 1720"><rect width="100%" height="100%" fill="white"/>
+<text x="40" y="20" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="38" font-weight="700" fill="#20384b">논리 ERD 1 · 건물과 설명 자료</text>
+<text x="40" y="78" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="27" font-weight="400" fill="#20384b">PK: 고유 ID   FK: 다른 자료 참조   []: 복수 참조   ?: null 허용</text>
+<rect x="50" y="160" width="620" height="287" fill="white" stroke="#8296a6" stroke-width="2"/>
+<rect x="50" y="160" width="620" height="60" fill="#eaf0f5" stroke="#8296a6" stroke-width="2"/>
+<text x="67" y="172" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="32" font-weight="700" fill="#20384b">구역 Area</text>
+<text x="67" y="232" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">PK id</text>
+<text x="67" y="274" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">name, aliases</text>
+<text x="67" y="316" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">FK parentAreaId? → Area.id</text>
+<text x="67" y="358" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">FK photoAssetId? → Asset.id</text>
+<text x="67" y="400" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">FK mapAssetId? → Asset.id</text>
+<rect x="930" y="160" width="620" height="371" fill="white" stroke="#8296a6" stroke-width="2"/>
+<rect x="930" y="160" width="620" height="60" fill="#eaf0f5" stroke="#8296a6" stroke-width="2"/>
+<text x="947" y="172" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="32" font-weight="700" fill="#20384b">대상 Target</text>
+<text x="947" y="232" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">PK id</text>
+<text x="947" y="274" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">kind, name, aliases</text>
+<text x="947" y="316" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">FK areaId → Area.id</text>
+<text x="947" y="358" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">FK parentBuildingId* → Target.id</text>
+<text x="947" y="400" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">FK overviewEntryId? → Entry.id</text>
+<text x="947" y="442" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">FK heroAssetId? → Asset.id</text>
+<text x="947" y="484" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">position? (위·경도, sourceIds[])</text>
+<rect x="50" y="700" width="620" height="203" fill="white" stroke="#8296a6" stroke-width="2"/>
+<rect x="50" y="700" width="620" height="60" fill="#eaf0f5" stroke="#8296a6" stroke-width="2"/>
+<text x="67" y="712" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="32" font-weight="700" fill="#20384b">출처 Source</text>
+<text x="67" y="772" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">PK id</text>
+<text x="67" y="814" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">title, publisher</text>
+<text x="67" y="856" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">url, checkedAt, claimNote</text>
+<rect x="930" y="750" width="620" height="329" fill="white" stroke="#8296a6" stroke-width="2"/>
+<rect x="930" y="750" width="620" height="60" fill="#eaf0f5" stroke="#8296a6" stroke-width="2"/>
+<text x="947" y="762" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="32" font-weight="700" fill="#20384b">설명 Entry</text>
+<text x="947" y="822" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">PK id</text>
+<text x="947" y="864" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">FK targetId → Target.id</text>
+<text x="947" y="906" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">kind, title, summary</text>
+<text x="947" y="948" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">FK sourceIds[] → Source.id</text>
+<text x="947" y="990" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">FK assetIds[] → Asset.id</text>
+<text x="947" y="1032" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">paragraphs, reviewStatus</text>
+<rect x="50" y="1210" width="620" height="287" fill="white" stroke="#8296a6" stroke-width="2"/>
+<rect x="50" y="1210" width="620" height="60" fill="#eaf0f5" stroke="#8296a6" stroke-width="2"/>
+<text x="67" y="1222" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="32" font-weight="700" fill="#20384b">이미지 Asset</text>
+<text x="67" y="1282" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">PK id</text>
+<text x="67" y="1324" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">assetKey, alt</text>
+<text x="67" y="1366" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">FK targetIds[] → Target.id</text>
+<text x="67" y="1408" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">FK sourceId → Source.id</text>
+<text x="67" y="1450" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">width, height, sha256</text>
+<polyline points="670,280 800,280 800,340 930,340" fill="none" stroke="#20384b" stroke-width="3"/>
+<polygon points="930,340 919.1946347717678,345.21958640933474 919.1946347717678,334.78041359066526" fill="#20384b"/>
+<rect x="729" y="232" width="74.0" height="39" fill="white"/>
+<text x="735" y="235" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="27" font-weight="400" fill="#20384b">1 : N</text>
+<polyline points="1240,531 1240,750" fill="none" stroke="#20384b" stroke-width="3"/>
+<polygon points="1240,750 1234.7804135906651,739.1946347717678 1245.2195864093349,739.1946347717678" fill="#20384b"/>
+<rect x="1254" y="649" width="74.0" height="39" fill="white"/>
+<text x="1260" y="652" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="27" font-weight="400" fill="#20384b">1 : N</text>
+<polyline points="930,943 810,943 810,840 670,840" fill="none" stroke="#20384b" stroke-width="3"/>
+<polygon points="670,840 680.8053652282322,834.7804135906653 680.8053652282322,845.2195864093347" fill="#20384b"/>
+<rect x="722" y="885" width="84.0" height="39" fill="white"/>
+<text x="728" y="888" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="27" font-weight="400" fill="#20384b">N : M</text>
+<polyline points="360,1210 360,903" fill="none" stroke="#20384b" stroke-width="3"/>
+<polygon points="360,903 365.21958640933474,913.8053652282322 354.78041359066526,913.8053652282322" fill="#20384b"/>
+<rect x="374" y="1092" width="74.0" height="39" fill="white"/>
+<text x="380" y="1095" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="27" font-weight="400" fill="#20384b">N : 1</text>
+<polyline points="670,1376 760,1376 760,445 930,445" fill="none" stroke="#20384b" stroke-width="3"/>
+<polygon points="930,445 919.1946347717678,450.21958640933474 919.1946347717678,439.78041359066526" fill="#20384b"/>
+<rect x="690" y="1142" width="84.0" height="39" fill="white"/>
+<text x="696" y="1145" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="27" font-weight="400" fill="#20384b">N : M</text>
+<text x="50" y="1580" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="28" font-weight="400" fill="#20384b">* parentBuildingId는 부분(kind=part)에만 필수입니다.</text>
+<text x="50" y="1625" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="28" font-weight="400" fill="#20384b">선은 주요 관계, 각 FK의 화살표는 참조 대상을 나타냅니다.</text>
+</svg>

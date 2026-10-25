@@ -46,6 +46,8 @@
 
 양식 6 설계·PC 실험 근거와 이후 실제 Android 연결 검증은 [Sprint 0 이슈](https://github.com/HyunKN/visual-travel-guide/issues/21)에서 추적한다. 설계·조사 완료와 도구 설치·앱 빌드·실기기 검증을 구분하며, 다음 행동·실행 증거는 해당 이슈에서 갱신한다.
 
+양식 6의 그림은 [다이어그램 원본과 미리보기](diagrams/form6-20261025/README.md)에서 확인한다. 논리 아키텍처, 두 핵심 시퀀스, JSON의 논리 ERD와 편집·재생성 원본을 함께 보관한다.
+
 프로토타입 단계의 수행·종료 근거는 [프로토타입 상위 Issue](https://github.com/HyunKN/visual-travel-guide/issues/4), [사람 관찰·백로그 반영 Issue](https://github.com/HyunKN/visual-travel-guide/issues/13), [구현·검증 PR](https://github.com/HyunKN/visual-travel-guide/pull/5)에서 확인한다. Wiki에서는 이 안내서와 익명 관찰 결과·최신 백로그 공개 요약·QA 방법을 탐색할 수 있다. 원본 참여자 기록·개인정보가 있는 제출 보고서는 공개 문서와 게시 대상에 포함하지 않는다. 이후 실제 개발은 최신 백로그에 따라 별도 작업으로 추적하며, 프로토타입 Issue를 계속 확장하지 않는다.
 
 ## 프로토타입 설계를 읽을 때

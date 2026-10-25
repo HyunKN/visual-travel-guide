@@ -1,0 +1,24 @@
+sequenceDiagram
+    actor U as 방문객
+    participant P as 화면·입력
+    participant A as 탐색·판단
+    participant M as 인식 연결부
+    participant R as 자료 조회
+    U->>P: 도움 확인 후 사진/예시 선택
+    P->>A: 입력·요청 ID 전달
+    alt 실제 사진
+        A->>M: 전처리·인식 요청
+        M-->>A: 후보·점수 / 오류
+    else 준비된 예시
+        A->>R: 예시 대상 조회
+        R-->>A: 예시의 대상 ID
+    end
+    alt 판단 기준 충족 또는 예시 대상 확인
+        A->>R: 같은 대상 설명 조회
+        R-->>A: 설명·출처 / 자료 없음
+    else 미확정·오류
+        A->>A: 재입력 경로 준비
+    end
+    A-->>P: 처리 결과·입력 출처
+    P-->>U: 설명 또는 다시 찾기 안내
+    Note over P,R: 유효 요청만 적용. 예시는 모델 호출 없음. 미확정·오류는 흐름 2.
