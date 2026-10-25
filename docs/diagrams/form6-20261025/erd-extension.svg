@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1220" viewBox="0 0 1600 1220"><rect width="100%" height="100%" fill="white"/>
+<text x="40" y="20" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="36" font-weight="700" fill="#20384b">논리 ERD 2 · 질문과 등록 사진의 부분 탐색</text>
+<text x="40" y="78" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="27" font-weight="400" fill="#20384b">질문·부분 탐색은 Should·Sprint 미배치, 예시는 US-01에 연결</text>
+<rect x="50" y="170" width="620" height="245" fill="white" stroke="#8296a6" stroke-width="2"/>
+<rect x="50" y="170" width="620" height="60" fill="#eaf0f5" stroke="#8296a6" stroke-width="2"/>
+<text x="67" y="182" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="32" font-weight="700" fill="#20384b">질문 Question · US-11</text>
+<text x="67" y="242" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">PK id</text>
+<text x="67" y="284" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">label</text>
+<text x="67" y="326" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">FK targetId → Target.id</text>
+<text x="67" y="368" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">FK answerEntryId → Entry.id</text>
+<rect x="930" y="170" width="620" height="203" fill="white" stroke="#8296a6" stroke-width="2"/>
+<rect x="930" y="170" width="620" height="60" fill="#eaf0f5" stroke="#8296a6" stroke-width="2"/>
+<text x="947" y="182" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="32" font-weight="700" fill="#20384b">대상·설명 참조</text>
+<text x="947" y="242" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">Target.PK id</text>
+<text x="947" y="284" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">Entry.PK id</text>
+<text x="947" y="326" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">같은 대상의 answer 설명만 연결</text>
+<polyline points="670,350 930,350" fill="none" stroke="#20384b" stroke-width="3"/>
+<polygon points="930,350 919.1946347717678,355.21958640933474 919.1946347717678,344.78041359066526" fill="#20384b"/>
+<rect x="694" y="293" width="191.0" height="39" fill="white"/>
+<text x="700" y="296" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="27" font-weight="400" fill="#20384b">N : 1 (각 참조)</text>
+<rect x="50" y="560" width="620" height="245" fill="white" stroke="#8296a6" stroke-width="2"/>
+<rect x="50" y="560" width="620" height="60" fill="#eaf0f5" stroke="#8296a6" stroke-width="2"/>
+<text x="67" y="572" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="32" font-weight="700" fill="#20384b">지원 영역 Region · US-12</text>
+<text x="67" y="632" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">PK id</text>
+<text x="67" y="674" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">FK assetId → Asset.id</text>
+<text x="67" y="716" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">FK partId → Target.id (part)</text>
+<text x="67" y="758" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">rect (0~1 좌표)</text>
+<rect x="930" y="560" width="620" height="203" fill="white" stroke="#8296a6" stroke-width="2"/>
+<rect x="930" y="560" width="620" height="60" fill="#eaf0f5" stroke="#8296a6" stroke-width="2"/>
+<text x="947" y="572" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="32" font-weight="700" fill="#20384b">등록 이미지·부분 참조</text>
+<text x="947" y="632" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">Asset.PK id</text>
+<text x="947" y="674" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">Target.PK id (kind=part)</text>
+<text x="947" y="716" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">등록 사진 안의 지원 영역만 연결</text>
+<polyline points="670,740 930,740" fill="none" stroke="#20384b" stroke-width="3"/>
+<polygon points="930,740 919.1946347717678,745.2195864093347 919.1946347717678,734.7804135906653" fill="#20384b"/>
+<rect x="694" y="683" width="191.0" height="39" fill="white"/>
+<text x="700" y="686" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="27" font-weight="400" fill="#20384b">N : 1 (각 참조)</text>
+<rect x="50" y="950" width="620" height="203" fill="white" stroke="#8296a6" stroke-width="2"/>
+<rect x="50" y="950" width="620" height="60" fill="#eaf0f5" stroke="#8296a6" stroke-width="2"/>
+<text x="67" y="962" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="32" font-weight="700" fill="#20384b">예시 Example · US-01</text>
+<text x="67" y="1022" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">PK id, label</text>
+<text x="67" y="1064" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">FK assetId → Asset.id</text>
+<text x="67" y="1106" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">FK targetId → Target.id</text>
+<rect x="930" y="950" width="620" height="203" fill="white" stroke="#8296a6" stroke-width="2"/>
+<rect x="930" y="950" width="620" height="60" fill="#eaf0f5" stroke="#8296a6" stroke-width="2"/>
+<text x="947" y="962" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="32" font-weight="700" fill="#20384b">검수한 이미지·대상 참조</text>
+<text x="947" y="1022" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">Asset.PK id</text>
+<text x="947" y="1064" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">Target.PK id</text>
+<text x="947" y="1106" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="29" font-weight="400" fill="#20384b">실제 인식과 구분하여 표시</text>
+<polyline points="670,1090 930,1090" fill="none" stroke="#20384b" stroke-width="3"/>
+<polygon points="930,1090 919.1946347717678,1095.2195864093349 919.1946347717678,1084.7804135906651" fill="#20384b"/>
+<rect x="694" y="1033" width="191.0" height="39" fill="white"/>
+<text x="700" y="1036" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="27" font-weight="400" fill="#20384b">N : 1 (각 참조)</text>
+</svg>

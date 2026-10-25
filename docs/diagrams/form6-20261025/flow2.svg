@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1548" viewBox="0 0 1600 1548">
+<rect width="100%" height="100%" fill="white"/>
+<text x="55" y="30" text-anchor="start" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="36" font-weight="700" fill="#20384b">핵심 흐름 2 · 불확실한 결과에서 다시 탐색하기</text>
+<text x="55" y="88" text-anchor="start" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="23" font-weight="400" fill="#667b8b">후보 비교는 조건에 따라 선택하며, 선택·보류·재입력의 경로를 나눕니다.</text>
+<rect x="30.0" y="145" width="240.0" height="58" fill="#edf3f6" stroke="#20384b" stroke-width="2"/>
+<text x="150.0" y="159" text-anchor="middle" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="27" font-weight="700" fill="#20384b">방문객</text>
+<line x1="150.0" y1="203" x2="150.0" y2="1458" stroke="#acbbc6" stroke-width="2" stroke-dasharray="8 6"/>
+<rect x="463.33333333333326" y="145" width="240.0" height="58" fill="#edf3f6" stroke="#20384b" stroke-width="2"/>
+<text x="583.3333333333333" y="159" text-anchor="middle" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="27" font-weight="700" fill="#20384b">화면·입력</text>
+<line x1="583.3333333333333" y1="203" x2="583.3333333333333" y2="1458" stroke="#acbbc6" stroke-width="2" stroke-dasharray="8 6"/>
+<rect x="896.6666666666666" y="145" width="239.9999999999999" height="58" fill="#edf3f6" stroke="#20384b" stroke-width="2"/>
+<text x="1016.6666666666666" y="159" text-anchor="middle" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="27" font-weight="700" fill="#20384b">탐색·판단</text>
+<line x1="1016.6666666666666" y1="203" x2="1016.6666666666666" y2="1458" stroke="#acbbc6" stroke-width="2" stroke-dasharray="8 6"/>
+<rect x="1330.0" y="145" width="240.0" height="58" fill="#edf3f6" stroke="#20384b" stroke-width="2"/>
+<text x="1450.0" y="159" text-anchor="middle" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="27" font-weight="700" fill="#20384b">자료 조회</text>
+<line x1="1450.0" y1="203" x2="1450.0" y2="1458" stroke="#acbbc6" stroke-width="2" stroke-dasharray="8 6"/>
+<text x="800.0" y="235" text-anchor="middle" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="30" font-weight="400" fill="#20384b">미확정·오류 / 재탐색 경로</text>
+<line x1="1016.6666666666666" y1="279" x2="583.3333333333333" y2="279" stroke="#20384b" stroke-width="2" stroke-dasharray="8 6"/>
+<polygon points="583.3333333333333,279 595.3333333333333,273 595.3333333333333,285" fill="#20384b"/>
+<text x="366.66666666666663" y="313" text-anchor="middle" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="30" font-weight="400" fill="#20384b">상태·가능한 행동 안내</text>
+<line x1="583.3333333333333" y1="357" x2="150.0" y2="357" stroke="#20384b" stroke-width="2" stroke-dasharray="8 6"/>
+<polygon points="150.0,357 162.0,351 162.0,363" fill="#20384b"/>
+<text x="48" y="398" text-anchor="start" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="23" font-weight="700" fill="#20384b">선택 · 후보가 있고 방문객이 비교 선택 — Sprint 2</text>
+<text x="1233.3333333333333" y="443" text-anchor="middle" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="30" font-weight="400" fill="#20384b">후보 사진·구별 근거 조회</text>
+<line x1="1016.6666666666666" y1="487" x2="1450.0" y2="487" stroke="#20384b" stroke-width="2"/>
+<polygon points="1450.0,487 1438.0,481 1438.0,493" fill="#20384b"/>
+<text x="1233.3333333333333" y="521" text-anchor="middle" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="30" font-weight="400" fill="#20384b">비교 자료 / 자료 없음</text>
+<line x1="1450.0" y1="565" x2="1016.6666666666666" y2="565" stroke="#20384b" stroke-width="2" stroke-dasharray="8 6"/>
+<polygon points="1016.6666666666666,565 1028.6666666666665,559 1028.6666666666665,571" fill="#20384b"/>
+<text x="800.0" y="599" text-anchor="middle" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="30" font-weight="400" fill="#20384b">비교 자료·대체 탐색 경로</text>
+<line x1="1016.6666666666666" y1="643" x2="583.3333333333333" y2="643" stroke="#20384b" stroke-width="2" stroke-dasharray="8 6"/>
+<polygon points="583.3333333333333,643 595.3333333333333,637 595.3333333333333,649" fill="#20384b"/>
+<rect x="35" y="391" width="1530" height="304" fill="none" stroke="#b4c1cb" stroke-width="2"/>
+<text x="366.66666666666663" y="702" text-anchor="middle" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="30" font-weight="400" fill="#20384b">후보 선택 또는 보류·재탐색</text>
+<line x1="150.0" y1="746" x2="583.3333333333333" y2="746" stroke="#20384b" stroke-width="2"/>
+<polygon points="583.3333333333333,746 571.3333333333333,740 571.3333333333333,752" fill="#20384b"/>
+<text x="800.0" y="780" text-anchor="middle" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="30" font-weight="400" fill="#20384b">선택한 행동·대상 ID</text>
+<line x1="583.3333333333333" y1="824" x2="1016.6666666666666" y2="824" stroke="#20384b" stroke-width="2"/>
+<polygon points="1016.6666666666666,824 1004.6666666666666,818 1004.6666666666666,830" fill="#20384b"/>
+<text x="48" y="865" text-anchor="start" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="23" font-weight="700" fill="#20384b">분기 · 후보 선택</text>
+<text x="1233.3333333333333" y="910" text-anchor="middle" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="30" font-weight="400" fill="#20384b">선택한 대상 설명 조회</text>
+<line x1="1016.6666666666666" y1="954" x2="1450.0" y2="954" stroke="#20384b" stroke-width="2"/>
+<polygon points="1450.0,954 1438.0,948 1438.0,960" fill="#20384b"/>
+<text x="1233.3333333333333" y="988" text-anchor="middle" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="30" font-weight="400" fill="#20384b">설명·출처 / 자료 없음</text>
+<line x1="1450.0" y1="1032" x2="1016.6666666666666" y2="1032" stroke="#20384b" stroke-width="2" stroke-dasharray="8 6"/>
+<polygon points="1016.6666666666666,1032 1028.6666666666665,1026 1028.6666666666665,1038" fill="#20384b"/>
+<line x1="35" y1="1066" x2="1565" y2="1066" stroke="#9eafba" stroke-width="2" stroke-dasharray="8 6"/>
+<text x="48" y="1075" text-anchor="start" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="23" font-weight="700" fill="#20384b">또는 · 판단 보류·재탐색</text>
+<text x="1032.6666666666665" y="1118" text-anchor="start" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="30" font-weight="400" fill="#20384b">이전 요청·선택 무효화</text>
+<line x1="1016.6666666666666" y1="1157" x2="1086.6666666666665" y2="1157" stroke="#20384b" stroke-width="2"/>
+<line x1="1086.6666666666665" y1="1157" x2="1086.6666666666665" y2="1174" stroke="#20384b" stroke-width="2"/>
+<line x1="1086.6666666666665" y1="1174" x2="1016.6666666666666" y2="1174" stroke="#20384b" stroke-width="2"/>
+<polygon points="1016.6666666666666,1174 1028.6666666666665,1168 1028.6666666666665,1180" fill="#20384b"/>
+<rect x="35" y="858" width="1530" height="356" fill="none" stroke="#b4c1cb" stroke-width="2"/>
+<text x="800.0" y="1221" text-anchor="middle" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="30" font-weight="400" fill="#20384b">설명 결과 또는 새 입력 경로</text>
+<line x1="1016.6666666666666" y1="1265" x2="583.3333333333333" y2="1265" stroke="#20384b" stroke-width="2" stroke-dasharray="8 6"/>
+<polygon points="583.3333333333333,1265 595.3333333333333,1259 595.3333333333333,1271" fill="#20384b"/>
+<text x="366.66666666666663" y="1299" text-anchor="middle" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="30" font-weight="400" fill="#20384b">설명 확인 또는 탐색 복귀</text>
+<line x1="583.3333333333333" y1="1343" x2="150.0" y2="1343" stroke="#20384b" stroke-width="2" stroke-dasharray="8 6"/>
+<polygon points="150.0,1343 162.0,1337 162.0,1349" fill="#20384b"/>
+<rect x="65" y="1381" width="1470" height="57" fill="#f1f5f7" stroke="#d7e0e6" stroke-width="1"/>
+<text x="88" y="1392" text-anchor="start" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="23" font-weight="400" fill="#20384b">늦은 이전 결과는 폐기. 사용자 후보 선택은 AI 검증 결과와 구분.</text>
+<text x="55" y="1500" text-anchor="start" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="21" font-weight="400" fill="#667b8b">구현 전 설계 · 실선: 요청/행동 · 점선: 결과/안내</text>
+</svg>

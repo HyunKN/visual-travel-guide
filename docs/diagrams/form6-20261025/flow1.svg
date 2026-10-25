@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1586" viewBox="0 0 1600 1586">
+<rect width="100%" height="100%" fill="white"/>
+<text x="55" y="30" text-anchor="start" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="36" font-weight="700" fill="#20384b">핵심 흐름 1 · 앱 실행에서 첫 설명까지</text>
+<text x="55" y="88" text-anchor="start" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="23" font-weight="400" fill="#667b8b">사진 인식과 준비된 예시를 구분하고, 같은 대상의 설명·출처로 연결합니다.</text>
+<rect x="30.0" y="145" width="240.0" height="58" fill="#edf3f6" stroke="#20384b" stroke-width="2"/>
+<text x="150.0" y="159" text-anchor="middle" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="27" font-weight="700" fill="#20384b">방문객</text>
+<line x1="150.0" y1="203" x2="150.0" y2="1496" stroke="#acbbc6" stroke-width="2" stroke-dasharray="8 6"/>
+<rect x="355.0" y="145" width="240.0" height="58" fill="#edf3f6" stroke="#20384b" stroke-width="2"/>
+<text x="475.0" y="159" text-anchor="middle" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="27" font-weight="700" fill="#20384b">화면·입력</text>
+<line x1="475.0" y1="203" x2="475.0" y2="1496" stroke="#acbbc6" stroke-width="2" stroke-dasharray="8 6"/>
+<rect x="680.0" y="145" width="240.0" height="58" fill="#edf3f6" stroke="#20384b" stroke-width="2"/>
+<text x="800.0" y="159" text-anchor="middle" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="27" font-weight="700" fill="#20384b">탐색·판단</text>
+<line x1="800.0" y1="203" x2="800.0" y2="1496" stroke="#acbbc6" stroke-width="2" stroke-dasharray="8 6"/>
+<rect x="1005.0" y="145" width="240.0" height="58" fill="#edf3f6" stroke="#20384b" stroke-width="2"/>
+<text x="1125.0" y="159" text-anchor="middle" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="27" font-weight="700" fill="#20384b">인식 연결부</text>
+<line x1="1125.0" y1="203" x2="1125.0" y2="1496" stroke="#acbbc6" stroke-width="2" stroke-dasharray="8 6"/>
+<rect x="1330.0" y="145" width="240.0" height="58" fill="#edf3f6" stroke="#20384b" stroke-width="2"/>
+<text x="1450.0" y="159" text-anchor="middle" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="27" font-weight="700" fill="#20384b">자료 조회</text>
+<line x1="1450.0" y1="203" x2="1450.0" y2="1496" stroke="#acbbc6" stroke-width="2" stroke-dasharray="8 6"/>
+<text x="312.5" y="235" text-anchor="middle" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="30" font-weight="400" fill="#20384b">도움 확인 후</text>
+<text x="312.5" y="270" text-anchor="middle" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="30" font-weight="400" fill="#20384b">사진/예시 선택</text>
+<line x1="150.0" y1="314" x2="475.0" y2="314" stroke="#20384b" stroke-width="2"/>
+<polygon points="475.0,314 463.0,308 463.0,320" fill="#20384b"/>
+<text x="637.5" y="345" text-anchor="middle" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="30" font-weight="400" fill="#20384b">입력·요청 ID 전달</text>
+<line x1="475.0" y1="389" x2="800.0" y2="389" stroke="#20384b" stroke-width="2"/>
+<polygon points="800.0,389 788.0,383 788.0,395" fill="#20384b"/>
+<text x="48" y="430" text-anchor="start" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="23" font-weight="700" fill="#20384b">분기 · 실제 사진</text>
+<text x="962.5" y="475" text-anchor="middle" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="30" font-weight="400" fill="#20384b">전처리·인식 요청</text>
+<line x1="800.0" y1="519" x2="1125.0" y2="519" stroke="#20384b" stroke-width="2"/>
+<polygon points="1125.0,519 1113.0,513 1113.0,525" fill="#20384b"/>
+<text x="962.5" y="553" text-anchor="middle" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="30" font-weight="400" fill="#20384b">후보·점수 / 오류</text>
+<line x1="1125.0" y1="597" x2="800.0" y2="597" stroke="#20384b" stroke-width="2" stroke-dasharray="8 6"/>
+<polygon points="800.0,597 812.0,591 812.0,603" fill="#20384b"/>
+<line x1="35" y1="631" x2="1565" y2="631" stroke="#9eafba" stroke-width="2" stroke-dasharray="8 6"/>
+<text x="48" y="640" text-anchor="start" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="23" font-weight="700" fill="#20384b">또는 · 준비된 예시</text>
+<text x="1125.0" y="683" text-anchor="middle" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="30" font-weight="400" fill="#20384b">예시 대상 조회</text>
+<line x1="800.0" y1="727" x2="1450.0" y2="727" stroke="#20384b" stroke-width="2"/>
+<polygon points="1450.0,727 1438.0,721 1438.0,733" fill="#20384b"/>
+<text x="1125.0" y="761" text-anchor="middle" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="30" font-weight="400" fill="#20384b">예시의 대상 ID</text>
+<line x1="1450.0" y1="805" x2="800.0" y2="805" stroke="#20384b" stroke-width="2" stroke-dasharray="8 6"/>
+<polygon points="800.0,805 812.0,799 812.0,811" fill="#20384b"/>
+<rect x="35" y="423" width="1530" height="434" fill="none" stroke="#b4c1cb" stroke-width="2"/>
+<text x="48" y="871" text-anchor="start" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="23" font-weight="700" fill="#20384b">분기 · 판단 기준 충족 또는 예시 대상 확인</text>
+<text x="1125.0" y="916" text-anchor="middle" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="30" font-weight="400" fill="#20384b">같은 대상 설명 조회</text>
+<line x1="800.0" y1="960" x2="1450.0" y2="960" stroke="#20384b" stroke-width="2"/>
+<polygon points="1450.0,960 1438.0,954 1438.0,966" fill="#20384b"/>
+<text x="1125.0" y="994" text-anchor="middle" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="30" font-weight="400" fill="#20384b">설명·출처 / 자료 없음</text>
+<line x1="1450.0" y1="1038" x2="800.0" y2="1038" stroke="#20384b" stroke-width="2" stroke-dasharray="8 6"/>
+<polygon points="800.0,1038 812.0,1032 812.0,1044" fill="#20384b"/>
+<line x1="35" y1="1072" x2="1565" y2="1072" stroke="#9eafba" stroke-width="2" stroke-dasharray="8 6"/>
+<text x="48" y="1081" text-anchor="start" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="23" font-weight="700" fill="#20384b">또는 · 미확정·오류</text>
+<text x="816.0" y="1124" text-anchor="start" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="30" font-weight="400" fill="#20384b">재입력 경로 준비</text>
+<line x1="800.0" y1="1163" x2="870.0" y2="1163" stroke="#20384b" stroke-width="2"/>
+<line x1="870.0" y1="1163" x2="870.0" y2="1180" stroke="#20384b" stroke-width="2"/>
+<line x1="870.0" y1="1180" x2="800.0" y2="1180" stroke="#20384b" stroke-width="2"/>
+<polygon points="800.0,1180 812.0,1174 812.0,1186" fill="#20384b"/>
+<rect x="35" y="864" width="1530" height="356" fill="none" stroke="#b4c1cb" stroke-width="2"/>
+<text x="637.5" y="1227" text-anchor="middle" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="30" font-weight="400" fill="#20384b">처리 결과·입력 출처</text>
+<line x1="800.0" y1="1271" x2="475.0" y2="1271" stroke="#20384b" stroke-width="2" stroke-dasharray="8 6"/>
+<polygon points="475.0,1271 487.0,1265 487.0,1277" fill="#20384b"/>
+<text x="312.5" y="1305" text-anchor="middle" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="30" font-weight="400" fill="#20384b">설명 또는 다시 찾기</text>
+<text x="312.5" y="1340" text-anchor="middle" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="30" font-weight="400" fill="#20384b">안내</text>
+<line x1="475.0" y1="1384" x2="150.0" y2="1384" stroke="#20384b" stroke-width="2" stroke-dasharray="8 6"/>
+<polygon points="150.0,1384 162.0,1378 162.0,1390" fill="#20384b"/>
+<rect x="65" y="1419" width="1470" height="57" fill="#f1f5f7" stroke="#d7e0e6" stroke-width="1"/>
+<text x="88" y="1430" text-anchor="start" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="23" font-weight="400" fill="#20384b">유효 요청만 적용. 예시는 모델 호출 없음. 미확정·오류는 흐름 2.</text>
+<text x="55" y="1538" text-anchor="start" dominant-baseline="text-before-edge" font-family="Malgun Gothic, sans-serif" font-size="21" font-weight="400" fill="#667b8b">구현 전 설계 · 실선: 요청/행동 · 점선: 결과/안내</text>
+</svg>

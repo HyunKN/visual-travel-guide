@@ -1,0 +1,23 @@
+sequenceDiagram
+    actor U as 방문객
+    participant P as 화면·입력
+    participant A as 탐색·판단
+    participant R as 자료 조회
+    A-->>P: 미확정·오류 / 재탐색 경로
+    P-->>U: 상태·가능한 행동 안내
+    opt 후보가 있고 방문객이 비교 선택 — Sprint 2
+        A->>R: 후보 사진·구별 근거 조회
+        R-->>A: 비교 자료 / 자료 없음
+        A-->>P: 비교 자료·대체 탐색 경로
+    end
+    U->>P: 후보 선택 또는 보류·재탐색
+    P->>A: 선택한 행동·대상 ID
+    alt 후보 선택
+        A->>R: 선택한 대상 설명 조회
+        R-->>A: 설명·출처 / 자료 없음
+    else 판단 보류·재탐색
+        A->>A: 이전 요청·선택 무효화
+    end
+    A-->>P: 설명 결과 또는 새 입력 경로
+    P-->>U: 설명 확인 또는 탐색 복귀
+    Note over P,A: 늦은 이전 결과는 폐기. 사용자 후보 선택은 AI 검증 결과와 구분.
