@@ -13,6 +13,10 @@
 - 프로토타입: [검토한 모바일 배치](prototype/UI_LAYOUT_REVIEW.html)에 따라 검색·전체 사진 탐색·후보 비교·설명·다음 관람·공통 이동을 연결했다. 시나리오는 관찰 과제이며 앱을 잠그지 않는다. [검증 기록](../prototype/VERIFICATION.md)의 브라우저·자동 검사와 [세 사용자 테스트 결과](prototype/OBSERVATION_RESULTS.md)의 실제 기록·미검증 사항을 구분한다.
 - 기존 웹 프로토타입의 기술 구성은 Vanilla JavaScript + Vite다. 흰 바탕·둥근 UI·기와 먹청색 중심을 적용했다. R01·R02·R03 기록을 분석했으며 발견된 모바일·사용성 문제의 수정 후 검증과 현장 효과는 남아 있다.
 
+## Sprint 제출 문서
+
+- [Sprint 1 Planning 공개본](sprints/SPRINT1_PLANNING.md): 제출용 Planning 6차 작성본의 항목과 표를 옮기고 개인 식별 정보는 제외했다.
+
 ## 각 문서는 무엇이고, 언제 쓰는가?
 
 | 문서 | 쉬운 설명 | 처음 쓰는 시점 | 다시 읽고 고치는 시점 |
