@@ -46,7 +46,7 @@
 
 이번 사용자 요청에 따라 세 테스트의 분석은 HTML을 추가하지 않고 [관찰 결과·Product Backlog 반영 근거](prototype/OBSERVATION_RESULTS.md) 한 문서에 모았다. 빈 기록지·진행 방법과 실제 결과를 구분하며, 결과 문서는 전체 제출용 Product Backlog를 대체하지 않는다.
 
-제품 개발 범위·우선순위를 검토할 때는 [Product Backlog 4차 작성본 공개 요약](PRODUCT_BACKLOG_DRAFT.md)을 읽는다. 「PPT 구성 이어가기」에서 수정·검수한 5개 Epic·12개 Story·46 SP와 Sprint 배치·공통 DoD를 반영한다. SP는 상대 추정 가안이며, 계획·규칙 채택과 제품 구현·AC 통과를 구분한다. 기존 파일명과 Wiki 주소는 링크 호환을 위해 유지한다. 개인정보가 있는 Word 원본·개별 US 제출 문서는 공개하지 않으며 HTML을 추가하지 않는다.
+제품 개발 범위·우선순위를 검토할 때는 [Product Backlog 최신 공개 요약](PRODUCT_BACKLOG_DRAFT.md)을 읽는다. 확정한 Sprint 1 재계획을 반영한 7개 Epic·17개 Story·70 SP와 우선순위·공통 DoD를 관리한다. Sprint 1 상위 12개는 50 SP, Sprint 2는 13 SP, Should 7 SP는 후순위 미배치다. SP는 상대 추정이며 계획·규칙 채택과 제품 구현·AC 통과를 구분한다. 기존 파일명과 Wiki 주소는 유지하고 개인정보가 있는 Word 원본·개별 US 제출 문서는 공개하지 않는다.
 
 양식 6 설계·PC 실험 근거와 이후 실제 Android 연결 검증은 [Sprint 0 이슈](https://github.com/HyunKN/visual-travel-guide/issues/21)에서 추적한다. 설계·조사 완료와 도구 설치·앱 빌드·실기기 검증을 구분하며, 다음 행동·실행 증거는 해당 이슈에서 갱신한다.
 
@@ -91,3 +91,5 @@
 - 자동화는 지정된 페이지만 관리하고 기존 Wiki 페이지를 보존한다. 게시 실패 시 직전 게시본을 유지하며, 재시도 방법은 WIKI에 기록한다.
 
 자동 게시의 대상과 검사 명령, 실패 시 처리 방법은 [WIKI](WIKI.md)가 기준이다. 설정 작업과 검증 결과는 [AI Workflow 설정 Issue](https://github.com/HyunKN/visual-travel-guide/issues/1)에 기록한다.
+
+Sprint 1의 제출 기준 계획과 Task·10/31 진행 기록은 [Sprint Planning](sprints/SPRINT1_PLANNING.md)과 [Sprint Backlog](sprints/SPRINT1_BACKLOG.md)에서 확인한다. 공개본은 개인정보를 제외하며 실제 개발 완료와 검증 통과를 의미하지 않는다.
