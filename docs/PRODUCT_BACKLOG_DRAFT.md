@@ -4,7 +4,7 @@
 
 기존 파일명과 Wiki 주소는 링크 호환을 위해 유지한다. 개인정보가 포함된 Word 표지와 개별 US 상세 파일은 공개하지 않는다.
 
-프로젝트명: **Vision AI와 위치정보를 활용한 장소 탐색 가이드 서비스** · Visual Travel Guide
+프로젝트명: **관광객을 위한 장소 탐색 가이드 서비스** · Visual Travel Guide
 
 [Sprint Planning](sprints/SPRINT1_PLANNING.md) · [Sprint Backlog](sprints/SPRINT1_BACKLOG.md)
 
