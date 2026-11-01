@@ -8,7 +8,7 @@ Sprint 1 · 2026.10.31 기준 · Task와 진행 기록
 
 | 항목 | 내용 |
 | --- | --- |
-| 프로젝트명 | Vision AI와 위치정보를 활용한 장소 탐색 가이드 서비스<br>Visual Travel Guide |
+| 프로젝트명 | 관광객을 위한 장소 탐색 가이드 서비스<br>Visual Travel Guide |
 
 | 항목 | 내용 |
 | --- | --- |
