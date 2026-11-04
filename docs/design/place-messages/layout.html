@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>장소 메시지 · 화면 치수와 상태 도면</title>
+<link rel="stylesheet" href="vendor/k-style-components.css">
+<style>
+:root{--font:system-ui,'Malgun Gothic',sans-serif;--tracking:-.02em;--fs-body:16px;--fw-body:400;--lh-body:1.6;--c-text-1:#243247;--c-text-2:#4e525a;--c-bg:#fff;--c-surface:#fff;--stack-s:8px;--fs-strong:18px;--fw-strong:600;--h-appbar:56px;--icon:24px;--phone-width:390px;--paper:#f3f5f7;--accent:#a5412c}
+body{padding:32px;max-width:1440px;margin:auto}h1{font-size:28px;line-height:1.4;margin-bottom:8px}h2{font-size:20px;margin-bottom:12px}p{margin-bottom:12px}.intro{max-width:900px;color:#4e525a}a{text-decoration:underline;text-underline-offset:3px}.controls{display:flex;gap:8px;flex-wrap:wrap;margin:24px 0;align-items:center}.controls button,.controls select{border:1px solid #c5cbd2;border-radius:8px;min-height:48px;padding:8px 16px;background:white}.controls button[aria-pressed=true]{background:#243247;color:white}.controls label{margin-right:4px}button:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #243247;outline-offset:3px}.workspace{display:grid;grid-template-columns:minmax(340px,470px) minmax(300px,1fr);gap:44px;align-items:start}.device-wrap{max-width:100%;overflow:auto;padding:8px 4px 16px}.device{width:var(--phone-width);height:844px;position:relative;background:white;outline:1px solid #9ba4af;border-radius:16px;overflow:hidden;display:grid;grid-template-rows:24px 56px 1fr 64px 64px 24px}.safe{background:repeating-linear-gradient(45deg,#f4f5f6,#f4f5f6 4px,#e9edf1 4px,#e9edf1 5px)}.appbar{position:relative;background:white;border-bottom:1px solid #e8e9ea}.appbar-btn{width:48px;height:48px}.appbar-title{font-size:18px}.plain-icon{font-size:26px;font-weight:400}.stage{position:relative;background:#f8f9fa;overflow:hidden}.stage img{position:absolute;object-fit:contain}.marker{position:absolute;width:48px;height:48px;display:grid;place-items:center;background:transparent;border:1px dashed #8793a4;border-radius:8px;z-index:10}.marker span{display:block;width:28px;height:12px;border-top:3px solid var(--accent);border-bottom:3px solid var(--accent);transform:skew(-25deg);filter:drop-shadow(0 1px 1px white) drop-shadow(0 -1px 1px white)}.marker.active span{outline:2px solid white;outline-offset:3px}.guides-off .marker{border-color:transparent}.toolbar{padding:8px 20px;display:flex;align-items:center;justify-content:flex-end;border-top:1px solid #e8e9ea;gap:8px}.action{min-height:48px;padding:10px 16px;border:1px solid #243247;border-radius:12px;font-size:16px;background:white}.primary{background:#243247;color:white}.bottom{display:grid;place-items:center;border-top:1px solid #e8e9ea;font-size:14px;color:#4e525a;background:white}.footer-note{font-size:13px;color:#4e525a;max-width:440px;margin-top:16px}.panel{position:absolute;z-index:40;left:20px;right:20px;bottom:160px;padding:20px;border:1px solid #e8e9ea;border-radius:16px;background:white;box-shadow:0 8px 24px #24324724;max-height:60%;overflow:auto;display:none}.panel.visible{display:block}.panel-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}.panel-head strong{font-size:16px}.panel-head button{min-width:48px;min-height:48px}.panel p{font-size:16px;line-height:25px;white-space:pre-wrap;overflow-wrap:anywhere;word-break:normal}.panel .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}.panel textarea{display:block;width:100%;min-height:160px;font-size:16px;line-height:25px;border:1px solid #e8e9ea;border-radius:8px;padding:12px;resize:vertical;background:white}.panel button[disabled]{opacity:.5;cursor:default}.facts{border-top:2px solid #243247;padding-top:20px}.facts section{padding-bottom:24px;margin-bottom:24px;border-bottom:1px solid #e8e9ea}.facts dl{display:grid;grid-template-columns:120px 1fr;gap:12px}.facts dt{font-weight:600}.facts dd{margin:0}.facts code,.output{font-family:Consolas,monospace;font-size:14px;background:#f3f5f7;padding:2px 4px}.output{display:block;padding:16px;white-space:pre-wrap;line-height:1.7;border-radius:8px}.caption{font-size:13px;color:#4e525a}.tag{display:inline-block;font-size:13px;border:1px solid #c5cbd2;padding:3px 8px;margin-bottom:12px}svg{pointer-events:none}footer{border-top:1px solid #e8e9ea;padding-top:20px;margin-top:24px;font-size:13px;color:#4e525a}@media(max-width:880px){body{padding:20px}.workspace{grid-template-columns:1fr;gap:24px}}@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<main>
+<span class="tag">구현 전 설계 도면 · 2026-11-04</span>
+<h1>장소 안에서 발견하는 메시지</h1>
+<p class="intro">공통 사진의 같은 위치에 글을 연결합니다. 아래는 치수와 상태를 비교하는 도면이며 실제 앱·서버가 아닙니다. 점선은 터치 영역이고 화면 밖 설명은 설계 주석입니다. 글은 작성한 가상 예문입니다.</p>
+<p class="intro"><strong>후속 변경 미반영:</strong> 2026-11-04에 큰 배경 사진 위 반투명 리퀴드 글래스 쪽지를 사용하도록 정했습니다. 이 도면의 작은 사진·불투명 패널은 이전안이며 추천 기능도 아직 없습니다. <a href="../PLACE_MESSAGES.md">최신 설계 기록</a>을 확인하세요.</p>
+<div class="controls" aria-label="도면 설정">
+  <label for="width">화면 폭</label><select id="width"><option value="320">320dp</option><option value="360">360dp</option><option value="390" selected>390dp</option><option value="430">430dp</option></select>
+  <button type="button" data-state="explore" aria-pressed="true">탐색 상태</button>
+  <button type="button" data-state="read" aria-pressed="false">읽기 상태</button>
+  <button type="button" data-state="compose" aria-pressed="false">작성 상태</button>
+  <button type="button" id="guides" aria-pressed="true">터치 영역 표시</button>
+</div>
+<div class="workspace">
+ <div>
+  <div class="device-wrap"><div class="device" id="device" aria-label="390dp 화면 도면">
+   <div class="safe" aria-hidden="true"></div>
+   <div class="appbar"><span class="appbar-btn plain-icon" aria-hidden="true">‹</span><div class="appbar-title">근정전</div><span class="appbar-btn" aria-hidden="true">···</span></div>
+   <div class="stage" id="stage"><img id="photo" src="../../prototype/content/assets/geunjeongjeon.jpg" alt="근정전 정면과 앞마당의 공통 사진"></div>
+   <div class="toolbar"><button class="action" id="write" type="button">글 남기기</button></div>
+   <div class="bottom">공통 하단바 영역 · 64dp</div>
+   <div class="safe" aria-hidden="true"></div>
+   <section id="reader" class="panel" aria-label="읽기 상태 도면">
+    <div class="panel-head"><strong>남겨진 글</strong><button type="button" class="close">닫기</button></div>
+    <p id="message"></p>
+   </section>
+   <section id="composer" class="panel" aria-label="작성 상태 도면">
+    <div class="panel-head"><span></span><button type="button" class="close">닫기</button></div>
+    <textarea aria-label="자유 텍스트 작성 예시" readonly>지붕보다 마당에 길게 드리운 그림자가 눈에 들어왔다.</textarea>
+    <div class="actions"><button type="button" class="action primary" disabled>저장</button></div>
+   </section>
+  </div></div>
+  <p class="footer-note">사진: 국가유산청 궁능유적본부 · 공공누리 제1유형. 원본 비율 유지, 파일 변경 없음. 화면의 흔적은 별도 레이어입니다. 작성·저장은 이 도면에서 실행하지 않습니다.</p>
+ </div>
+ <aside class="facts">
+  <section><h2>시선과 동작</h2><p>사진 → 흔적 발견 → 글 하나 열기 → 같은 장소로 복귀.</p><p>별점·댓글 목록·자동 넘김 없이 위치가 탐색의 기준이 됩니다. 겹친 흔적은 묶음으로 열고 저장 위치는 유지합니다.</p></section>
+  <section><h2>고정 치수</h2><dl><dt>앱바</dt><dd>56dp + 상단 safe area</dd><dt>흔적 그림</dt><dd>28 × 12dp</dd><dt>터치 영역</dt><dd>48 × 48dp / 사이 간격 8dp</dd><dt>보호 여백</dt><dd>사진 영역 사방 24dp</dd><dt>읽기 패널</dt><dd>좌우 20dp / padding 20dp / radius 16dp</dd><dt>본문</dt><dd>16 / 25 · 글자 확대 허용</dd><dt>하단바</dt><dd>64dp + 하단 safe area / 불투명 흰색</dd></dl></section>
+  <section><h2>같은 위치를 유지하는 계산</h2><output id="geometry" class="output"></output><p class="caption">폭을 바꿔도 원본 사진의 동일한 지점에 표식을 투영합니다. 양쪽 끝의 24dp는 터치 영역을 위한 공간입니다.</p></section>
+  <section><h2>사진 구도는 후속 선택</h2><p>현재 근정전 원본은 2000 × 1151의 가로 사진이라 세로 여백이 큽니다. 현장감을 위한 세로 구도를 선정할 필요가 있습니다. 치수 검토에서 임의로 잘라 문제를 감추지 않았습니다.</p></section>
+  <section><h2>코드와 검증</h2><p><a href="../PLACE_MESSAGES.md">전체 기술 명세</a> · <a href="geometry.ts">좌표 코드</a> · <a href="contract.ts">데이터 계약</a></p><p>참고 코드 strict 검사와 4개 동작 검사 통과. Android 터치·키보드·TalkBack·실제 공유는 별도 검증 대상입니다.</p></section>
+ </aside>
+</div>
+</main>
+<footer>k-style-ui-ux 원본 components.css의 앱바 골격을 재사용하고 이 도면의 확장 CSS를 적용했습니다. <a href="vendor/LICENSE.k-style-ui-ux">MIT 고지</a> · 기본 토큰 출처/변경 범위는 기술 명세 §8에 기록했습니다. CSS의 px는 이 도면에서 dp를 표현하는 논리 단위입니다.</footer>
+<script>
+'use strict';
+const device=document.getElementById('device'),stage=document.getElementById('stage'),photo=document.getElementById('photo');
+const reader=document.getElementById('reader'),composer=document.getElementById('composer');
+const notes=[{u:.62,v:.73,body:'지붕보다 마당에 길게 드리운 그림자가 눈에 들어왔다.'},{u:.28,v:.87,body:'멀리서 볼 때와 가까이서 볼 때 느낌이 달랐다.\n한 번 더 돌아보고 가려고 한다.'},{u:.5,v:.35,body:'오늘은 한동안 이 자리에 서 있었다.'}];
+let mode='explore', selected=0;
+function setMode(value){mode=value;reader.classList.toggle('visible',value==='read');composer.classList.toggle('visible',value==='compose');document.getElementById('message').textContent=notes[selected].body;document.querySelectorAll('[data-state]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.state===value)));render();}
+function render(){const w=stage.clientWidth,h=stage.clientHeight,s=Math.min((w-48)/2000,(h-48)/1151),iw=2000*s,ih=1151*s,x=(w-iw)/2,y=(h-ih)/2;
+ Object.assign(photo.style,{left:x+'px',top:y+'px',width:iw+'px',height:ih+'px'});
+ stage.querySelectorAll('.marker').forEach(b=>b.remove());
+ notes.forEach((n,i)=>{const b=document.createElement('button');b.type='button';b.className='marker'+(i===selected&&mode!=='explore'?' active':'');b.setAttribute('aria-label','사진의 흔적 '+(i+1)+' 열기');b.style.left=(x+n.u*iw-24)+'px';b.style.top=(y+n.v*ih-24)+'px';b.append(document.createElement('span'));b.addEventListener('click',()=>{selected=i;setMode('read');});stage.append(b);});
+ document.getElementById('geometry').textContent='장면: '+w+' × '+h+'dp\n사진: '+iw.toFixed(2)+' × '+ih.toFixed(2)+'dp\n사진 시작: ('+x.toFixed(2)+', '+y.toFixed(2)+')\n첫 흔적 u/v: (0.62, 0.73)\n화면 x/y: ('+(x+.62*iw).toFixed(2)+', '+(y+.73*ih).toFixed(2)+')';
+}
+document.getElementById('width').addEventListener('change',e=>{device.style.width=e.target.value+'px';device.setAttribute('aria-label',e.target.value+'dp 화면 도면');render();});
+document.querySelectorAll('[data-state]').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.state)));
+document.querySelectorAll('.close').forEach(b=>b.addEventListener('click',()=>setMode('explore')));
+document.getElementById('write').addEventListener('click',()=>setMode('compose'));
+document.getElementById('guides').addEventListener('click',e=>{device.classList.toggle('guides-off');e.currentTarget.setAttribute('aria-pressed',String(!device.classList.contains('guides-off')));});
+new ResizeObserver(render).observe(stage);photo.addEventListener('load',render);render();
+</script>
+</html>

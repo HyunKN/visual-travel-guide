@@ -3,7 +3,7 @@
 단일 도메인으로 시작한다. 문서를 모아두려는 프로젝트 방침에 따라 Matt 스킬의 기본 루트 경로 대신 아래 경로를 사용한다.
 
 - 용어집 원본: [docs/GLOSSARY.md](../GLOSSARY.md). 도메인 스킬은 '프로젝트 용어' 절을 참조한다.
-- ADR: 중요한 결정이 생기면 `docs/adr/NNNN-short-title.md`로 작성한다. 현재 폴더·기록은 없다.
+- ADR: 중요한 결정은 `docs/adr/NNNN-short-title.md`로 작성한다. [ADR 0001 — 쪽지는 공통 장소 사진에 고정](../adr/0001-shared-place-photo-anchors.md).
 - 구조 설명: [ARCHITECTURE](../ARCHITECTURE.md).
 
 관련 영역을 설계·구현·리뷰할 때 용어집과 해당 ADR을 읽는다. 스킬이 루트의 `GLOSSARY.md`를 찾도록 되어 있어도 이 경로를 우선하고 별도 용어집을 복제하지 않는다. 기존 결정과 충돌하면 그 이유와 재검토 필요성을 드러낸다.

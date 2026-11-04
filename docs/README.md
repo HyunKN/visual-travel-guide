@@ -4,10 +4,19 @@
 
 ## 현재 상태
 
+- 2026-11-04 [공통 장소 메시지 구현 설계](design/PLACE_MESSAGES.md)는 리뷰 목록 대신 장소 사진 위 흔적을 발견하는 사용자 방향을 다룬다. [치수·상태 도면](design/place-messages/layout.html), TypeScript 좌표·타입 참고 코드와 검증 결과를 포함한다. 코드의 수학적 확인과 Android UI·실제 공유 검증은 구분한다.
+
+- 2026-10-29: 사용자가 기본 탐색과 기록·흔적 경험을 Sprint 1 안에 연결하도록 요청했다. [Sprint 1 범위·일정 조정안](experiments/sprint1-scope-replan.md)은 잔여 66시간의 산정 가정, 기능 재배치, 위험 판단일, 완료 조건을 담는다. 기존 백로그·양식 6의 변경 검토이며 최종 추정·구현·공유 서비스 선정 완료를 뜻하지 않는다.
+
 - 문서 운영 규칙: 이 문서 묶음에서 정의했다.
 - 제품·UI는 프로토타입 기준과 후속 제품 계획을 구분한다. [구조 문서](ARCHITECTURE.md)는 현재 프로토타입 구현과 양식 6 기반 실제 제품 설계 초안을 함께 담는다. 2026-10-23 공식 사진 확보·PC 후보 모델 실행 근거를 연결했으며 제품의 기술 선정·구현·성능 검증 완료를 뜻하지 않는다.
 - 앱 코드와 실행 명령: [prototype](../prototype/README.md)의 독립 모바일 웹에 있다. 정적 자료와 메모리 상태로 동작한다.
-- 실제 제품 방향: 2026-10-24 설치형 Android 앱·기기 내 추론 우선, TypeScript + React Native + Expo 시작 구성을 선택했다. 작은 Android 모델 연결 실험을 먼저 수행한다. [구조 초안](ARCHITECTURE.md)에 결정과 미정 항목을 기록했다. 현재 웹 프로토타입과 별개이며 Android 앱 구현·실기기 검증은 아직 없다.
+- Android 제품 개발은 별도 [mobile](../mobile/README.md)에서 시작한다. 설치·화면 이동을 확인하는 최소 앱이며 제품 기능과 실행 검증 상태는 해당 안내에서 구분한다.
+- Sprint·전체 계획·실제 개발 결과는 [Sprint·WBS 현황판](operations/SPRINT_PROGRESS.html)에서 함께 본다. 기존 Story·Task·추정·완료 기준을 재사용하며 인수 완료율과 착수율을 구분한다.
+- Android 검사 결과는 [읽기용 검증 보고서](operations/ANDROID_VERIFICATION.html)로 확인한다. 원본 `mobile/VERIFICATION.md`가 바뀌면 `python scripts/render_android_verification.py`로 HTML을 다시 생성한다. 변환에는 `markdown-it-py`가 필요하며 새 Android 검사를 실행하는 명령은 아니다.
+- 학습용 사진의 파일별 출처·저작자·이용조건·접근 방법과 수집 도구는 사용자 요청으로 Git 제외 내부 자료에 보관한다. 내부 진입점은 `local-assets/datasets/source-registry/INDEX.html`이다. 공개용 문서에는 수집 경계와 익명 집계만 남기며 확보·시각 검수·학습/평가 분할·학습 완료를 구분한다.
+- 2026-11-03 [데이터 수집 경계·설계 논의](experiments/data-collection-scope.md)에 사용자 방향, 요소 인식 후 건물 후보를 좁히는 구상, 메모 연결 단위, 수집 자료와 검증 계획을 정리했다. 현판·처마의 지원 목록과 부위별 메모 방식은 미확정이며 기존 백로그·Sprint 완료 상태를 변경하지 않는다.
+- 실제 제품 방향: 2026-10-24 설치형 Android 앱·기기 내 추론 우선, TypeScript + React Native + Expo 시작 구성을 선택했다. 작은 Android 모델 연결 실험을 먼저 수행한다. [구조 초안](ARCHITECTURE.md)에 결정과 미정 항목을 기록했다. 현재 웹 프로토타입과 별개로 최소 Android 개발 앱을 생성했으며 제품 기능·실기기 검증은 아직 없다.
 - 초기 제품 데이터: 앱에 포함한 검수 JSON과 별도 이미지·모델 파일을 채택했다. DB는 초기 구성에서 사용하지 않는다. [저장·조회 기준](ARCHITECTURE.md#31-데이터-관계와-무결성)과 [데이터·입출력 상세 설계](experiments/form6-data-contract-review.md)에 필드·갱신 정책·정상/오류 계약·2단계 설계 검수를 기록했다. 스키마·앱 구현과 실기기 검증은 남아 있다.
 - 문서 검사·Wiki 자동 게시: GitHub Actions 설정을 추가했다. 실제 실행 결과와 장애 처리 방법은 [WIKI](WIKI.md)를 확인한다.
 - 프로토타입: [검토한 모바일 배치](prototype/UI_LAYOUT_REVIEW.html)에 따라 검색·전체 사진 탐색·후보 비교·설명·다음 관람·공통 이동을 연결했다. 시나리오는 관찰 과제이며 앱을 잠그지 않는다. [검증 기록](../prototype/VERIFICATION.md)의 브라우저·자동 검사와 [세 사용자 테스트 결과](prototype/OBSERVATION_RESULTS.md)의 실제 기록·미검증 사항을 구분한다.
@@ -31,7 +40,7 @@
 | [양식 6 개발 환경 조사](experiments/form6-environment-research.md) | 공식 배포물 기준 버전 조합·빌드 방식 비교와 설치/실행 미확인 경계 | Android 개발 환경을 구성하기 전 | SDK·네이티브 런타임·빌드 도구를 바꿀 때 |
 | [GLOSSARY · 용어 사전](GLOSSARY.md) | 프로젝트에서 쓰는 단어와 줄임말의 뜻을 정리한 사전 | 주요 단어의 뜻을 정할 때 | 새 단어가 생기거나 이름·뜻이 바뀔 때 |
 | [CODING_STANDARDS · 코드 작성 약속](CODING_STANDARDS.md) | 코드를 작성하고 검토할 때 함께 지킬 약속 | 첫 코드 작성 규칙을 정할 때 | 자주 나온 검토 의견을 공통 약속으로 정할 때 |
-| ADR · 설계 결정 기록 (`docs/adr/`) | 여러 방법 중 왜 이 방법을 골랐는지, 어떤 점을 고려했는지 남기는 기록 | 중요한 설계 방법을 선택할 때 | 그 결정과 관련된 설계를 바꿀 때. 첫 결정 전에는 폴더를 만들지 않는다. |
+| ADR · 설계 결정 기록 (`docs/adr/`) | 여러 방법 중 왜 이 방법을 골랐는지, 어떤 점을 고려했는지 남기는 기록. [ADR 0001 — 쪽지는 공통 장소 사진에 고정](adr/0001-shared-place-photo-anchors.md) | 중요한 설계 방법을 선택할 때 | 그 결정과 관련된 설계를 바꿀 때 |
 | [AGENTS · AI 작업 안내](../AGENTS.md) | AI에게 지금 작업에서 어떤 문서를 읽고 어떤 규칙을 지켜야 하는지 안내하는 문서 | 개발 문서를 처음 정리할 때 | AI가 읽어야 할 문서나 문서 위치가 바뀔 때 |
 | [Issue tracker · 작업 기록 설정](agents/issue-tracker.md) | AI가 작업을 어느 GitHub Issue에 기록하고 서로 어떻게 연결할지 안내하는 설정 | 스킬을 프로젝트에 연결할 때 | 작업을 기록하는 곳이나 연결 방법이 바뀔 때 |
 | [Domain · 용어·결정 문서 위치](agents/domain.md) | AI가 용어 사전과 설계 결정 기록을 어디서 찾고 어떻게 참고할지 안내하는 설정 | 스킬을 프로젝트에 연결할 때 | 용어 사전이나 설계 결정 기록의 위치가 바뀔 때 |
@@ -42,7 +51,7 @@
 
 이번 사용자 요청에 따라 세 테스트의 분석은 HTML을 추가하지 않고 [관찰 결과·Product Backlog 반영 근거](prototype/OBSERVATION_RESULTS.md) 한 문서에 모았다. 빈 기록지·진행 방법과 실제 결과를 구분하며, 결과 문서는 전체 제출용 Product Backlog를 대체하지 않는다.
 
-제품 개발 범위·우선순위를 검토할 때는 [Product Backlog 4차 작성본 공개 요약](PRODUCT_BACKLOG_DRAFT.md)을 읽는다. 「PPT 구성 이어가기」에서 수정·검수한 5개 Epic·12개 Story·46 SP와 Sprint 배치·공통 DoD를 반영한다. SP는 상대 추정 가안이며, 계획·규칙 채택과 제품 구현·AC 통과를 구분한다. 기존 파일명과 Wiki 주소는 링크 호환을 위해 유지한다. 개인정보가 있는 Word 원본·개별 US 제출 문서는 공개하지 않으며 HTML을 추가하지 않는다.
+제품 개발 범위·우선순위를 검토할 때는 [Product Backlog 최신 공개 요약](PRODUCT_BACKLOG_DRAFT.md)을 읽는다. 확정한 Sprint 1 재계획을 반영한 7개 Epic·17개 Story·70 SP와 우선순위·공통 DoD를 관리한다. Sprint 1 상위 12개는 50 SP, Sprint 2는 13 SP, Should 7 SP는 후순위 미배치다. SP는 상대 추정이며 계획·규칙 채택과 제품 구현·AC 통과를 구분한다. 기존 파일명과 Wiki 주소는 유지하고 개인정보가 있는 Word 원본·개별 US 제출 문서는 공개하지 않는다.
 
 양식 6 설계·PC 실험 근거와 이후 실제 Android 연결 검증은 [Sprint 0 이슈](https://github.com/HyunKN/visual-travel-guide/issues/21)에서 추적한다. 설계·조사 완료와 도구 설치·앱 빌드·실기기 검증을 구분하며, 다음 행동·실행 증거는 해당 이슈에서 갱신한다.
 
@@ -75,6 +84,8 @@
 | 문서 열람과 진행 상황 탐색 | Wiki: 원본 문서의 게시본과 Issue·PR 링크 |
 
 진행 상태를 별도의 TODO 문서에 복제하지 않는다. 문서의 기준을 바꾸는 결정은 해당 원본에 반영하고, 배경 Issue·PR이 있으면 연결한다.
+
+2026-11-02 사용자 요청으로 [Sprint·WBS 현황판](operations/SPRINT_PROGRESS.html)을 추가했다. 새 백로그나 독립 WBS 번호를 만드는 대신 기존 계획과 Issue/PR·PR 전 검증 기록을 한 화면에 보여주는 로컬 스냅샷으로 사용한다. 2026-11-04부터 개발현황 채팅에서 개발 스레드 1·2의 최신 기록과 실제 저장소·검증 근거를 대조해 같은 파일의 `progress-data`에 확인일·Task 상태·AC 결과·근거를 갱신한다. 스레드의 설계 결정과 구현·실행 검증을 구분하며 기존 AC와 최신 결정의 차이는 정합성 검토 대상으로 표시한다. 부분 작업에 임의의 완료 퍼센트를 주거나 초기 추정을 실제 잔여 시간으로 바꾸지 않는다. 원격 Issue와 로컬 결과가 다르면 함께 표시하며, 자동 동기화·주기 실행을 구성했다는 뜻이 아니다. 원격 갱신·계획 변경은 기존 운영 규칙과 사용자의 요청 범위를 따른다.
 
 ## Wiki 게시
 
