@@ -1,0 +1,283 @@
+{
+  "date": "2026-11-06",
+  "scope": "Local HTML only; not Android or user-study evidence",
+  "browser": "149.0.7827.55",
+  "sources": {
+    "index.html": "8d4e5de1e21ce44c72622697ed831379ba62c560e11ec6980eefae4673204410",
+    "reference.css": "c0d2c63b35004c29a59e1863b1a6db1405d2caa05e5466403f58c8a79a5ae263",
+    "reference.js": "fb02ffec1a8a3d292456be84b50a1dd95d6f406b488abe683a4f3b05ff3dfe02"
+  },
+  "checks": [
+    "Home-to-scene retains home return target",
+    "Reader hides other scene actions",
+    "Fixture recommendation toggles and reverses",
+    "Reader keyboard trap, Escape and focus restoration",
+    "Real DOM photo/anchor alignment within 1 CSS px in contain",
+    "Detail-to-scene retains detail return target",
+    "Draft text retained across document navigation; mock save only",
+    "Decode error retains prior photo",
+    "Clear hides preview without deleting source",
+    "Six phone frames: 360/390/430 at 100/200 percent, no horizontal overflow",
+    "Composer completion action stays inside phone at 200 percent",
+    "Long note scrolls while close and footer controls stay visible",
+    "Reduced-transparency preview is opaque without blur",
+    "Reference document itself reflows at 360px browser viewport",
+    "No JavaScript errors or HTTP requests during checks"
+  ],
+  "layouts": [
+    {
+      "width": "360",
+      "large": false,
+      "measure": [
+        {
+          "id": "home",
+          "width": 358,
+          "scrollWidth": 358,
+          "innerOverflow": 0
+        },
+        {
+          "id": "detail",
+          "width": 358,
+          "scrollWidth": 358,
+          "innerOverflow": 0
+        },
+        {
+          "id": "scene",
+          "width": 358,
+          "scrollWidth": 358,
+          "innerOverflow": 0
+        },
+        {
+          "id": "compose",
+          "width": 358,
+          "scrollWidth": 358,
+          "innerOverflow": 0
+        },
+        {
+          "id": "photo",
+          "width": 358,
+          "scrollWidth": 358,
+          "innerOverflow": 0
+        },
+        {
+          "id": "notes",
+          "width": 358,
+          "scrollWidth": 358,
+          "innerOverflow": 0
+        }
+      ]
+    },
+    {
+      "width": "360",
+      "large": true,
+      "measure": [
+        {
+          "id": "home",
+          "width": 358,
+          "scrollWidth": 358,
+          "innerOverflow": 0
+        },
+        {
+          "id": "detail",
+          "width": 358,
+          "scrollWidth": 358,
+          "innerOverflow": 0
+        },
+        {
+          "id": "scene",
+          "width": 358,
+          "scrollWidth": 358,
+          "innerOverflow": 0
+        },
+        {
+          "id": "compose",
+          "width": 358,
+          "scrollWidth": 358,
+          "innerOverflow": 0
+        },
+        {
+          "id": "photo",
+          "width": 358,
+          "scrollWidth": 358,
+          "innerOverflow": 0
+        },
+        {
+          "id": "notes",
+          "width": 358,
+          "scrollWidth": 358,
+          "innerOverflow": 0
+        }
+      ]
+    },
+    {
+      "width": "390",
+      "large": false,
+      "measure": [
+        {
+          "id": "home",
+          "width": 388,
+          "scrollWidth": 388,
+          "innerOverflow": 0
+        },
+        {
+          "id": "detail",
+          "width": 388,
+          "scrollWidth": 388,
+          "innerOverflow": 0
+        },
+        {
+          "id": "scene",
+          "width": 388,
+          "scrollWidth": 388,
+          "innerOverflow": 0
+        },
+        {
+          "id": "compose",
+          "width": 388,
+          "scrollWidth": 388,
+          "innerOverflow": 0
+        },
+        {
+          "id": "photo",
+          "width": 388,
+          "scrollWidth": 388,
+          "innerOverflow": 0
+        },
+        {
+          "id": "notes",
+          "width": 388,
+          "scrollWidth": 388,
+          "innerOverflow": 0
+        }
+      ]
+    },
+    {
+      "width": "390",
+      "large": true,
+      "measure": [
+        {
+          "id": "home",
+          "width": 388,
+          "scrollWidth": 388,
+          "innerOverflow": 0
+        },
+        {
+          "id": "detail",
+          "width": 388,
+          "scrollWidth": 388,
+          "innerOverflow": 0
+        },
+        {
+          "id": "scene",
+          "width": 388,
+          "scrollWidth": 388,
+          "innerOverflow": 0
+        },
+        {
+          "id": "compose",
+          "width": 388,
+          "scrollWidth": 388,
+          "innerOverflow": 0
+        },
+        {
+          "id": "photo",
+          "width": 388,
+          "scrollWidth": 388,
+          "innerOverflow": 0
+        },
+        {
+          "id": "notes",
+          "width": 388,
+          "scrollWidth": 388,
+          "innerOverflow": 0
+        }
+      ]
+    },
+    {
+      "width": "430",
+      "large": false,
+      "measure": [
+        {
+          "id": "home",
+          "width": 428,
+          "scrollWidth": 428,
+          "innerOverflow": 0
+        },
+        {
+          "id": "detail",
+          "width": 428,
+          "scrollWidth": 428,
+          "innerOverflow": 0
+        },
+        {
+          "id": "scene",
+          "width": 428,
+          "scrollWidth": 428,
+          "innerOverflow": 0
+        },
+        {
+          "id": "compose",
+          "width": 428,
+          "scrollWidth": 428,
+          "innerOverflow": 0
+        },
+        {
+          "id": "photo",
+          "width": 428,
+          "scrollWidth": 428,
+          "innerOverflow": 0
+        },
+        {
+          "id": "notes",
+          "width": 428,
+          "scrollWidth": 428,
+          "innerOverflow": 0
+        }
+      ]
+    },
+    {
+      "width": "430",
+      "large": true,
+      "measure": [
+        {
+          "id": "home",
+          "width": 428,
+          "scrollWidth": 428,
+          "innerOverflow": 0
+        },
+        {
+          "id": "detail",
+          "width": 428,
+          "scrollWidth": 428,
+          "innerOverflow": 0
+        },
+        {
+          "id": "scene",
+          "width": 428,
+          "scrollWidth": 428,
+          "innerOverflow": 0
+        },
+        {
+          "id": "compose",
+          "width": 428,
+          "scrollWidth": 428,
+          "innerOverflow": 0
+        },
+        {
+          "id": "photo",
+          "width": 428,
+          "scrollWidth": 428,
+          "innerOverflow": 0
+        },
+        {
+          "id": "notes",
+          "width": 428,
+          "scrollWidth": 428,
+          "innerOverflow": 0
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "network": []
+}

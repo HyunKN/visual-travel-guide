@@ -4,6 +4,8 @@
 
 ## 현재 상태
 
+- 2026-11-06 [App UI 구성 레퍼런스](design/APP_UI_REFERENCE.md), [여섯 화면 HTML](design/app-ui-reference/index.html), [캡처·수정 전후 보고서](design/app-ui-reference/review.html)에 구조·화면 검토와 15개 HTML 검사 결과를 보존했다. 실제 앱의 최종 UI·사용자 승인·기업 앱보다 우수하다는 검증 결과와 구분하며 [#36](https://github.com/HyunKN/visual-travel-guide/issues/36)에 연결한다.
+
 - 2026-11-04 [공통 장소 메시지 구현 설계](design/PLACE_MESSAGES.md)는 리뷰 목록 대신 장소 사진 위 흔적을 발견하는 사용자 방향을 다룬다. [치수·상태 도면](design/place-messages/layout.html), TypeScript 좌표·타입 참고 코드와 검증 결과를 포함한다. 코드의 수학적 확인과 Android UI·실제 공유 검증은 구분한다.
 
 - 2026-10-29: 사용자가 기본 탐색과 기록·흔적 경험을 Sprint 1 안에 연결하도록 요청했다. [Sprint 1 범위·일정 조정안](experiments/sprint1-scope-replan.md)은 잔여 66시간의 산정 가정, 기능 재배치, 위험 판단일, 완료 조건을 담는다. 기존 백로그·양식 6의 변경 검토이며 최종 추정·구현·공유 서비스 선정 완료를 뜻하지 않는다.
