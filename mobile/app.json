@@ -25,7 +25,12 @@
     },
     "plugins": [
       "expo-router",
-      "expo-font"
+      "expo-font",
+      ["expo-image-picker", {
+        "cameraPermission": "사진을 촬영하려면 카메라 접근이 필요해요.",
+        "photosPermission": "선택한 사진을 가져와요.",
+        "microphonePermission": false
+      }]
     ]
   }
 }

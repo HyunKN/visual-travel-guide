@@ -1,4 +1,21 @@
-# Android 최소 앱 검증
+# Android 앱 개발 검증
+
+## 2026-11-05 장소 설명·사진 입력 (#28·#29)
+
+범위: [#28](https://github.com/HyunKN/visual-travel-guide/issues/28) 직접 선택·설명·복귀와 [#29](https://github.com/HyunKN/visual-travel-guide/issues/29) 사진 입력. 진행 원본은 해당 Issue이며 이 기록은 검사 시점의 근거다. Story·Sprint 완료 SP, 사용자 가치, 모델 인식 성능의 증거가 아니다.
+
+- 콘텐츠 조회 `npm run test:content` 6/6, 사진 상태 `npm run test:photo` 8/8, `npm run typecheck`, `npm run lint`, `npm run check:dependencies` 통과. SDK 57.0.31·RN 0.86.3에 `expo-image-picker ~57.0.20`을 SDK 호환 설치 명령으로 추가했다. 사진 API·설정은 [SDK 57 공식 문서](https://docs.expo.dev/versions/v57.0.0/sdk/imagepicker/)와 설치된 타입/소스를 대조했다.
+- `expo prebuild --platform android --no-install`은 기존 생성 폴더를 다시 만들었다. D:의 기존 앱 build/.cxx 대상은 보존하고 동일 Junction을 복원했다. V:는 이번에 만들지 않은 기존 저장소 연결이다. C:/V:가 섞인 RN codegen의 `different roots` 오류를 두 번 재현했다. 작업 폴더만 V:로 맞추는 것으로는 해소되지 않았다.
+- RN Gradle plugin 0.86.3의 `File.cliPath`가 다른 드라이브에도 `relativeTo`를 호출하는 것을 확인해 [한정 설치 보정](scripts/fix-windows-gradle-path.cjs)을 추가했다. 같은 드라이브는 기존 상대 경로를 유지하고 다른 드라이브는 절대 경로를 사용한다. 적용과 재적용 검사를 수행했으며 이후 실제 codegen 단계와 APK 빌드를 통과했다. 생성된 Android 소스나 전역 설정을 직접 수정하지 않았다. Kotlin incremental cache도 경로 충돌을 보고했지만 빌드 도구의 non-daemon fallback으로 컴파일됐다. 무경고 빌드나 완전한 경로 문제 해결을 뜻하지 않는다.
+- V: 작업 경로·D: SDK/Gradle, x86_64 `:app:assembleDebug --max-workers=2` 성공: 19m 28s, 455 tasks 중 425 executed / 30 up-to-date. 캐시를 재사용한 개발 빌드다. APK 90,058,037 bytes, SHA-256 `98d118a362a00de655d433617e66e96fdd2963a821e0e0f5c75a18b91a58968a`, package `com.visualtravelguide.app`, ABI x86_64. aapt에서 CAMERA와 RECORD_AUDIO 미포함을 확인했다. `adb install -r` 성공.
+- 새 APK·Metro localhost:8083·`emulator-5554` API 36에서 세 장소 선택 → 각 장소의 첫 이야기 → 출처 → Android 뒤로가기 → 상세 스크롤 위치 유지 → 홈 스크롤 위치 유지를 모두 통과했다. 없는 장소 ID는 오류에서 지원 장소 선택으로 복귀했다. 사진의 원본 높이/크기가 화면을 넘던 문제를 수정하고 홈·상세 캡처에서 사진과 제목·본문 표시를 확인했다.
+- 원문 열기는 Chrome의 `FirstRunActivity` 진입과 Android 뒤로가기 후 앱 출처 화면·홈 복귀를 확인했다. 브라우저 초기 설정을 대신 승인하지 않았으며 원문 네트워크 로딩은 판정하지 않았다.
+- 사진 입력은 시스템 권한 거부 후 안내, 갤러리 선택 → 미리보기, 재선택 취소 → 이전 사진 유지, 가상 카메라 촬영 → Done → 앱 미리보기, 촬영 취소 → 이전 사진 유지, 선택 해제 → 재선택 → 해제 → 홈 복귀를 확인했다. 권한을 더 이상 요청할 수 없을 때 `설정 열기`가 표시됨도 확인했다. 테스트로 바꾼 CAMERA 고정 거부 플래그를 제거하고 기존 허용 상태를 복구했다.
+- 에뮬레이터의 `Pictures/VTG_QA/app29-fixture.jpg`는 이번 검사에서 넣은 근정전 공식 사진이다. 재선택·해제 후 원본 SHA-256이 `fccf05b39ca410d775ea11b00d2d53877556593d1e38c9babe792a1e94cc51bd`로 그대로임을 확인했다. 사람 확인에 쓸 수 있도록 이 테스트 사진은 남겼다. 카메라 사진은 에뮬레이터의 가상 장면이며 실제 관광지 촬영 증거가 아니다.
+- `확인 대기` 라벨을 생성·적용할 수 있음을 GitHub connector로 확인했다. 최신 Workflow에 따라 기능을 구현하고 AI 검사를 통과해도 Issue를 열린 상태로 두고 사람이 확인한 뒤 종료한다. 기능 최종 완료 수·Story SP를 자동으로 올리지 않는다.
+- 원본 근거는 Git 제외 `.codex-build/app-28-qa/`, `app-29-qa/`, `app-29-build*.log`다. 공식 사진 원본과 출처/이용 조건/해시는 `src/features/place-content/catalog.json`에 있다. 촬영일을 모르는 자료는 추정하지 않고 null로 남겼다.
+- 기존 근정전 메시지 시안 진입 → 흔적 열기 → 추천수 표시 → 닫기 → 같은 사진 복귀와 개발 실행 확인 화면의 이동·뒤로가기 회귀 검사도 통과했다. 새 입력 기능이 실제 글 저장·공유를 추가한 것은 아니다.
+- 실기기·ARM 빌드, 독립 실행 release APK, Android Activity 강제 종료 후 입력 복구의 실제 기기 검사, 모델 추론·위치·실제 글 저장/공유, 사람의 어투·흥미 비교는 미실행이다. 복구 결과 변환은 단위 검사만 통과했다. 사진 선택기에 새 모듈이 필요한 만큼 기존 APK에 JS만 갱신한 상태는 이 APK 검사의 대체가 아니다.
 
 ## 2026-11-04 앱 빌드 산출물 D: 이동
 

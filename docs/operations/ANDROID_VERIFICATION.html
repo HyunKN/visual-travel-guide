@@ -8,7 +8,23 @@
 <p>원본에 기록된 검사 결과입니다. 현재 기기 상태를 실시간으로 조회하지 않습니다.</p>
 <div class="verdict"><strong>빌드 결과와 기기 실행 결과를 구분해 기록합니다.</strong><p>아래에서 통과·실패·미실행 항목과 남은 확인을 함께 볼 수 있습니다.</p></div>
 <p class="reader-note">이 문서는 파일 자체로 열립니다. 임시 서버나 인터넷 연결 없이 검사 결과를 읽을 수 있습니다.</p></header>
-<main><h2>2026-11-04 앱 빌드 산출물 D: 이동</h2>
+<main><h2>2026-11-05 장소 설명·사진 입력 (#28·#29)</h2>
+<p>범위: <a href="https://github.com/HyunKN/visual-travel-guide/issues/28">#28</a> 직접 선택·설명·복귀와 <a href="https://github.com/HyunKN/visual-travel-guide/issues/29">#29</a> 사진 입력. 진행 원본은 해당 Issue이며 이 기록은 검사 시점의 근거다. Story·Sprint 완료 SP, 사용자 가치, 모델 인식 성능의 증거가 아니다.</p>
+<ul>
+<li>콘텐츠 조회 <code>npm run test:content</code> 6/6, 사진 상태 <code>npm run test:photo</code> 8/8, <code>npm run typecheck</code>, <code>npm run lint</code>, <code>npm run check:dependencies</code> 통과. SDK 57.0.31·RN 0.86.3에 <code>expo-image-picker ~57.0.20</code>을 SDK 호환 설치 명령으로 추가했다. 사진 API·설정은 <a href="https://docs.expo.dev/versions/v57.0.0/sdk/imagepicker/">SDK 57 공식 문서</a>와 설치된 타입/소스를 대조했다.</li>
+<li><code>expo prebuild --platform android --no-install</code>은 기존 생성 폴더를 다시 만들었다. D:의 기존 앱 build/.cxx 대상은 보존하고 동일 Junction을 복원했다. V:는 이번에 만들지 않은 기존 저장소 연결이다. C:/V:가 섞인 RN codegen의 <code>different roots</code> 오류를 두 번 재현했다. 작업 폴더만 V:로 맞추는 것으로는 해소되지 않았다.</li>
+<li>RN Gradle plugin 0.86.3의 <code>File.cliPath</code>가 다른 드라이브에도 <code>relativeTo</code>를 호출하는 것을 확인해 <span title="개발용 원본: scripts/fix-windows-gradle-path.cjs">한정 설치 보정</span>을 추가했다. 같은 드라이브는 기존 상대 경로를 유지하고 다른 드라이브는 절대 경로를 사용한다. 적용과 재적용 검사를 수행했으며 이후 실제 codegen 단계와 APK 빌드를 통과했다. 생성된 Android 소스나 전역 설정을 직접 수정하지 않았다. Kotlin incremental cache도 경로 충돌을 보고했지만 빌드 도구의 non-daemon fallback으로 컴파일됐다. 무경고 빌드나 완전한 경로 문제 해결을 뜻하지 않는다.</li>
+<li>V: 작업 경로·D: SDK/Gradle, x86_64 <code>:app:assembleDebug --max-workers=2</code> 성공: 19m 28s, 455 tasks 중 425 executed / 30 up-to-date. 캐시를 재사용한 개발 빌드다. APK 90,058,037 bytes, SHA-256 <code>98d118a362a00de655d433617e66e96fdd2963a821e0e0f5c75a18b91a58968a</code>, package <code>com.visualtravelguide.app</code>, ABI x86_64. aapt에서 CAMERA와 RECORD_AUDIO 미포함을 확인했다. <code>adb install -r</code> 성공.</li>
+<li>새 APK·Metro localhost:8083·<code>emulator-5554</code> API 36에서 세 장소 선택 → 각 장소의 첫 이야기 → 출처 → Android 뒤로가기 → 상세 스크롤 위치 유지 → 홈 스크롤 위치 유지를 모두 통과했다. 없는 장소 ID는 오류에서 지원 장소 선택으로 복귀했다. 사진의 원본 높이/크기가 화면을 넘던 문제를 수정하고 홈·상세 캡처에서 사진과 제목·본문 표시를 확인했다.</li>
+<li>원문 열기는 Chrome의 <code>FirstRunActivity</code> 진입과 Android 뒤로가기 후 앱 출처 화면·홈 복귀를 확인했다. 브라우저 초기 설정을 대신 승인하지 않았으며 원문 네트워크 로딩은 판정하지 않았다.</li>
+<li>사진 입력은 시스템 권한 거부 후 안내, 갤러리 선택 → 미리보기, 재선택 취소 → 이전 사진 유지, 가상 카메라 촬영 → Done → 앱 미리보기, 촬영 취소 → 이전 사진 유지, 선택 해제 → 재선택 → 해제 → 홈 복귀를 확인했다. 권한을 더 이상 요청할 수 없을 때 <code>설정 열기</code>가 표시됨도 확인했다. 테스트로 바꾼 CAMERA 고정 거부 플래그를 제거하고 기존 허용 상태를 복구했다.</li>
+<li>에뮬레이터의 <code>Pictures/VTG_QA/app29-fixture.jpg</code>는 이번 검사에서 넣은 근정전 공식 사진이다. 재선택·해제 후 원본 SHA-256이 <code>fccf05b39ca410d775ea11b00d2d53877556593d1e38c9babe792a1e94cc51bd</code>로 그대로임을 확인했다. 사람 확인에 쓸 수 있도록 이 테스트 사진은 남겼다. 카메라 사진은 에뮬레이터의 가상 장면이며 실제 관광지 촬영 증거가 아니다.</li>
+<li><code>확인 대기</code> 라벨을 생성·적용할 수 있음을 GitHub connector로 확인했다. 최신 Workflow에 따라 기능을 구현하고 AI 검사를 통과해도 Issue를 열린 상태로 두고 사람이 확인한 뒤 종료한다. 기능 최종 완료 수·Story SP를 자동으로 올리지 않는다.</li>
+<li>원본 근거는 Git 제외 <code>.codex-build/app-28-qa/</code>, <code>app-29-qa/</code>, <code>app-29-build*.log</code>다. 공식 사진 원본과 출처/이용 조건/해시는 <code>src/features/place-content/catalog.json</code>에 있다. 촬영일을 모르는 자료는 추정하지 않고 null로 남겼다.</li>
+<li>기존 근정전 메시지 시안 진입 → 흔적 열기 → 추천수 표시 → 닫기 → 같은 사진 복귀와 개발 실행 확인 화면의 이동·뒤로가기 회귀 검사도 통과했다. 새 입력 기능이 실제 글 저장·공유를 추가한 것은 아니다.</li>
+<li>실기기·ARM 빌드, 독립 실행 release APK, Android Activity 강제 종료 후 입력 복구의 실제 기기 검사, 모델 추론·위치·실제 글 저장/공유, 사람의 어투·흥미 비교는 미실행이다. 복구 결과 변환은 단위 검사만 통과했다. 사진 선택기에 새 모듈이 필요한 만큼 기존 APK에 JS만 갱신한 상태는 이 APK 검사의 대체가 아니다.</li>
+</ul>
+<h2>2026-11-04 앱 빌드 산출물 D: 이동</h2>
 <ul>
 <li>새 <code>mobile/android/app/build</code>(1,175,150,088 bytes, 1,008개 파일)와 <code>mobile/android/app/.cxx</code>(131,561,196 bytes, 141개 파일)를 <code>D:\Android\Projects\visual-travel-guide\app-build-rebuild-20261104</code>, <code>app-cxx-rebuild-20261104</code>에 각각 복사했다. 파일별 상대 경로·크기와 APK SHA-256을 대조한 뒤 기존 위치에 각 D: 폴더를 가리키는 NTFS Junction을 만들었다.</li>
 <li>연결 후 V: 가상 경로에서 x86_64 <code>:app:assembleDebug</code> 증분 빌드 성공(455 tasks 중 19 executed / 436 up-to-date). 에뮬레이터 <code>emulator-5554</code>의 기존 개발 앱 시작 화면과 Metro 응답을 확인했다. 새로 설치하거나 버튼을 다시 누른 검사는 아니다. 로그·UI tree: Git 제외 <code>.codex-build/android-build-d-drive-20261104.log</code>, <code>vtg-d-storage.xml</code>.</li>
@@ -232,5 +248,5 @@
 </ol>
 <h2>의존성 audit</h2>
 <p><code>npm audit --json</code>은 29건(critical 0, high 5, moderate 22, low 2)을 보고했다. high는 Expo CLI·Router와 전이 의존성 decode-uri-component/query-string/zod에 걸쳐 집계되어 있다. 중복된 의존 경로의 집계이지 29개의 독립 앱 취약점을 입증한 검사는 아니다. Router 경로의 npm 제안은 SDK 58 major 변경이어서 자동 적용하지 않았다. 원본은 <code>.codex-build/npm-audit.json</code>에 있다. 현재 검사만으로 출시 안전성을 판단하지 않으며 외부 배포 전 호환 가능한 수정 버전·실제 노출 경로를 확인한다.</p>
-</main><footer>원본: mobile/VERIFICATION.md · 이 페이지는 원본의 읽기용 변환본이며 새 검사 결과가 아닙니다.<br>원본 SHA-256: 406a9e0ad15711c54f76eb963dd704d434f0ce2376b23422b2afba58880f6a6f</footer>
+</main><footer>원본: mobile/VERIFICATION.md · 이 페이지는 원본의 읽기용 변환본이며 새 검사 결과가 아닙니다.<br>원본 SHA-256: a79ba7bba1e2c60fc1077ee8f927a7388c615b0d539de6f87c01568db423ecfd</footer>
 </body></html>

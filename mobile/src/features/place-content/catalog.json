@@ -1,0 +1,197 @@
+{
+  "version": 1,
+  "places": [
+    {
+      "id": "geunjeongjeon",
+      "name": "근정전",
+      "headline": "왕의 공식 행사가 열리던 마당",
+      "entryIds": [
+        "geunjeongjeon-1",
+        "geunjeongjeon-2",
+        "geunjeongjeon-3"
+      ],
+      "sceneId": "geunjeongjeon-front-v1",
+      "assetId": "photo-geunjeongjeon"
+    },
+    {
+      "id": "gyotaejeon",
+      "name": "교태전",
+      "headline": "왕비의 생활 공간과 뒤뜰",
+      "entryIds": [
+        "gyotaejeon-1",
+        "gyotaejeon-2",
+        "gyotaejeon-3"
+      ],
+      "sceneId": "gyotaejeon-front-v1",
+      "assetId": "photo-gyotaejeon"
+    },
+    {
+      "id": "gwanghwamun",
+      "name": "광화문",
+      "headline": "세 개의 문으로 들어가는 궁궐",
+      "entryIds": [
+        "gwanghwamun-1",
+        "gwanghwamun-2",
+        "gwanghwamun-3"
+      ],
+      "sceneId": "gwanghwamun-front-v1",
+      "assetId": "photo-gwanghwamun"
+    }
+  ],
+  "entries": [
+    {
+      "id": "geunjeongjeon-1",
+      "placeId": "geunjeongjeon",
+      "title": "왕과 신하가 마주하던 곳",
+      "body": "근정전에서는 왕의 즉위식 같은 큰 행사를 치르고 외국 사신을 맞았어요. 왕이 신하들의 인사를 받는 자리이기도 했죠. 이곳에서 무엇을 했는지 알고 보면, 건물 앞의 넓은 마당도 행사를 위한 공간으로 보이기 시작해요.",
+      "sourceIds": [
+        "royal-geunjeongjeon"
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "geunjeongjeon-2",
+      "placeId": "geunjeongjeon",
+      "title": "마당의 돌은 자리를 알려줘요",
+      "body": "가운데 길 양쪽에 선 돌 표식은 관리들이 품계에 따라 설 자리를 나타내요. 품계는 관리의 지위와 등급을 뜻해요. 같은 마당에 모였어도 서는 자리는 달랐던 셈이에요.",
+      "sourceIds": [
+        "royal-geunjeongjeon"
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "geunjeongjeon-3",
+      "placeId": "geunjeongjeon",
+      "title": "겉의 두 층과 안의 한 공간",
+      "body": "근정전은 두 단의 돌 기단 위에 서 있어요. 겉에서 보면 지붕이 두 층이지만, 내부는 위아래가 트인 하나의 공간이에요. 건물의 높이와 그 아래 기단을 함께 바라보면 모습을 더 잘 이해할 수 있어요.",
+      "sourceIds": [
+        "royal-geunjeongjeon"
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "gyotaejeon-1",
+      "placeId": "gyotaejeon",
+      "title": "큰 행사장 뒤의 생활 공간",
+      "body": "교태전은 왕비의 침전, 곧 생활하고 쉬던 공간이에요. 궁궐 한가운데에 자리한 왕비의 거처라서 중궁전이라고도 불렀어요. 근정전에서 공식 행사를 떠올렸다면, 여기서는 궁 안의 일상을 생각해볼 수 있어요.",
+      "sourceIds": [
+        "royal-gyotaejeon"
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "gyotaejeon-2",
+      "placeId": "gyotaejeon",
+      "title": "건물 뒤에는 아미산이 있어요",
+      "body": "교태전 뒤에는 왕비의 후원인 아미산이 있어요. 계단처럼 높이를 달리한 화단과 굴뚝이 어우러진 정원이에요. 육각형 굴뚝에는 오래 살고 나쁜 기운을 물리치기를 바라는 문양이 새겨져 있어요.",
+      "sourceIds": [
+        "royal-gyotaejeon"
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "gyotaejeon-3",
+      "placeId": "gyotaejeon",
+      "title": "지금의 건물은 언제 지었을까요",
+      "body": "현재의 교태전은 1995년에 복원한 건물이에요. 이전 건물은 1917년 창덕궁의 불탄 생활 공간을 다시 짓는 데 목재를 쓰기 위해 철거됐어요. 처음 세운 시기와 지금 보는 건물의 복원 시기를 구분해서 살펴보면 좋아요.",
+      "sourceIds": [
+        "royal-gyotaejeon"
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "gwanghwamun-1",
+      "placeId": "gwanghwamun",
+      "title": "같은 문으로 들어가지 않았어요",
+      "body": "광화문은 경복궁의 정문이에요. 높은 돌 기단 위에 이층 문루를 올리고, 아래에는 둥근 아치 모양의 통로를 세 개 냈어요. 가운데는 왕이, 양쪽은 왕세자와 관리들이 드나들었어요.",
+      "sourceIds": [
+        "royal-gwanghwamun"
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "gwanghwamun-2",
+      "placeId": "gwanghwamun",
+      "title": "문 위에서는 시간을 알렸어요",
+      "body": "문루 안에는 시간을 알리는 종이 있었어요. 들어가는 길을 내려다보는 건물에 시간을 알리는 역할도 있었던 거예요. 아래의 통로와 그 위 문루를 나누어 바라보면 각각의 쓰임을 떠올릴 수 있어요.",
+      "sourceIds": [
+        "royal-gwanghwamun"
+      ],
+      "reviewed": true
+    },
+    {
+      "id": "gwanghwamun-3",
+      "placeId": "gwanghwamun",
+      "title": "같은 자리에 돌아온 목조 문",
+      "body": "광화문은 일제강점기에 옮겨졌고, 한국전쟁 중 문루가 파괴됐어요. 1968년에는 콘크리트 구조로 다시 세웠다가, 2010년 원래 위치와 형태의 목조 건물로 복원했어요. 오늘 보는 모습에 이르기까지 자리가 달라지고 재료도 바뀌었어요.",
+      "sourceIds": [
+        "royal-gwanghwamun"
+      ],
+      "reviewed": true
+    }
+  ],
+  "sources": [
+    {
+      "id": "royal-geunjeongjeon",
+      "title": "근정전 공식 안내",
+      "publisher": "국가유산청 궁능유적본부",
+      "url": "https://royal.khs.go.kr/user/board/E101020000_view_storyBoard.ajax?id=20231123030313006700&siteCode=ENG",
+      "checkedAt": "2026-11-05"
+    },
+    {
+      "id": "royal-gyotaejeon",
+      "title": "교태전 공식 안내",
+      "publisher": "국가유산청 궁능유적본부",
+      "url": "https://royal.khs.go.kr/user/board/E101020000_view_storyBoard.ajax?id=20231123030313003299&siteCode=ENG",
+      "checkedAt": "2026-11-05"
+    },
+    {
+      "id": "royal-gwanghwamun",
+      "title": "광화문 공식 안내",
+      "publisher": "국가유산청 궁능유적본부",
+      "url": "https://royal.khs.go.kr/user/board/E101020000_view_storyBoard.ajax?id=20231123030313000617&siteCode=ENG",
+      "checkedAt": "2026-11-05"
+    }
+  ],
+  "assets": [
+    {
+      "id": "photo-geunjeongjeon",
+      "placeId": "geunjeongjeon",
+      "file": "geunjeongjeon.jpg",
+      "credit": "근정전 전경 · 국가유산청 궁능유적본부",
+      "sourceId": "royal-geunjeongjeon",
+      "downloadUrl": "https://royal.khs.go.kr/afile/preview/5680",
+      "license": "공공누리 제1유형",
+      "licenseUrl": "https://www.kogl.or.kr/info/licenseType1.do",
+      "sha256": "fccf05b39ca410d775ea11b00d2d53877556593d1e38c9babe792a1e94cc51bd",
+      "modification": "원본 파일 변경 없음. 화면에서만 비율을 유지하여 표시.",
+      "captureDate": null
+    },
+    {
+      "id": "photo-gyotaejeon",
+      "placeId": "gyotaejeon",
+      "file": "gyotaejeon.jpg",
+      "credit": "교태전 전경 · 국가유산청 궁능유적본부",
+      "sourceId": "royal-gyotaejeon",
+      "downloadUrl": "https://royal.khs.go.kr/afile/preview/5740",
+      "license": "공공누리 제1유형",
+      "licenseUrl": "https://www.kogl.or.kr/info/licenseType1.do",
+      "sha256": "03e95a24c650b7df74e8e2c44cadf494d6875c3f0313f03f3566a465d9b357aa",
+      "modification": "원본 파일 변경 없음. 화면에서만 비율을 유지하여 표시.",
+      "captureDate": null
+    },
+    {
+      "id": "photo-gwanghwamun",
+      "placeId": "gwanghwamun",
+      "file": "gwanghwamun.jpg",
+      "credit": "광화문 전경 · 국가유산청 궁능유적본부",
+      "sourceId": "royal-gwanghwamun",
+      "downloadUrl": "https://royal.khs.go.kr/afile/preview/5654",
+      "license": "공공누리 제1유형",
+      "licenseUrl": "https://www.kogl.or.kr/info/licenseType1.do",
+      "sha256": "df4307f18ebe6c3da9eae1f96f8628b8f100033e5829d782d96cbe38bbe45e68",
+      "modification": "원본 파일 변경 없음. 화면에서만 비율을 유지하여 표시.",
+      "captureDate": null
+    }
+  ]
+}

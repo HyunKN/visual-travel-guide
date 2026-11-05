@@ -1,0 +1,60 @@
+/* global __dirname */
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const path = require('node:path');
+const { createPlaceContent } = require(path.resolve(__dirname, '../../../../.codex-build/app-content-tests/content.js'));
+const bundled = require('./catalog.json');
+const copy = () => structuredClone(bundled);
+
+test('all three supported places have their own reviewed entries, photo credit and source', () => {
+  const api = createPlaceContent(copy());
+  assert.deepEqual(api.getStartOptions().map(option => option.kind), ['direct-selection', 'camera', 'library']);
+  assert.deepEqual(api.listBuildings().map(p => p.id), ['geunjeongjeon', 'gyotaejeon', 'gwanghwamun']);
+  for (const place of api.listBuildings()) {
+    assert.equal(api.getBuilding(place.id).status, 'ok');
+    assert.equal(api.getPhoto(place.id).placeId, place.id);
+    for (const id of place.entryIds) {
+      const entry = api.getEntry(id, place.id);
+      assert.equal(entry.status, 'ok');
+      assert.ok(entry.data.sourceIds.every(s => api.getSource(s).status === 'ok'));
+    }
+  }
+});
+test('unknown IDs and entries owned by another place never return plausible substitute content', () => {
+  const api = createPlaceContent(copy());
+  assert.equal(api.getBuilding('unknown').status, 'not-found');
+  assert.deepEqual(api.getEntry(bundled.places[0].entryIds[0], bundled.places[1].id), { status: 'error', code: 'TARGET_MISMATCH' });
+  assert.deepEqual(api.getBuilding(' '), { status: 'error', code: 'INVALID_ARGUMENT' });
+  assert.equal(api.getPhoto('unknown'), null);
+});
+test('unreviewed entries and broken source references make the place unavailable', () => {
+  for (const broken of ['review', 'source', 'body']) {
+    const data = copy();
+    if (broken === 'review') data.entries[0].reviewed = false;
+    if (broken === 'source') data.sources[0].url = 'file:///private';
+    if (broken === 'body') data.entries[0].body = '  ';
+    const api = createPlaceContent(data);
+    assert.equal(api.getBuilding('geunjeongjeon').status, 'unavailable');
+    assert.equal(api.listBuildings().length, 2);
+  }
+});
+test('missing or wrong-place photos do not substitute another place or hide valid text', () => {
+  const data = copy();
+  data.assets[0].placeId = 'gyotaejeon';
+  const api = createPlaceContent(data);
+  assert.equal(api.getPhoto('geunjeongjeon'), null);
+  assert.equal(api.getBuilding('geunjeongjeon').status, 'ok');
+});
+test('external source failure is retryable without changing the current place or entry', async () => {
+  const api = createPlaceContent(copy());
+  const before = api.getBuilding('geunjeongjeon');
+  assert.deepEqual(await api.openSource('royal-geunjeongjeon', async () => { throw new Error('no handler'); }), { status: 'error', code: 'SOURCE_OPEN_FAILED' });
+  let opened;
+  assert.deepEqual(await api.openSource('royal-geunjeongjeon', async url => { opened = url; }), { status: 'opened' });
+  assert.equal(opened, bundled.sources[0].url);
+  assert.deepEqual(api.getBuilding('geunjeongjeon'), before);
+});
+test('missing sources never invoke an external URL opener', async () => {
+  const api = createPlaceContent(copy());
+  assert.deepEqual(await api.openSource('unknown', async () => assert.fail('must not open')), { status: 'error', code: 'SOURCE_NOT_FOUND' });
+});

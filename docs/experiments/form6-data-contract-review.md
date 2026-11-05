@@ -97,6 +97,8 @@ Summary는 ID·명칭·사진 참조·소속 구역 등 목록에 필요한 값�
 
 사진 API 근거: [Expo ImagePicker](https://docs.expo.dev/versions/latest/sdk/imagepicker/)는 선택 취소와 선택 자산을 구분한다. [ImageManipulator](https://docs.expo.dev/versions/latest/sdk/imagemanipulator/)의 이미지 변환과 모델 입력 텐서 생성은 별개다. 어떤 라이브러리가 실제 RGB 배열을 생성할지는 모델 연결 실험에서 검증하며 이미지 축소 성공만으로 전처리 완료로 주장하지 않는다.
 
+2026-11-05 [App #28](https://github.com/HyunKN/visual-travel-guide/issues/28)·[#29](https://github.com/HyunKN/visual-travel-guide/issues/29) 구현 범위: 검색·전체 구역 지도를 앞당기지 않고 지원 장소 3곳을 직접 선택한다. 따라서 현재 `getStartOptions`는 `direct-selection/camera/library`만 반환한다. 조회 결과는 위 `status/data` 계약을 따른다. `PhotoInput`은 선택·취소·오류를 `kind`로 구분하고, 오류 원인을 `reason`으로 정규화한다. Activity 복구는 `getPendingResultAsync`의 사진을 재검사하며, 입력 경로를 알 수 없는 경우 `origin: unknown`으로 반환한다. 이 사진에는 현재 위치를 결합하지 않는다. `releasePhoto(photoId)`는 등록 참조만 해제하며 원본 사진을 삭제하지 않는다. 실제 화면·함수와 검사 명령은 [앱 안내](../../mobile/README.md)에 연결한다. 전체 계약과 모델 연결 완료를 뜻하지 않는다.
+
 ### 4.2 인식과 결과 출처
 
 입력: `{requestId, photoId, contentVersion, locationContext?}`. photoId는 입력 관리자에 등록된 URI/크기/origin을 참조한다. `locationContext`는 `{latitude, longitude, accuracyMeters, observedAt, relation: confirmed-current-capture}`를 만족할 때만 전달한다. 갤러리 입력은 초기에는 현재 위치를 결합하지 않는다. 카메라 사진도 오래된 좌표·부정확한 좌표를 쓰지 않으며 유효시간·정확도 기준은 위치 보정 실험 전에 정한다. 기준 미검증 동안 photo-only다.

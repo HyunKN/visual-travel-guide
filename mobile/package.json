@@ -7,6 +7,7 @@
     "expo-constants": "~57.0.22",
     "expo-dev-client": "~57.0.20",
     "expo-font": "~57.0.4",
+    "expo-image-picker": "~57.0.20",
     "expo-linking": "~57.0.13",
     "expo-router": "~57.0.29",
     "expo-status-bar": "~57.0.1",
@@ -26,11 +27,13 @@
     "typescript": "6.0.3"
   },
   "scripts": {
-    "postinstall": "node scripts/fix-windows-autolinking.cjs",
+    "postinstall": "node scripts/fix-windows-autolinking.cjs && node scripts/fix-windows-gradle-path.cjs",
     "start": "expo start --dev-client",
     "start:emulator": "node --dns-result-order=ipv4first node_modules/expo/bin/cli start --dev-client --localhost --port 8081",
     "android": "expo run:android",
     "typecheck": "tsc --noEmit",
+    "test:content": "node scripts/test-content.cjs",
+    "test:photo": "node scripts/test-photo.cjs",
     "lint": "expo lint",
     "check:dependencies": "expo install --check"
   },

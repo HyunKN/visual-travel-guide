@@ -4,11 +4,11 @@
 
 ## 이번 구현의 범위
 
-Expo SDK 57 + React Native + TypeScript의 로컬 Development Build를 준비한다. 시작 화면 → 임시 상세 화면 → Android 뒤로가기, 종료 후 재실행이 첫 확인 대상이다. 화면은 설치·이동 확인용이며 제품 UI·US-01 완료나 사용자 가치 검증을 의미하지 않는다. 사진·모델·위치·저장·Supabase 기능은 아직 연결하지 않았다.
+Expo SDK 57 + React Native + TypeScript의 로컬 Development Build다. [App 기능 지도 #27](https://github.com/HyunKN/visual-travel-guide/issues/27)에서 진행 순서와 상태를 관리한다. [#28](https://github.com/HyunKN/visual-travel-guide/issues/28)의 첫 흐름은 근정전·교태전·광화문 선택 → 이야기 → 출처 → 이전 화면 복귀다. [#29](https://github.com/HyunKN/visual-travel-guide/issues/29)는 사진 촬영·갤러리 선택과 미리보기를 맡는다. 모델 인식·위치·글 저장·실제 공유는 아직 연결하지 않았다. 기능 구현, Android 검사, 사용자 가치 검증은 구분한다.
 
 2026-11-04 읽기 시안: 개발용 시작 화면의 `근정전 메시지 시안`에서 공통 사진, 흔적 3개, 반투명 쪽지, 추천 토글을 확인할 수 있다. [메시지 설계](../docs/design/PLACE_MESSAGES.md)의 첫 시연 범위다. 글과 추천수는 화면 확인용이며 공유·작성·영구 저장은 미연결이다. 사진은 [프로토타입 자료의 동일 원본](../docs/prototype/content/assets/geunjeongjeon.jpg)으로 국가유산청 궁능유적본부, 공공누리 제1유형이다. 원본 파일은 변경하지 않고 화면에 맞춰 중앙 크롭해 표시한다.
 
-기존 AI·검색과 비교할 사용자 가치 가설은 [PRODUCT](../docs/PRODUCT.md#개발-핵심-원칙-사용자가-선택할-이유)를 따른다. 이번 환경 작업은 이후 실제 흐름의 검증을 가능하게 하는 지원 작업이므로 별도 사용자 비교는 하지 않는다.
+기존 AI·검색과 비교할 사용자 가치 가설은 [PRODUCT](../docs/PRODUCT.md#개발-핵심-원칙-사용자가-선택할-이유)를 따른다. 직접 선택·사진 입력은 같은 장소의 설명과 이후 흔적 경험을 잇기 위한 기반이다. 출처를 따라 읽는 이야기 초안과 관람 포인트를 제공하지만, 사용자가 기존 검색보다 흥미를 느끼고 실제 대상을 다시 보는지는 아직 검증하지 않았다. 사람 비교·실기기·모델 연결의 결과를 이 구현으로 대신하지 않는다.
 
 ## 설치와 실행
 
@@ -18,6 +18,8 @@ Expo SDK 57 + React Native + TypeScript의 로컬 Development Build를 준비한
 cd mobile
 npm ci
 npm run typecheck
+npm run test:content
+npm run test:photo
 npm run lint
 npm run check:dependencies
 npx expo-doctor@1.21.5
@@ -62,13 +64,27 @@ JavaScript 의존성은 실제 `mobile/node_modules`에 둔다. 전체 node_modu
 
 Windows에서 `npm ci`의 postinstall은 Expo autolinking의 `cmd /c`를 `cmd /d /c`로 수정한다. 이 PC의 machine AutoRun이 출력하는 `Active code page: 65001`이 JSON에 섞여 빌드가 실패하는 것을 재현했다. `/d`는 해당 하위 명령에서만 AutoRun을 끄며 레지스트리는 수정하지 않는다. 수정 위치는 `expo-modules-autolinking@57.0.16`의 `Os.kt`이고 [스크립트](scripts/fix-windows-autolinking.cjs)가 중복 적용과 예상 밖 원문을 검사한다. Expo 업그레이드 시 upstream 수정 여부를 대조하고 필요 없으면 스크립트를 제거한다.
 
+SDK 57 사진 선택기를 추가한 빌드에서는 Expo가 네이티브 모듈을 C: 실제 경로로 해석하고 앱 codegen을 V:로 해석해 RN Gradle plugin 0.86.3의 `File.cliPath`가 `different roots`로 실패했다. [설치 보정](scripts/fix-windows-gradle-path.cjs)은 같은 드라이브의 기존 상대 경로 처리는 유지하고, 다른 드라이브일 때만 절대 경로를 넘긴다. 버전·예상 원문을 검사하고 재적용을 허용한다. 생성된 Android 코드를 직접 수정하지 않는다. RN 업그레이드 때 upstream과 대조해 제거 여부를 검토한다. 이것은 긴 경로 제한 전체를 해결하는 변경이 아니다.
+
 ## 코드 읽는 순서
 
 1. `app.json`, `package.json`: 앱 식별자·SDK·개발 명령.
 2. `src/app/_layout.tsx`: Expo Router의 native Stack과 화면 제목.
-3. `src/app/index.tsx`: 개발용 시작 화면과 상세 진입.
+3. `src/features/place-content/PlaceScreens.tsx`: 장소 선택·설명·출처 화면. `src/app/`에서는 화면을 라우트로 내보낸다.
 4. `src/app/development-check.tsx`: 임시 상세와 뒤로가기 확인.
 5. `src/features/place-message-preview/PlaceMessagePreview.tsx`: 사진과 흔적의 좌표, 쪽지와 추천 토글을 확인하는 Android 시안.
+6. `src/features/place-content/catalog.json` → `content.ts`: 장소·설명·출처·사진의 ID 관계와 검수 여부를 확인하는 조회 함수. 없는 자료는 다른 장소로 대체하지 않는다.
+7. `src/features/photo-input/photoInput.ts` → `nativePhotoInput.ts` → `PhotoInputScreen.tsx`: 임시 사진 계약 → SDK 연결 → 미리보기 화면. 입력과 추론의 책임을 나눈다.
+
+## 콘텐츠·사진 입력 경계
+
+이야기는 국가유산청 궁능유적본부의 장소별 공식 설명을 확인해 풀어 쓴 앱 초안이다. `catalog.json`의 `reviewed`는 출처와 내용 대조를 마쳤다는 개발 검수 표식이며 사용자 어투 평가나 전문가 감수를 뜻하지 않는다. 공식 사진 3장의 출처·이용 조건·원본 해시는 같은 파일의 `assets`에 있다. 원본 파일은 변경하지 않고 화면에서 중앙 크롭한다. 공공누리 제1유형 출처는 장소 설명 하단에 표시한다. 이 자료를 모델 학습 성능의 근거로 사용하지 않는다.
+
+사진 화면은 시스템 카메라 또는 Android 사진 선택기를 연다. 갤러리 전체 접근 권한을 요청하지 않으며 영상·음성 입력, 업로드·갤러리 저장은 제공하지 않는다. `expo-image-picker` 추가 후에는 native 재생성·개발 APK 재빌드가 필요하다. Expo Go나 기존 APK의 JavaScript 갱신만으로 확인하지 않는다. [SDK 57 API](https://docs.expo.dev/versions/v57.0.0/sdk/imagepicker/)를 기준으로 구현했다.
+
+`selectPhoto`는 읽을 수 있는 사진만 새 `photoId`로 등록하며, 거부·취소·실패에서는 이전 선택을 유지한다. `releasePhoto`는 일치하는 핸들만 해제한다. 화면을 닫으면 대기 중 응답을 무시하고 선택 참조를 해제한다. 원본과 선택기가 만든 캐시 파일을 직접 지우지 않으며 캐시는 OS가 관리한다. 사진 URI는 앱 안에서만 사용하고 로그·공개 기록에 넣지 않는다. Activity 재생성 후 `getPendingResultAsync`로 얻은 사진은 원래 입력 경로를 추정하지 않고 `origin: unknown`으로 전달한다. 선택 참조는 앱 종료 후 보존을 보장하지 않는다.
+
+조회 6개 검사는 `test:content`, 사진 상태·오류·경합 8개 검사는 `test:photo`로 실행한다. 실제 시스템 카메라·사진 선택기 동작은 이 단위 검사와 별개이며 [검증 기록](VERIFICATION.md) 및 해당 Issue에 결과를 남긴다. 새 테스트는 구현을 미러링하기보다 다른 장소 혼입·이전 입력 손실·원본 삭제·늦은 응답의 위험을 확인한다.
 
 ## 다음 기능을 연결할 최소 데이터 계약
 
