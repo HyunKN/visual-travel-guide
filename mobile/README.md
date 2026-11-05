@@ -4,6 +4,8 @@
 
 ## 이번 구현의 범위
 
+현재 홈·장소 설명은 **기능 확인용 기본 UI**다. 최종 디자인을 구현·승인한 상태가 아니다. [후반 공통 UI 작업 #36](https://github.com/HyunKN/visual-travel-guide/issues/36)에서 주요 기능 연결 후 시안 검토 → 사용자 선택 → 공통 UI 적용·회귀 확인을 진행한다. 작업 경계는 [DESIGN](../docs/DESIGN.md#기능-확인용-ui와-후반-최종-ui-작업)을 따른다. 기능 확인과 디자인 승인을 분리하며, 앱·에뮬레이터·개발 서버는 사용자가 직접 실행한다.
+
 Expo SDK 57 + React Native + TypeScript의 로컬 Development Build다. [App 기능 지도 #27](https://github.com/HyunKN/visual-travel-guide/issues/27)에서 진행 순서와 상태를 관리한다. [#28](https://github.com/HyunKN/visual-travel-guide/issues/28)의 첫 흐름은 근정전·교태전·광화문 선택 → 이야기 → 출처 → 이전 화면 복귀다. [#29](https://github.com/HyunKN/visual-travel-guide/issues/29)는 사진 촬영·갤러리 선택과 미리보기를 맡는다. 모델 인식·위치·글 저장·실제 공유는 아직 연결하지 않았다. 기능 구현, Android 검사, 사용자 가치 검증은 구분한다.
 
 2026-11-04 읽기 시안: 개발용 시작 화면의 `근정전 메시지 시안`에서 공통 사진, 흔적 3개, 반투명 쪽지, 추천 토글을 확인할 수 있다. [메시지 설계](../docs/design/PLACE_MESSAGES.md)의 첫 시연 범위다. 글과 추천수는 화면 확인용이며 공유·작성·영구 저장은 미연결이다. 사진은 [프로토타입 자료의 동일 원본](../docs/prototype/content/assets/geunjeongjeon.jpg)으로 국가유산청 궁능유적본부, 공공누리 제1유형이다. 원본 파일은 변경하지 않고 화면에 맞춰 중앙 크롭해 표시한다.
