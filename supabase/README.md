@@ -20,11 +20,17 @@ npm test
 
 **개발자가 이어갈 순서:**
 
-1. 대상이 비어 있는 **개발 프로젝트**인지 대조한 후 SQL Editor 또는 migration 절차로 migrations/의 0001(place_messages) → 0002(read_snapshot) → 0003(home_preview) 순서로 각각 한 번 적용한다. 이 저장소에서 원격 적용은 수행하지 않았다. Data API에 내부 `vtg` 스키마를 추가하지 않는다. 기본 테이블은 RLS·권한으로 직접 접근을 막고 호출용 RPC만 제공한다.
+1. 대상이 비어 있는 **개발 프로젝트**인지 대조한 후 SQL Editor 또는 migration 절차로 migrations/의 0001(place_messages) → 0002(read_snapshot) → 0003(home_preview) → 0004(rate_limit_feedback) 순서로 각각 한 번 적용한다. 이 저장소에서 원격 적용은 수행하지 않았다. Data API에 내부 `vtg` 스키마를 추가하지 않는다. 기본 테이블은 RLS·권한으로 직접 접근을 막고 호출용 RPC만 제공한다.
 2. mobile의 git 제외 파일 `.env.local`에 `EXPO_PUBLIC_SUPABASE_URL`과 `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`를 본인이 설정한다. HTTPS의 기본 supabase.co 프로젝트 주소와 sb_publishable_ 키만 허용한다. 비밀 키나 세션은 넣지 않는다. SecureStore가 포함된 새 개발 APK를 직접 빌드·설치한 뒤 Metro를 직접 다시 시작해 설정을 반영한다. 작성 화면의 공개하기→소유권 한계 확인→익명 세션 저장→요청 저장/전송으로 이어진다. 세션이 유실된 기존 글에 새 익명 사용자를 자동 부여하지 않는다.
 3. 비로그인/실제 익명 사용자 A·B를 **독립 세션**으로 검사한다. A 게시 → B가 같은 장면에서 읽기 → B의 A 글 변경·철회 거부 → B 신고 → 서버 관리자 숨김 → 비로그인/B 읽기 불가. A의 철회 결과·불확실한 재시도·기기 재시작도 확인한다. 통과 증거를 이슈에 남긴 뒤 사용자 확인을 받는다.
 
 **서버 함수:** `vtg_markers`(본문 없는 페이지), `vtg_read`(한 글), `vtg_write`(게시·수정·철회), `vtg_request_status`(본인 요청 재확인), `vtg_report`(타인 글 신고). 요청값·결과 버전으로 재전송을 구분한다. 관리자 숨김은 서버에서만 하며 신고 자체가 자동 차단을 일으키지 않는다. 노출한 RPC에는 테이블 소유자 권한이 필요하므로 관리 전용 migration 역할로 적용하고 앱에 해당 권한을 주지 않는다.
+
+제한 응답: [0004](migrations/202611070004_rate_limit_feedback.sql)는 원래 write/report 함수를 내부 `vtg.write_base/report_base`로 옮기고 같은 공개 RPC에 피드백을 덧붙인다. 소유자·버전·idempotency·철회 규칙은 원본을 재사용한다. 내부 함수/계산 helper는 앱 역할에 EXECUTE를 주지 않는다. 기존 제한(5회/분·50회/일, 신고 10회/시간)의 해당 순위 이벤트가 만료되는 시각을 계산하며, 분/일 제한이 겹치면 더 늦은 시각을 쓴다. 같은 요청 재확인·중복 신고와 공개 철회는 계속 가능하다.
+
+정확한 `rate_limited` 예외만 [PostgreSQL DETAIL](https://www.postgresql.org/docs/current/plpgsql-errors-and-messages.html)로 `{"retryAt":"UTC ISO 시각"}`을 전달하고 [PostgREST](https://docs.postgrest.org/en/stable/references/errors.html)의 기존 P0001/HTTP 400 형식을 유지한다. 초 경계 뒤로 올려 너무 이른 재시도를 안내하지 않는다. 추가 요청에 따라 기준 시각은 바뀔 수 있다. 앱은 완료된 이 오류에서만 시각을 검증해 공개/신고 화면에 기기 현지 시각으로 표시한다. 구 서버·잘못된 details는 일반 제한 안내로 대체하며 임의 서버 문구를 표시하지 않는다. 5xx·통신 실패는 기존 불확실 상태를 유지한다.
+
+이 안내는 현재 시도의 `DeliveryResult.rateLimit`에만 있고 DB의 consent/job·본문·서버 version은 바꾸지 않는다. 초안·기존 공개 사본을 유지하며 자동 재전송/예약/새 요청 생성은 하지 않는다. 재진입 후 시각 안내의 보존은 보장하지 않으며, 다시 공개할 때 서버가 재판정한다. 새 공유 설정에서는 0004까지 적용하고 제한 응답·철회를 실제 프로젝트/Android에서 추가 검증한다.
 
 로컬 테스트는 PostgreSQL 권한·함수·저장만 검증한다. 실제 Supabase Auth·PostgREST·속도·남용 방지·서로 다른 Android 기기에서의 전달은 미검증이다.
 

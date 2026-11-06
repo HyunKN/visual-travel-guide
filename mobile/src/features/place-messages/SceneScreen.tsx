@@ -18,6 +18,8 @@ import { Action as Button } from '../../ui/Action';
 import { color, layout, textStyles } from '../../ui/theme';
 import { createReaderPresentation } from './presentation';
 import { useReaderMotion } from './useReaderMotion';
+import { PublicationRejected } from '../public-messages/publication';
+import { rateLimitText } from '../public-messages/feedback';
 
 type FocusTarget = React.ElementRef<typeof View> | null;
 function focus(target: FocusTarget) {
@@ -84,7 +86,7 @@ export default function SceneScreen({ sceneId, source, messageId, draftId }: { s
     if(reporting.current)return;
     reporting.current=true;setReportState({id,busy:true,message:''});
     try{await getPublicService().report(id,reason);setReportState({id,busy:false,message:'신고를 접수했어요.'});}
-    catch{setReportState({id,busy:false,message:'신고 접수를 확인하지 못했어요. 다시 시도해 주세요.'});}
+    catch(error){setReportState({id,busy:false,message:error instanceof PublicationRejected && error.rateLimit?rateLimitText(error.rateLimit,'신고'):'신고 접수를 확인하지 못했어요. 다시 시도해 주세요.'});}
     finally{reporting.current=false;}
   }
   function chooseReport(id:string){

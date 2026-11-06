@@ -1,6 +1,9 @@
 export type PublicationState='pending'|'uncertain'|'published'|'withdrawn'|'conflict'|'rejected';
 export type WritePayload={p_id:string;p_expected:number;p_scene:string;p_u:number;p_v:number;p_body:string|null;p_withdraw:boolean};
 export type PublicationJob={noteId:string;requestId:string;ownerId:string;serviceId:string;submittedRevision:number;payload:WritePayload;state:PublicationState;serverVersion:number|null;updatedAt:string};
+export type RateLimitInfo=Readonly<{reason:'rate-limited';retryAt:string|null}>;
+/** Feedback describes this attempt only; durable job/consent fields remain unchanged. */
+export type DeliveryResult=PublicationJob & {rateLimit?:RateLimitInfo};
 export interface PublicationStorage {
   getPublication(id:string):Promise<PublicationJob|null>;
   settlePublication(id:string,requestId:string,state:PublicationState,version?:number|null):Promise<void>;
@@ -13,12 +16,12 @@ export interface PublicationRemote {
 }
 /** Only a parsed server rejection can be definite. All other failures are uncertain. */
 export class PublicationRejected extends Error {
-  constructor(readonly kind:'conflict'|'rejected') { super(kind); }
+  constructor(readonly kind:'conflict'|'rejected',readonly rateLimit?:RateLimitInfo) { super(kind); }
 }
 /** No background sending: call only after explicit publication or retry action. */
 export function createPublisher(storage:PublicationStorage,remote:PublicationRemote) {
-  const running=new Map<string,Promise<PublicationJob>>();
-  async function deliver(id:string):Promise<PublicationJob> {
+  const running=new Map<string,Promise<DeliveryResult>>();
+  async function deliver(id:string):Promise<DeliveryResult> {
     const job=await storage.getPublication(id);
     if(!job) throw new Error('Missing publication');
     if(job.ownerId!==remote.ownerId || job.serviceId!==remote.serviceId) throw new Error('Wrong publication session or service');
@@ -32,7 +35,8 @@ export function createPublisher(storage:PublicationStorage,remote:PublicationRem
       if(!Number.isSafeInteger(version) || version!==job.payload.p_expected+1) throw new Error('Invalid confirmation');
     } catch(error) {
       await storage.settlePublication(id,job.requestId,error instanceof PublicationRejected ? error.kind : 'uncertain');
-      return (await storage.getPublication(id))!;
+      const settled=(await storage.getPublication(id))!;
+      return error instanceof PublicationRejected && error.kind==='rejected' && error.rateLimit ? {...settled,rateLimit:error.rateLimit} : settled;
     }
     // Local acknowledgement failure propagates. It never generates a new request.
     await storage.settlePublication(id,job.requestId,job.payload.p_withdraw?'withdrawn':'published',version);

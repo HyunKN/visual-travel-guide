@@ -10,6 +10,7 @@ import type {PublicationJob} from '../public-messages/publication';
 import {editorAction} from '../public-messages/editorAction';
 import { Action } from '../../ui/Action';
 import { color, layout, textStyles } from '../../ui/theme';
+import { rateLimitText } from '../public-messages/feedback';
 export { Action } from '../../ui/Action';
 
 export default function Editor({initial,onClose,onMove}: {initial:Draft;onClose:()=>void;onMove?: (draft:Draft)=>void}) {
@@ -57,7 +58,7 @@ export default function Editor({initial,onClose,onMove}: {initial:Draft;onClose:
         setJob(job);setJobLoaded(true);
         if(job.state==='published')onClose();
         else if(job.state==='withdrawn')setError('공개를 철회했어요. 초안은 이 기기에 남아 있어요.');
-        else setError(job.state==='uncertain'?'공개 결과를 확인하지 못했어요. 다시 확인해 주세요.':
+        else setError(job.rateLimit?rateLimitText(job.rateLimit,'공개'):job.state==='uncertain'?'공개 결과를 확인하지 못했어요. 다시 확인해 주세요.':
           job.state==='conflict'?'기존 공개 글과 상태가 달라요. 초안은 보관돼요.':'공개하지 못했어요. 초안은 보관돼요.');
       }
     } catch {

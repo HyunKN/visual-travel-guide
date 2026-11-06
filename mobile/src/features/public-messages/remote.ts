@@ -21,9 +21,19 @@ export function createPublicationRemote(ownerId:string,serviceId:string,rpc:Rpc)
 }
 // Only known SQL exceptions from a completed RPC response may use this helper.
 // Transport failures, auth expiry, 5xx and unknown responses remain uncertain.
-export function serverRejection(code:string,message:string):PublicationRejected|null {
+export function serverRejection(code:string,message:string,details?:unknown):PublicationRejected|null {
   if(code!=='P0001') return null;
   if(['request_conflict','unavailable_or_conflict','already_withdrawn'].includes(message)) return new PublicationRejected('conflict');
-  if(['invalid_body','invalid_request','rate_limited'].includes(message)) return new PublicationRejected('rejected');
+  if(message==='rate_limited') {
+    let retryAt:string|null=null;
+    try {
+      const value=typeof details==='string' && details.length<=512?JSON.parse(details):null;
+      const time=value?.retryAt;
+      if(typeof time==='string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(time)
+        && Number.isFinite(Date.parse(time)) && new Date(time).toISOString()===time)retryAt=time;
+    } catch { /* Old/malformed feedback must not become arbitrary UI text. */ }
+    return new PublicationRejected('rejected',{reason:'rate-limited',retryAt});
+  }
+  if(['invalid_body','invalid_request'].includes(message)) return new PublicationRejected('rejected');
   return null;
 }

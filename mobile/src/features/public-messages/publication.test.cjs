@@ -22,6 +22,16 @@ async function prepare(c){
 function remote(overrides={}){
   return {ownerId:'author-a',serviceId:'project-a',status:async()=>null,write:async()=>1,...overrides};
 }
+test('rate rejection returns attempt feedback while durable consent/draft stay intact and no resend occurs',async t=>{
+  const c=connect();t.after(()=>c.db.close());await c.tx(migrate);const {d,job}=await prepare(c);
+  let writes=0;const retryAt='2027-01-15T12:00:01.000Z';
+  const publisher=createPublisher(c.store,remote({write:async()=>{writes++;throw serverRejection('P0001','rate_limited',JSON.stringify({retryAt}));}}));
+  const result=await publisher.deliver(d.id);
+  assert.equal(result.state,'rejected');assert.equal(result.rateLimit.retryAt,retryAt);assert.equal(writes,1);
+  assert.equal((await c.store.getDraft(d.id,d.sceneId)).body,d.body);
+  const saved=await c.store.getPublication(d.id);assert.equal(saved.requestId,job.requestId);assert.deepEqual(saved.payload,job.payload);
+  assert.equal(saved.rateLimit,undefined);assert.equal((await publisher.deliver(d.id)).state,'rejected');assert.equal(writes,1);
+});
 test('public consent and local transaction required; v1 migration preserves notes and rolls back on failure',async t=>{
   const c=connect();t.after(()=>c.db.close());await c.tx(migrate);
   let d=await c.store.createDraft('scene-a',{u:0,v:1});

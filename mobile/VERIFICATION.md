@@ -1,5 +1,14 @@
 # Android 앱 개발 검증
 
+## 2026-11-07 공유 제한의 재시도 시각 (#34 보완)
+
+- 남은 조건 대조에서 SQL의 `rate_limited`에 재시도 시각이 없는 것을 확인했다. 기존 상세 설계 §7의 누락을 구현했으며 새 횟수 정책/제품 기능을 추가하지 않았다. 읽기 전용 프로세스 조회에서는 adb·emulator/qemu·Node 실행 항목이 없었으므로 기존 기기 실행 증거를 재사용하지 않았다.
+- migration 0004는 원래 write/report 규칙을 내부 함수로 유지하고 공개 RPC 거절에 retryAt만 추가한다. owner lock, 내부 EXECUTE 차단, 기존 데이터·replay·철회·중복 신고를 보존한다. 횟수를 초과한 이벤트 수도 고려해 해당 순위의 만료 시각을 계산한다. 분/일 조건이 겹치면 늦은 시각, 신고는 시간별 기준이다. 시간은 초 경계 뒤로 올린 UTC ISO 값이다.
+- SDK는 완료된 HTTP 400/P0001/rate_limited에서만 제한 정보를 파싱한다. 형식·달력·크기를 검증하고 그 외 details는 UI에 보내지 않는다. 5xx는 같은 본문이어도 불확실 상태다. Editor/신고는 기기 현지 재시도 시각 또는 일반 제한 안내를 표시하며, 초안·기존 공개 version·동의 snapshot을 유지한다. 안내는 이번 시도의 반환값이며 자동 재전송/예약과 SQLite schema 변경은 없다.
+- 실행: 앱 메시지/SDK 검사 68/68, 실제 PostgreSQL 엔진 정책·SQLite↔SQL 검사 4/4. SQL에서 기존 게시 후 upgrade·분/일/시간 제한·동일 요청·중복 신고·철회·기간 만료·권한을 확인했고, 앱 SQLite↔SQL의 공개 수정 제한에서 새 초안/기존 공개 본문 보존도 확인했다. 실제 SDK 합성 HTTP에서 details 전달·잘못된 피드백·5xx 구분과 요청 추가 없음 검사도 통과했다.
+- TypeScript·lint(오류/경고 0), Android JS/Hermes 컴파일(1,736 modules·30 assets), 문서/diff 검사 통과. 실제 Supabase Auth/PostgREST·원격 migration·Android 안내 표시/동작은 미실행이며 로컬 엔진/가짜 HTTP 통과가 이를 대체하지 않는다.
+- 앱·에뮬레이터·개발 HTTP 서버·새 APK 빌드/설치·새 의존성 다운로드는 실행하지 않았다. 프로젝트 준비 후 0001→0004 적용 및 A/B 직접 API·Android 제한/철회 안내를 확인한다. #34 완료 체크는 유지한다. 공개 RPC/소유권·화면 흐름 책임은 같으며 상세 SQL/반환 계약은 supabase/README에 기록해 공통 ARCHITECTURE는 수정하지 않았다.
+
 ## 2026-11-07 사진 입력·작성·쪽지 표시와 모션 (#32·36 부분 적용)
 
 - 사진 입력·공통 장면 조작·작성면에 같은 Action·토큰·글자 규칙을 확장했다. 선택 사진 읽기 실패는 현재 photoId가 일치할 때만 표시하고, 읽기/작성의 native focus 대상은 공통 버튼 내부 Pressable ref로 유지했다. UI 교체로 사진·초안·공개 선택·좌표·서버 계약을 바꾸지 않았다.

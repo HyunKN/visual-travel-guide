@@ -4,6 +4,7 @@ const {Buffer}=require('node:buffer');
 const {createSdkGateway,boundedJsonFetch}=require('../../../../.codex-build/app-message-tests/public-messages/sdkGateway.js');
 const {createAuthorSession}=require('../../../../.codex-build/app-message-tests/public-messages/session.js');
 const {PublicationRejected}=require('../../../../.codex-build/app-message-tests/public-messages/publication.js');
+const {rateLimitText}=require('../../../../.codex-build/app-message-tests/public-messages/feedback.js');
 // Deliberately fabricated tokens. No account, secret files or network are used.
 const owner='aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa';
 const token=exp=>[Buffer.from(JSON.stringify({alg:'HS256',typ:'JWT'})).toString('base64url'),
@@ -66,4 +67,25 @@ test('deadline covers body stall; already-cancelled requests never reach transpo
   const controller=new AbortController();controller.abort();
   const cancelled=boundedJsonFetch(async()=>{entered=true;return json(null);},15);
   await assert.rejects(cancelled('https://synthetic.invalid',{signal:controller.signal}));assert.equal(entered,false);
+});
+test('actual SDK forwards only completed known rate rejection; 5xx feedback is never definite',async()=>{
+  const retryAt='2027-01-15T12:00:01.000Z';let status=400,calls=0;
+  const gateway=createSdkGateway('https://synthetic.supabase.co','sb_publishable_synthetic',async()=>{
+    calls++;return json({code:'P0001',message:'rate_limited',details:JSON.stringify({retryAt})},status);
+  });
+  await assert.rejects(gateway.write('vtg_write',{}),e=>e instanceof PublicationRejected&&e.kind==='rejected'&&e.rateLimit.retryAt===retryAt);
+  assert.equal(calls,1); // No timer or automatic resend is introduced.
+  await assert.rejects(gateway.write('vtg_report',{}),e=>e.rateLimit.reason==='rate-limited');
+  status=503;await assert.rejects(gateway.write('vtg_write',{}),e=>!(e instanceof PublicationRejected));
+});
+test('old or malformed feedback cannot become arbitrary text; publish/report remain understandable',async()=>{
+  const {serverRejection}=require('../../../../.codex-build/app-message-tests/public-messages/remote.js');
+  for(const details of [undefined,null,'not-json',JSON.stringify({retryAt:'2027-02-30T12:00:00.000Z'}),JSON.stringify({retryAt:'arbitrary backend text'}),'x'.repeat(513)]){
+    const error=serverRejection('P0001','rate_limited',details);
+    assert.equal(error.kind,'rejected');assert.equal(error.rateLimit.retryAt,null);
+    assert.equal(rateLimitText(error.rateLimit,'공개'),'공개 요청이 많아요. 잠시 후 다시 시도해주세요.');
+  }
+  const info={reason:'rate-limited',retryAt:'2027-01-15T12:00:01.000Z'};
+  assert.match(rateLimitText(info,'신고'),/^신고 요청이 많아요\..*1월.*다시 시도해주세요\.$/);
+  assert.equal(serverRejection('P0001','unrecognized',JSON.stringify(info)),null);
 });

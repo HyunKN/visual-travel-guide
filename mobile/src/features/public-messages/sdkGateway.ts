@@ -45,7 +45,7 @@ export function createSdkGateway(url:string,key:string,transport:typeof fetch=fe
     },
     async write(name:string,args:Record<string,unknown>){
       const {data,error,status}=await client.rpc(name,args);
-      if(error)throw (status===400?serverRejection(error.code,error.message):null)??new Error('Public request failed');
+      if(error)throw (status===400?serverRejection(error.code,error.message,error.details):null)??new Error('Public request failed');
       return data;
     },
   };
