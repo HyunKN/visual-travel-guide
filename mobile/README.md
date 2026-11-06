@@ -134,7 +134,7 @@ SDK 57 사진 선택기를 추가한 빌드에서는 Expo가 네이티브 모듈
 6. `src/features/place-content/catalog.json` → `content.ts`: 장소·설명·출처·사진의 ID 관계와 검수 여부를 확인하는 조회 함수. 없는 자료는 다른 장소로 대체하지 않는다.
 7. `src/features/photo-input/photoInput.ts` → `nativePhotoInput.ts` → `PhotoInputScreen.tsx`: 임시 사진 계약 → SDK 연결 → 미리보기 화면. 입력과 추론의 책임을 나눈다.
 8. `src/features/local-notes/`: 저장 규칙(store), Expo SQLite 연결(device), 작성 화면(Editor).
-9. `src/features/location/`: 출처 있는 좌표·위치 판정과 지도 표시.
+9. `src/features/location/`: 좌표·거리 판정(location), 요청·취소·만료(controller), Expo 연결(nativeLocation), 지도(PalaceMap).
 10. `src/features/recognition/`: 앱 요청·취소·응답 검증과 미탑재 runtime 연결 지점.
 
 ## 콘텐츠·사진 입력 경계
@@ -146,6 +146,14 @@ SDK 57 사진 선택기를 추가한 빌드에서는 Expo가 네이티브 모듈
 `selectPhoto`는 읽을 수 있는 사진만 새 `photoId`로 등록하며, 거부·취소·실패에서는 이전 선택을 유지한다. `releasePhoto`는 일치하는 핸들만 해제한다. 화면을 닫으면 대기 중 응답을 무시하고 선택 참조를 해제한다. 원본과 선택기가 만든 캐시 파일을 직접 지우지 않으며 캐시는 OS가 관리한다. 사진 URI는 앱 안에서만 사용하고 로그·공개 기록에 넣지 않는다. Activity 재생성 후 `getPendingResultAsync`로 얻은 사진은 원래 입력 경로를 추정하지 않고 `origin: unknown`으로 전달한다. 선택 참조는 앱 종료 후 보존을 보장하지 않는다.
 
 조회 6개 검사는 `test:content`, 사진 상태·오류·경합 8개 검사는 `test:photo`로 실행한다. 실제 시스템 카메라·사진 선택기 동작은 이 단위 검사와 별개이며 [검증 기록](VERIFICATION.md) 및 해당 Issue에 결과를 남긴다. 새 테스트는 구현을 미러링하기보다 다른 장소 혼입·이전 입력 손실·원본 삭제·늦은 응답의 위험을 확인한다.
+
+## 현재 위치 연결 경계
+
+‘현재 위치 확인’을 누를 때만 foreground 권한 → 위치 서비스 확인 → 단일 위치 조회를 수행한다. 화면 이탈·백그라운드 전환·취소·15초 대기 상한은 늦은 결과 적용을 막는다. OS의 이미 시작한 단일 위치 요청을 강제로 종료한다고 보장하지 않는다. 위치 구독·백그라운드 추적·영구 저장·서버 전송은 없다.
+
+좌표 시각 60초 이내·accuracy 100m 이내일 때만 지도 표식·정확도 원·직선 거리와 가까운 순서를 제공한다. 만료 타이머와 foreground 복귀 시 재검사로 오래된 좌표를 제거한다. 거리는 출처 있는 건물 중심까지의 근사 직선 거리이며 입구·도보 경로나 방문 인증이 아니다. 거부·위치 서비스 꺼짐·오차·timeout에서도 모든 지원 장소를 직접 선택할 수 있다. 다시 묻기 불가에서는 앱 권한 설정, 위치 서비스 꺼짐에서는 기기 위치 설정을 여는 버튼을 제공한다. 설정 복귀 후 자동 권한 요청은 하지 않는다.
+
+`createLocationController`의 요청·취소·만료 검사는 기존 `npm run test:messages`에 포함된다. adapter는 [Expo 57 Location](https://docs.expo.dev/versions/v57.0.0/sdk/location/), 설정 버튼은 [RN 0.86 Linking](https://reactnative.dev/docs/0.86/linking)과 [Android 위치 설정 Intent](https://developer.android.com/reference/android/provider/Settings#ACTION_LOCATION_SOURCE_SETTINGS)를 기준으로 작성했다. 실제 권한창·설정 복귀·GPS·Google Maps 타일은 사용자 Android 확인이 필요하다. 지도 공급자 설정이 없어도 위치/직접 선택 코드는 유지하며, 지도 키는 위 설정 절차와 새 native 빌드를 따른다.
 
 ## 사진 인식 연결 경계
 

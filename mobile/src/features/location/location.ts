@@ -1,7 +1,7 @@
 export type Point={latitude:number;longitude:number};
 export type Fix=Point & {accuracy:number|null;timestamp:number};
 export function classify(fix:Fix,now:number):'good'|'invalid'|'stale'|'imprecise' {
-  if(!Number.isFinite(fix.latitude)||Math.abs(fix.latitude)>90||!Number.isFinite(fix.longitude)||Math.abs(fix.longitude)>180||!Number.isFinite(fix.timestamp)||fix.timestamp>now)return 'invalid';
+  if(!Number.isFinite(now)||now<0||!Number.isFinite(fix.latitude)||Math.abs(fix.latitude)>90||!Number.isFinite(fix.longitude)||Math.abs(fix.longitude)>180||!Number.isFinite(fix.timestamp)||fix.timestamp<0||fix.timestamp>now)return 'invalid';
   if(now-fix.timestamp>60_000)return 'stale';
   if(fix.accuracy===null||!Number.isFinite(fix.accuracy)||fix.accuracy<0||fix.accuracy>100)return 'imprecise';
   return 'good';
@@ -18,3 +18,10 @@ export const locations=[
   {placeId:'gyotaejeon',latitude:37.5799157,longitude:126.9770581,way:'279961704/8'},
   {placeId:'gwanghwamun',latitude:37.5759283,longitude:126.9768176,way:'170199440/22'},
 ];
+
+/** Distances are to sourced building centers, not entrances or walking routes. */
+export function nearbyPlaces(fix:Fix|null,now:number){
+  const usable=fix!==null&&classify(fix,now)==='good';
+  const places=locations.map(place=>({...place,distanceMeters:usable?meters(fix,place):null}));
+  return usable?places.sort((a,b)=>a.distanceMeters!-b.distanceMeters!||a.placeId.localeCompare(b.placeId)):places;
+}
