@@ -33,3 +33,5 @@ npm test
 공개 읽기: sceneMessages는 세션 없는 별도 client로 snapshot→marker/본문을 읽으며 개인 본문은 원격으로 보내지 않는다. 서버 기준 페이지와 기기 개인 글을 최대 60개씩 합치며 같은 ID는 하나만 표시한다. 공개 목록이 실패하면 개인 글과 오류 상태를 표시한다. 다른 사람의 공개 글에서 신고 이유를 고른 뒤 안전한 익명 세션으로 접수하며 서버 확인 전 성공을 표시하지 않는다. 대상 프로젝트에서 migration 0002 적용 후 공개 글이 개인 표식과 함께 나타나는지, A/B 신고·숨김·삭제/철회 후 재조회도 확인한다.
 
 홈 미리보기는 vtg_home_preview(읽기 전용 RPC)로 지원 scene의 최신 공개 글 최대 1개만 받는다. 비로그인 읽기를 사용하고 기기 개인 글은 조회하지 않는다. 설정/공개 글 없음/오류일 때 홈 미리보기는 생략한다. 실제 사용자가 글을 숨김/철회한 뒤 홈을 다시 열어 해당 미리보기가 사라지는지도 확인한다.
+
+SDK 연결부는 mobile/src/features/public-messages/sdkGateway.ts에 있다. 앱의 안전한 세션 보관은 nativeService가 담당하고 gateway는 실제 SDK Auth·공개/인증 RPC와 JSON HTTP의 deadline을 담당한다. mobile의 test:messages는 실제 SDK에 합성 HTTP 응답을 주입해 인증 헤더 분리·갱신·본문 전송 정지·빈 응답·서버 오류 구분을 검사한다. 이는 실제 원격 서비스 검사와 별개다.
