@@ -25,8 +25,11 @@ npm run test:photo
 npm run test:messages
 npm run lint
 npm run check:dependencies
+npm run check:android-bundle
 npx expo-doctor@1.21.5
 ```
+
+`check:android-bundle`은 Android 파일 내보내기만 검사한다. Expo 57의 mockServer export 경로를 사용하므로 HTTP 포트를 열거나 앱을 실행하지 않는다. Git 제외 `.codex-build/android-bundle-check`에 Hermes 묶음/에셋을 만들고, 임시 파일은 같은 폴더 체계 안에 둔다. 환경 파일과 외부 서비스 설정을 제외한 기본 구성 검사이며 실제 기기 검증을 대신하지 않는다.
 
 Android SDK·Java와 실행 중인 Emulator 또는 USB 디버깅 기기가 필요하다. 2026-11-02 이 PC의 도구·캐시는 `D:\Android`로 이동했다. 프로젝트 소스는 C:에 유지한다. SDK는 `D:\Android\Sdk`, 가상 기기는 `D:\Android\User\avd`, Gradle/JDK는 `D:\Android\Gradle`에 있다. Android Studio는 `D:\Android\android-studio`에 있다.
 

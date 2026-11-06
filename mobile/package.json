@@ -41,7 +41,8 @@
     "test:photo": "node scripts/test-photo.cjs",
     "test:messages": "node scripts/test-messages.cjs",
     "lint": "expo lint",
-    "check:dependencies": "expo install --check"
+    "check:dependencies": "expo install --check",
+    "check:android-bundle": "node scripts/check-android-bundle.cjs"
   },
   "private": true
 }

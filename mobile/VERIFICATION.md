@@ -1,5 +1,13 @@
 # Android 앱 개발 검증
 
+## 2026-11-07 Android JS/Hermes 내보내기 (#35 준비)
+
+- native Debug APK에는 최신 JS 묶음 생성 검사가 별도로 필요하다. 설치된 Expo 57 CLI의 export→instantiateMetro에서 mockServer=true 분기를 확인했다. runServer는 해당 분기에서 listen 이전에 반환하므로 HTTP 서버/포트를 열지 않는다. 출력의 Starting Metro Bundler는 파일 내보내기 엔진 시작이며 expo start/앱 실행이 아니다.
+- Android export 성공: 1,726 modules, 30 assets, Hermes entry bytecode 4,635,928 bytes. HBC SHA-256 713dd9dff9d130c9fdc41f99b49e0c09eab40624794b38a2b77e83497a5cea5f. D:/Android/Projects/visual-travel-guide/android-export-20261107에 보관. 전체 산출물 6,993,668 bytes. 사진 3개·Router 리소스를 포함하며 앱의 Spoqa TTF는 앞서 확인한 native APK 리소스다.
+- 재현 명령 `npm run check:android-bundle` 추가. 첫 sandbox 실행은 Hermes가 AppContainer 임시 경로의 hbc에 쓰지 못해 실패했다. 자식 프로세스 TEMP/TMP를 Git 제외 .codex-build/android-bundle-temp로 지정해 재실행 성공했다. 기본 출력은 .codex-build/android-bundle-check. 스크립트 lint·diff 검사 통과.
+- 위 해시는 D:에 생성한 실행 산출물의 식별값이다. 반복 명령의 C: 산출물과 해시는 달랐으며 바이트 단위 재현성을 통과했다고 판정하지 않았다. 두 실행의 컴파일 성공과 재현 가능한 검사 절차를 확인한 것이다.
+- 환경 파일 읽기/CLI 네트워크/telemetry를 끄고 외부 서비스 설정 없는 기준으로 컴파일했다. 실제 Supabase 연결 상태나 JavaScript를 기기에서 실행한 결과는 아니다. 앱 설치·앱/에뮬레이터/개발 HTTP 서버 시작 없음. 모델·지도 키·실서비스·사용자 검증은 남아 있다.
+
 ## 2026-11-07 새 네이티브 APK 빌드 (#35 준비)
 
 - 소스 기준 76ccf14 + Windows object path plugin. prebuild는 통과했으나 Android 생성 폴더를 다시 만들었고 app build/.cxx Junction을 복원했다. 기존 APK/캐시는 보존하고 새 대상은 D:/Android/Projects/visual-travel-guide/app-build-20261107-s1 및 app-cxx-20261107-s1이다. D:/Android/vtg는 C: 저장소를 가리키는 폴더 Junction이다. 새 드라이브 생성·소스 이동 없음.
