@@ -30,9 +30,33 @@ npx expo-doctor@1.21.5
 
 Android SDK·Java와 실행 중인 Emulator 또는 USB 디버깅 기기가 필요하다. 2026-11-02 이 PC의 도구·캐시는 `D:\Android`로 이동했다. 프로젝트 소스는 C:에 유지한다. SDK는 `D:\Android\Sdk`, 가상 기기는 `D:\Android\User\avd`, Gradle/JDK는 `D:\Android\Gradle`에 있다. Android Studio는 `D:\Android\android-studio`에 있다.
 
+### Windows 네이티브 빌드 경로
+
+2026-11-07 검사에서 `expo prebuild --platform android --no-install`도 Android 생성 폴더를 지우고 다시 만드는 것을 확인했다. 기존 native 수동 수정과 app build/.cxx Junction을 먼저 확인한다. 이번 작업은 기존 APK·캐시를 보존하고 `D:\Android\Projects\visual-travel-guide\app-build-20261107-s1`·`app-cxx-20261107-s1`에 새 출력을 둔다. `D:\Android\vtg`는 C: 저장소를 가리키는 폴더 Junction이다. 새 드라이브나 소스 이동이 아니다.
+
+Windows에서 Ninja 오브젝트 경로 260자 초과를 재현해 `plugins/withWindowsObjectPaths.cjs`를 추가했다. Expo 생성 시 app Gradle의 CMake에 `CMAKE_OBJECT_PATH_MAX=240`을 적용해 긴 경로를 해시하도록 한다. 생성 파일을 수동 편집하지 않는다. PowerShell에서는 `'-Pandroid.builder.sdkDownload=false'`처럼 점이 포함된 Gradle 인수를 인용한다. 이 옵션은 SDK 자동 설치를 막으며, `--offline`은 Gradle 라이브러리 조회도 캐시로 제한한다. 새 모듈 의존성이 캐시에 없으면 offline 빌드는 실패할 수 있다.
+
+### 이번 PC에서 준비된 APK 사용
+
+2026-11-07 x86_64 개발 APK 빌드·메타데이터 검사는 통과했다. 설치/실행은 사용자가 한다. 이미 준비된 APK를 쓸 때는 prebuild와 재빌드를 반복할 필요가 없다. Android Studio에서 에뮬레이터를 켠 후 아래 devices 출력에 device가 보일 때 설치한다. -r은 기존 기기 데이터를 지우는 명령이 아니다.
+
+```powershell
+& "D:\Android\Sdk\platform-tools\adb.exe" devices
+& "D:\Android\Sdk\platform-tools\adb.exe" install -r "D:\Android\Projects\visual-travel-guide\app-build-20261107-s1\outputs\apk\debug\app-debug.apk"
+```
+
+이 앱은 Metro가 필요한 Development Build다. 이 프로젝트의 8083 서버가 이미 켜져 있다면 다시 시작하지 않는다. 없으면 별도 PowerShell에서 다음을 직접 실행한다.
+
+```powershell
+cd C:\Users\hi\Desktop\projects_2026\visual-travel-guide\mobile
+node --dns-result-order=ipv4first node_modules/expo/bin/cli start --dev-client --localhost --port 8083
+```
+
+다른 PowerShell에서 `adb reverse tcp:8083 tcp:8083`을 실행한 뒤 에뮬레이터의 앱 아이콘을 직접 눌러 localhost:8083 서버를 선택한다. 기기 연결이 없거나 포트가 다른 서버에 사용 중이면 그 원인을 먼저 확인한다. 최신 source의 공개 기능은 Supabase 설정이 있어야 동작한다. 실제 실행·데이터 복원·디자인 검수는 아래 순서로 수행한다.
+
 ### 이번 변경을 직접 확인하기
 
-SQLite·지도 모듈과 Android 폰트를 추가했다. 이전 APK에 JS만 갱신하면 이 변경을 확인할 수 없다. Android Studio Device Manager에서 `VTG_API_36`을 직접 켠 후 저장소 루트에서 아래 순서로 진행한다. 이미 설치한 이 PC에서는 npm ci를 반복할 필요가 없다. Android 생성 폴더를 지우는 `--clean`은 사용하지 않는다. 앱 build/.cxx가 계속 D:를 가리키는지 prebuild 전후에 확인한다. 아래 명령은 이번 검증에서 실행하지 않았다.
+SQLite·지도 모듈과 Android 폰트를 추가했다. 이전 APK에 JS만 갱신하면 이 변경을 확인할 수 없다. Android Studio Device Manager에서 `VTG_API_36`을 직접 켠 후 저장소 루트에서 아래 순서로 진행한다. 이미 설치한 이 PC에서는 npm ci를 반복할 필요가 없다. `--clean`을 추가하지 않아도 생성 폴더가 재생성될 수 있으므로 기존 native 수정·Junction을 먼저 확인한다. 앱 build/.cxx가 계속 D:를 가리키는지 prebuild 전후에 확인한다. 아래 run:android 명령은 앱을 설치·실행하므로 AI는 실행하지 않았다. build-only 검사는 아래 별도 명령으로 통과했다.
 
 ```powershell
 . .\scripts\use-android-tools.ps1
@@ -48,7 +72,7 @@ adb reverse tcp:8083 tcp:8083
 npx expo run:android --device --port 8083 --no-bundler
 ```
 
-이 PC의 기존 x86_64 빌드에는 짧은 경로가 필요했던 이력이 있다. Ninja 경로 길이 오류가 나면 드라이브를 새로 만들거나 파일을 옮기지 말고 [기존 빌드 근거](VERIFICATION.md)를 확인한다. 새 빌드의 시간·여유 공간은 아직 측정하지 않았다.
+이 PC의 기존 x86_64 빌드에는 짧은 경로가 필요했던 이력이 있다. Ninja 경로 길이 오류가 나면 드라이브를 새로 만들거나 파일을 옮기지 말고 [기존 빌드 근거](VERIFICATION.md)를 확인한다. 최신 native build-only 검사와 APK 정보는 VERIFICATION의 2026-11-07 기록을 따른다.
 
 1. 홈 ‘마당의 돌은 자리를 알려줘요’ → 같은 제목의 근정전 이야기 → ‘쪽지 보기’. 처음 확대 사진과 ‘전체 사진’ 전환을 비교한다.
 2. ‘글 남기기’ → 사진을 눌러 위치 선택 → ‘글 쓰기’. 공개 범위 미선택인지 확인한다. 한글 두 줄 입력 → ‘나만 보기’ → ‘저장’. 표식을 열고 본문을 확인한다.
@@ -128,3 +152,13 @@ SDK 57 사진 선택기를 추가한 빌드에서는 Expo가 네이티브 모듈
 자동 검사와 Android 실행·뒤로가기·재실행 결과는 [VERIFICATION](VERIFICATION.md)에 기록한다. 모델 적재·실기기·정확도·공유·사용자 비교는 각각 실제 실행 증거가 필요하다.
 
 설정 근거: [Expo SDK 57](https://docs.expo.dev/versions/v57.0.0/), [Router 설치](https://docs.expo.dev/router/installation/), [로컬 개발 빌드](https://docs.expo.dev/guides/local-app-development/), [Android Emulator](https://developer.android.com/studio/run/emulator-commandline).
+
+
+최신 Windows build-only 재현(앱 설치/실행 없음): 저장소 루트에서 도구를 적용하고 D: 폴더 연결과 app build/.cxx의 기존 대상이 유효한지 확인한 후 실행한다. prebuild 직후에는 Junction을 다시 연결해야 한다.
+
+```powershell
+. .\scripts\use-android-tools.ps1
+$env:NODE_ENV = 'development'
+Set-Location D:\Android\vtg\mobile
+.\android\gradlew.bat -p android :app:assembleDebug '-PreactNativeArchitectures=x86_64' '-Pandroid.builder.sdkDownload=false' '-Pkotlin.incremental=false' '-Pkotlin.compiler.execution.strategy=in-process' --max-workers=2 --offline --console=plain
+```

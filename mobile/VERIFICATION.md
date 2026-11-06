@@ -1,5 +1,14 @@
 # Android 앱 개발 검증
 
+## 2026-11-07 새 네이티브 APK 빌드 (#35 준비)
+
+- 소스 기준 76ccf14 + Windows object path plugin. prebuild는 통과했으나 Android 생성 폴더를 다시 만들었고 app build/.cxx Junction을 복원했다. 기존 APK/캐시는 보존하고 새 대상은 D:/Android/Projects/visual-travel-guide/app-build-20261107-s1 및 app-cxx-20261107-s1이다. D:/Android/vtg는 C: 저장소를 가리키는 폴더 Junction이다. 새 드라이브 생성·소스 이동 없음.
+- 오프라인 첫 시도는 PowerShell의 점 포함 -P 인수 분리로 실패해 인용했다. 다음은 Play Services location 21.0.1 메타데이터/아카이브가 캐시에 없어 실패했다. SDK 자동 설치를 막은 채 누락 Gradle 라이브러리를 D: 캐시에 받은 빌드는 Kotlin/Java를 통과했지만 Ninja 오브젝트 상대 경로 309자로 실패했다. 로그 1~4는 .codex-build/app-sprint1-20261107-build*.log에 보존한다.
+- CMake 경로 제한 180만으로는 긴 출력 디렉터리 때문에 해시가 적용되지 않았다. Windows 전용 Expo plugin으로 CMAKE_OBJECT_PATH_MAX=240을 설정하고 더 짧은 D:/Android/vtg에서 재생성·빌드했다. 문제 오브젝트 경로가 309→169자로 줄어든 것을 build.ninja에서 확인했다. plugin 중복 적용/예상 밖 구조 차단 검사 및 JS lint 통과.
+- 최종 명령: 아래 README의 SDK 자동 설치 금지·오프라인·x86_64·최대 worker 2 명령. Kotlin incremental을 끄고 in-process로 실행해 C:/D: 캐시 fallback을 피했다. BUILD SUCCESSFUL in 9m 29s, 473 tasks(441 executed/32 up-to-date). 마지막 실행은 캐시를 재사용한 것이며 전체 준비 시간은 아니다. Java 탐지·deprecated API·Gradle 경고가 남아 무경고 빌드로 해석하지 않는다.
+- APK: mobile/android/app/build/outputs/apk/debug/app-debug.apk → D: 출력 폴더. 96,688,076 bytes, SHA-256 90db726260b3c14483394dfe169cbaac5588cddb7a52d729af1515507c3f3914. com.visualtravelguide.app / 0.1.0(1), minSdk24/target36, ABI x86_64만 포함. TTF 400/700, SQLite .so 및 SQLite/SecureStore/Location/Maps 클래스 포함 확인.
+- aapt/최종 Manifest: CAMERA와 foreground COARSE/FINE_LOCATION 포함, RECORD_AUDIO 없음, allowBackup=false. 설치·앱/에뮬레이터/Metro 실행은 하지 않았다. 이 APK는 Metro가 필요한 Development Build이며 JS 화면·모델·서버·실기기 성능·ARM 지원을 검증한 결과가 아니다.
+
 ## 2026-11-07 실제 SDK·주입 HTTP 검사 (#34)
 
 - Native 연결에서 SDK gateway를 분리하고 실제 Supabase JS 2.119.0에 HTTP 응답을 주입했다. 가짜 SDK로 대체하지 않았다. 테스트용 JWT/refresh 문자열은 합성 자료이며 실제 계정·키·환경 파일을 읽거나 네트워크를 호출하지 않았다.
