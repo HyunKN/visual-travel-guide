@@ -67,10 +67,12 @@ function build(c:NonNullable<typeof config>) {
       });
     },
     async publish(draft:Draft,withdraw=false) {
-      const previous=await deviceNotes.getPublication(draft.id);
       const bound=await deviceNotes.publicationOwner(c.url);
-      if(previous && previous.serviceId!==c.url)throw new Error('Publication service changed');
-      return author.run(previous?.ownerId??bound,!withdraw,async ownerId=>{
+      return author.run(bound,!withdraw,async ownerId=>{
+        // Read inside the serialized author operation, not before queued actions.
+        const previous=await deviceNotes.getPublication(draft.id);
+        if(previous && previous.serviceId!==c.url)throw new Error('Publication service changed');
+        if(previous && previous.ownerId!==ownerId)throw new Error('Publication author changed');
         if(previous && ['pending','uncertain'].includes(previous.state) && previous.payload.p_withdraw!==withdraw)throw new Error('Resolve previous publication first');
         const job=previous && ['pending','uncertain'].includes(previous.state)?previous:await deviceNotes.preparePublication(draft,ownerId,c.url,withdraw);
         const remote=createPublicationRemote(ownerId,c.url,async(name,args)=>{

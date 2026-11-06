@@ -6,7 +6,8 @@ import { validateBody } from '../place-messages/contract';
 import { deviceNotes } from './device';
 import type { Draft } from './store';
 import {getPublicService,publicServiceConfigured} from '../public-messages/nativeService';
-import type {PublicationState} from '../public-messages/publication';
+import type {PublicationJob} from '../public-messages/publication';
+import {editorAction} from '../public-messages/editorAction';
 
 export function Action({label,onPress,disabled=false,selected}: {label:string;onPress:()=>void;disabled?:boolean;selected?:boolean}) {
   return <Pressable accessibilityRole={selected === undefined ? 'button' : 'radio'} accessibilityState={{disabled,checked:selected}} disabled={disabled}
@@ -17,9 +18,13 @@ export default function Editor({initial,onClose,onMove}: {initial:Draft;onClose:
   const [value,setValue] = useState(initial), [busy,setBusy] = useState(false), [error,setError] = useState('');
   const last = useRef(initial), timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const lock = useRef(false), mounted = useRef(true);
-  const [publication,setPublication]=useState<PublicationState|null>(null);
-  const [withdrawal,setWithdrawal]=useState(false);
-  useEffect(()=>{let active=true;void deviceNotes.getPublication(initial.id).then(job=>{if(active){setPublication(job?.state??null);setWithdrawal(job?.payload.p_withdraw??false);}},()=>{});return ()=>{active=false;};},[initial.id]);
+  const [job,setJob]=useState<PublicationJob|null>(null),[jobLoaded,setJobLoaded]=useState(false);
+  const publication=job?.state??null;
+  async function refreshJob(){
+    const next=await deviceNotes.getPublication(initial.id);
+    if(mounted.current){setJob(next);setJobLoaded(true);}
+  }
+  useEffect(()=>{let active=true;void deviceNotes.getPublication(initial.id).then(next=>{if(active){setJob(next);setJobLoaded(true);}},()=>{if(active)setError('공개 상태를 확인하지 못했어요.');});return ()=>{active=false;};},[initial.id]);
   useEffect(() => { mounted.current = true; return () => { mounted.current = false; clearTimeout(timer.current); }; },[]);
   function change(patch: Partial<Pick<Draft,'body'|'visibility'>>) {
     if (lock.current) return;
@@ -42,6 +47,7 @@ export default function Editor({initial,onClose,onMove}: {initial:Draft;onClose:
     finally { lock.current = false; if (mounted.current) setBusy(false); }
   }
   const invalid = validateBody(value.body);
+  const action=editorAction(value,job,publicServiceConfigured,jobLoaded);
   async function publish(withdraw=false) {
     if(lock.current)return;
     lock.current=true;setBusy(true);clearTimeout(timer.current);setError('');
@@ -49,18 +55,22 @@ export default function Editor({initial,onClose,onMove}: {initial:Draft;onClose:
       await deviceNotes.saveDraft(last.current);
       const job=await getPublicService().publish(last.current,withdraw);
       if(mounted.current){
-        setPublication(job.state);
-        setWithdrawal(job.payload.p_withdraw);
+        setJob(job);setJobLoaded(true);
         if(job.state==='published')onClose();
         else if(job.state==='withdrawn')setError('공개를 철회했어요. 초안은 이 기기에 남아 있어요.');
         else setError(job.state==='uncertain'?'공개 결과를 확인하지 못했어요. 다시 확인해 주세요.':
           job.state==='conflict'?'기존 공개 글과 상태가 달라요. 초안은 보관돼요.':'공개하지 못했어요. 초안은 보관돼요.');
       }
-    } catch {if(mounted.current)setError('공개에 필요한 세션이나 저장소를 확인하지 못했어요. 초안은 유지돼요.');}
+    } catch {
+      // A request may already be durable even if its local acknowledgement failed.
+      if(mounted.current)setJobLoaded(false);
+      try{await refreshJob();}catch{/* Retry explicitly from this screen. */}
+      if(mounted.current)setError('공개에 필요한 세션이나 저장소를 확인하지 못했어요. 초안은 유지돼요.');
+    }
     finally{lock.current=false;if(mounted.current)setBusy(false);}
   }
   function confirmPublish() {
-    if(publication==='pending'||publication==='uncertain'){void publish(withdrawal);return;}
+    if(action.operation==='reconcile'){void publish(job!.payload.p_withdraw);return;}
     Alert.alert('이 글을 공개할까요?','누구나 읽을 수 있어요. 앱을 삭제하거나 세션을 잃으면 공개 글을 수정·철회할 수 없어요.',[
       {text:'취소',style:'cancel'},{text:'공개하기',onPress:()=>{void publish();}},
     ]);
@@ -77,17 +87,19 @@ export default function Editor({initial,onClose,onMove}: {initial:Draft;onClose:
         {value.visibility === 'public' && !publicServiceConfigured && <Text style={s.meta}>공개 공유는 아직 연결되지 않았어요. 초안은 이 기기에 보관돼요.</Text>}
         {publication && ['pending','uncertain'].includes(publication) && <Text style={s.meta}>앞서 공개한 내용의 결과를 확인해야 해요. 지금 수정한 초안은 전송되지 않아요.</Text>}
         {publication==='published' && <Text style={s.meta}>앞서 공개한 글이 있어요. 수정한 내용은 다시 공개하기 전까지 초안으로 남아요.</Text>}
-        {publicServiceConfigured && publication==='published' && <Action label="공개 철회" disabled={busy} onPress={()=>Alert.alert('공개 글을 철회할까요?','서버에서 철회가 확인되면 다른 사람이 읽을 수 없어요.',[
+        {value.visibility==='private' && action.canWithdraw && <Text style={s.meta}>공개 철회를 확인한 뒤 나만 보기로 저장할 수 있어요.</Text>}
+        {action.canWithdraw && <Action label="공개 철회" disabled={busy} onPress={()=>Alert.alert('공개 글을 철회할까요?','서버에서 철회가 확인되면 다른 사람이 읽을 수 없어요.',[
           {text:'취소',style:'cancel'},{text:'철회',style:'destructive',onPress:()=>{void publish(true);}},
         ])}/>}
         {invalid === 'too-large' && <Text accessibilityRole="alert" style={s.meta}>글이 너무 길어요. 내용을 줄여 주세요.</Text>}
         {error !== '' && <Text accessibilityRole="alert" style={s.meta}>{error}</Text>}
+        {!jobLoaded && <Action label="공개 상태 다시 확인" disabled={busy} onPress={()=>{void refreshJob().catch(()=>setError('공개 상태를 확인하지 못했어요.'));}} />}
       </ScrollView>
-      <View style={s.row}><Action label="초안 버리기" disabled={busy} onPress={() => Alert.alert('작성 중인 초안을 버릴까요?',undefined,[
+      <View style={s.row}><Action label="초안 버리기" disabled={busy||!action.canDiscard} onPress={() => Alert.alert('작성 중인 초안을 버릴까요?',undefined,[
         {text:'취소',style:'cancel'},{text:'버리기',style:'destructive',onPress:()=>{ void finish('discard'); }},
-      ])} /><Action label={value.visibility==='public'?(publication==='pending'||publication==='uncertain'?(withdrawal?'철회 결과 확인':'공개 결과 확인'):'공개하기'):'저장'}
-        disabled={busy || !!invalid || value.visibility===null || (value.visibility==='public'&&!publicServiceConfigured)}
-        onPress={()=>{if(value.visibility==='public')confirmPublish();else void finish('save');}} /></View>
+      ])} /><Action label={action.label}
+        disabled={busy || action.disabled}
+        onPress={()=>{if(action.operation!=='private')confirmPublish();else void finish('save');}} /></View>
     </KeyboardAvoidingView>
   </Modal>;
 }

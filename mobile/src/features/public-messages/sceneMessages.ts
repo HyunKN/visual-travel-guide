@@ -47,6 +47,7 @@ export function createSceneMessages(local:LocalScene,rpc:SceneRpc|null,now=()=>n
             (m.createdAt>c.before || (m.createdAt===c.before && m.id>=c.id!)))))throw new Error('Out-of-page public markers');
         } catch(error) {
           if(signal.aborted)throw error;
+          remote=[];
           c={...c,mode:'private',failed:true};
         }
       }

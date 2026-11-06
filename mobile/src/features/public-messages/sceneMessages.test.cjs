@@ -38,3 +38,11 @@ test('bad remote payload does not become public content; microseconds remain dis
   assert.equal(timestamp('2026-11-07T01:00:00.123Z'),'2026-11-07T01:00:00.123000Z');
   assert.notEqual(timestamp(stamp),timestamp('2026-11-07T01:00:00.123455Z'));
 });
+test('rejected duplicate or out-of-snapshot remote rows are completely discarded',async()=>{
+  for(const rows of [[row(1),row(1)],[{...row(1),created_at:'2026-11-08T00:00:00Z'}]]){
+    const source=createSceneMessages(local,async name=>name==='vtg_snapshot'?stamp:rows);
+    const page=await source.list('scene',null,signal());
+    assert.equal(page.publicStatus,'error');
+    assert.deepEqual(page.items,[]);
+  }
+});
