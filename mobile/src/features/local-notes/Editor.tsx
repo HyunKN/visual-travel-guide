@@ -9,6 +9,7 @@ import {getPublicService,publicServiceConfigured} from '../public-messages/nativ
 import type {PublicationJob} from '../public-messages/publication';
 import {editorAction} from '../public-messages/editorAction';
 import { Action } from '../../ui/Action';
+import { color, layout, textStyles } from '../../ui/theme';
 export { Action } from '../../ui/Action';
 
 export default function Editor({initial,onClose,onMove}: {initial:Draft;onClose:()=>void;onMove?: (draft:Draft)=>void}) {
@@ -77,7 +78,7 @@ export default function Editor({initial,onClose,onMove}: {initial:Draft;onClose:
     <KeyboardAvoidingView style={[s.page,{paddingTop:insets.top+8,paddingBottom:insets.bottom+8}]} behavior="height">
       <View style={s.row}><Text style={s.title} accessibilityRole="header">쪽지 쓰기</Text><Action label="닫기" disabled={busy} onPress={() => { void finish('leave'); }} /></View>
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={s.form}>
-        <TextInput multiline accessibilityLabel="쪽지 내용" placeholder="무엇을 발견했나요?" placeholderTextColor="#596776" value={value.body}
+        <TextInput multiline accessibilityLabel="쪽지 내용" placeholder="무엇을 발견했나요?" placeholderTextColor={color.secondary} value={value.body}
           editable={!busy} onChangeText={body => change({body})} textAlignVertical="top" style={s.input} />
         {onMove && <Action label="위치 변경" disabled={busy} onPress={() => { void finish('move'); }} />}
         <View accessibilityRole="radiogroup" style={s.row}><Action label="공개" selected={value.visibility==='public'} disabled={busy} onPress={() => change({visibility:'public'})} />
@@ -102,7 +103,7 @@ export default function Editor({initial,onClose,onMove}: {initial:Draft;onClose:
   </Modal>;
 }
 export const s = StyleSheet.create({
-  page:{flex:1,backgroundColor:'#FFFFFF',paddingHorizontal:20},form:{gap:16,paddingVertical:16},row:{flexDirection:'row',flexWrap:'wrap',alignItems:'center',justifyContent:'space-between',gap:8},
-  label:{color:'#243247',fontSize:16,fontWeight:'700'},title:{fontSize:22,lineHeight:32,color:'#243247',fontWeight:'700'},
-  input:{minHeight:140,fontFamily:'SpoqaHanSans',fontSize:17,lineHeight:29,color:'#243247',backgroundColor:'#F3F5F7',borderRadius:12,padding:16},meta:{fontSize:15,lineHeight:23,color:'#526071'},
+  page:{flex:1,width:'100%',maxWidth:layout.readingWidth,alignSelf:'center',backgroundColor:color.page,paddingHorizontal:layout.gutter},form:{gap:16,paddingVertical:16},row:{flexDirection:'row',flexWrap:'wrap',alignItems:'center',justifyContent:'space-between',gap:8},
+  label:textStyles.action,title:textStyles.heading,
+  input:{...textStyles.body,minHeight:140,fontFamily:'SpoqaHanSans',backgroundColor:color.subtle,borderRadius:layout.radius,padding:16},meta:textStyles.source,
 });

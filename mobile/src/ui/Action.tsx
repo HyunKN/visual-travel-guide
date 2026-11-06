@@ -1,15 +1,16 @@
-import { StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
+import type { Ref } from 'react';
+import { StyleSheet, type StyleProp, type View, type ViewStyle } from 'react-native';
 import { Text } from './Text';
 import { TapArea } from './TapArea';
 import { color, layout, textStyles } from './theme';
 
-export function Action({ label, onPress, disabled = false, busy = false, selected, variant = 'quiet', style, containerStyle }:
+export function Action({ label, onPress, disabled = false, busy = false, selected, variant = 'quiet', style, containerStyle, buttonRef }:
   { label: string; onPress: () => void; disabled?: boolean; busy?: boolean; selected?: boolean;
-    variant?: 'quiet' | 'primary' | 'soft' | 'danger'; style?: StyleProp<ViewStyle>; containerStyle?: StyleProp<ViewStyle> }) {
+    variant?: 'quiet' | 'primary' | 'soft' | 'danger'; style?: StyleProp<ViewStyle>; containerStyle?: StyleProp<ViewStyle>; buttonRef?: Ref<View> }) {
   const blocked = disabled || busy;
   return <TapArea accessibilityRole={selected === undefined ? 'button' : 'radio'}
     accessibilityState={{ disabled: blocked, ...(selected === undefined ? {} : { checked: selected }), busy }}
-    disabled={blocked} onPress={onPress} containerStyle={[styles.container, containerStyle]}
+    disabled={blocked} onPress={onPress} buttonRef={buttonRef} containerStyle={[styles.container, containerStyle]}
     style={[styles.button, variant === 'primary' && styles.primary, variant === 'soft' && styles.soft,
       selected && styles.selected, blocked && styles.disabled, style]}>
     <Text style={[textStyles.action, variant === 'primary' && styles.lightText, variant === 'danger' && styles.dangerText]}>{label}</Text>
