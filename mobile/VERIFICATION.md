@@ -1,5 +1,14 @@
 # Android 앱 개발 검증
 
+## 2026-11-07 인식 요청·취소 경계 (#30 부분 구현)
+
+- `createRequest/recognize/cancelRecognition`과 사진 화면 연결: 요청·사진·콘텐츠 ID 일치, 한 번에 한 native 작업, 30초 UI 대기 상한. 취소/시간 초과는 native 종료가 아니며 실제 Promise 종료 전 재요청은 BUSY다. 화면 이탈·백그라운드 전환·사진 교체/해제에서 적용을 무효화한다.
+- adapter 반환의 지원 장소·rank·유한 score·정렬·모델/전처리/정책 버전을 검사한다. 미검증 정책은 identified를 허용하지 않는다. photo-only이며 파일 삭제·업로드·위치 결합은 없다. 실제 adapter는 작업이 끝난 뒤에만 Promise를 완료해야 한다.
+- 실행 결과: `test:recognition` 14/14, `test:photo` 8/8, `test:content` 6/6, typecheck 및 lint(경고 0) 통과. 취소 직후 응답, 취소/timeout 후 native 잠금 유지, 늦은 성공/실패, 중복 요청, 입력·버전 교체, 잘못된 결과와 정책 보류를 가짜 runtime으로 확인했다.
+- `check:android-bundle` 통과: 1,728 modules, 30 assets, Android Hermes 묶음 생성. 컴파일 검사이며 Android에서 코드를 실행한 증거는 아니다. native dependency 변경·APK 재빌드/설치·앱/에뮬레이터/개발 HTTP 서버 실행은 하지 않았다.
+- `nativeRecognition.ts`는 runtime=null이므로 현재 제품은 MODEL_NOT_READY 안내와 직접 선택을 제공한다. 모델 artifact·실제 decode/preprocessing/inference·PC↔Android parity·기기 시간/메모리·화면 이벤트/접근성 검수는 미실행이다. #30 완료/사람 확인으로 집계하지 않는다.
+- 사용자가 실행해 확인할 최소 경로: 사진 선택 → 장소 찾기 → 미탑재 안내 → 장소 직접 선택 → 기존 이야기 화면. 실제 취소·30초 대기·확정 결과 이동은 runtime 연결 후 기기에서 추가 검증한다. 공통 설계 계약을 구현한 변경이며 ARCHITECTURE/설계 수치는 바꾸지 않았다.
+
 ## 2026-11-07 Android JS/Hermes 내보내기 (#35 준비)
 
 - native Debug APK에는 최신 JS 묶음 생성 검사가 별도로 필요하다. 설치된 Expo 57 CLI의 export→instantiateMetro에서 mockServer=true 분기를 확인했다. runServer는 해당 분기에서 listen 이전에 반환하므로 HTTP 서버/포트를 열지 않는다. 출력의 Starting Metro Bundler는 파일 내보내기 엔진 시작이며 expo start/앱 실행이 아니다.

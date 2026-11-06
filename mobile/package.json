@@ -39,6 +39,7 @@
     "typecheck": "tsc --noEmit",
     "test:content": "node scripts/test-content.cjs",
     "test:photo": "node scripts/test-photo.cjs",
+    "test:recognition": "node scripts/test-recognition.cjs",
     "test:messages": "node scripts/test-messages.cjs",
     "lint": "expo lint",
     "check:dependencies": "expo install --check",
