@@ -106,7 +106,7 @@ export default function SceneScreen({ sceneId, source, messageId, draftId }: { s
   const readingId=state.reader?.id;
   useEffect(()=>{
     if(!local || !readingId)return;
-    const timer=setInterval(()=>{if(AppState.currentState==='active')void controller.open(readingId);},30000);
+    const timer=setInterval(()=>{if(AppState.currentState==='active')void controller.open(readingId,'revalidate');},30000);
     return ()=>clearInterval(timer);
   },[local,readingId,controller]);
   const selectedAnchor = reader?.kind === 'found' ? reader.message.anchor : page?.items.find(m => m.id === reader?.id)?.anchor
@@ -218,6 +218,7 @@ export default function SceneScreen({ sceneId, source, messageId, draftId }: { s
             {reader?.kind === 'unavailable' && <Text style={s.body}>지금은 볼 수 없는 글이에요.</Text>}
             {reader?.kind === 'error' && <><Text style={s.body}>글을 불러오지 못했어요.</Text><Button label="다시 시도" onPress={() => { void controller.open(reader.id); }} /></>}
           </ScrollView>
+          {reader?.kind==='found' && reader.checking && <Text accessibilityLiveRegion="polite" style={s.meta}>글 상태를 다시 확인하고 있어요.</Text>}
           <View style={s.row}>
             {groupIds.length > 1 && <><Button label="이전 글" disabled={groupIndex <= 0} onPress={() => { void controller.open(groupIds[groupIndex - 1]); }} /><Text style={s.meta}>{groupIndex + 1}/{groupIds.length}</Text><Button label="다음 글" disabled={groupIndex < 0 || groupIndex >= groupIds.length - 1} onPress={() => { void controller.open(groupIds[groupIndex + 1]); }} /></>}
             <Button label={opaque ? '투명 배경' : '불투명 배경'} onPress={() => setOpaque(x => !x)} />

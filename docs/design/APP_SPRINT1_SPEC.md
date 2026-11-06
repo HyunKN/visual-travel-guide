@@ -82,6 +82,7 @@
 - 사진 로드 성공 전에 표식을 표시하지 않는다. 목록/본문 각각 loading/empty/ready/offline/error/unavailable을 구분한다. 새 scene·새 선택·취소 후 늦은 응답은 request generation으로 폐기한다.
 - production 기본 저장소는 실제 local/public adapter만 사용한다. 개발 fixture는 개발용 경로에서만 명시적으로 사용하며 사용자 글처럼 홈에 노출하지 않는다.
 - reader 닫힘은 fit·페이지·선택 그룹을 유지한다. 화면 크기 변경은 같은 anchor 재투영. 알 수 없는 ID·다른 scene 본문은 표시하지 않는다.
+- 이미 읽는 글의 주기적 재확인은 일반 선택과 구분한다. 대기 중 본문·열림 상태를 유지하고 확인 중임을 표시한다. 삭제/숨김 응답은 본문을 제거하고, 오류도 이전 본문을 최신처럼 유지하지 않는다. 같은 재확인의 중복 호출·닫기/이탈 후 늦은 결과는 적용하지 않는다. 최초 로딩·명시적 다른 글 선택·오류 재시도는 기존 loading 경로를 따른다.
 
 예정 함수: getScene, imageRect, project, unproject, layoutMarkers, createMessageReader(list/read/cancel), SceneScreen/MessageReader. 순수 geometry·상태 동작과 RN 렌더를 분리한다.
 

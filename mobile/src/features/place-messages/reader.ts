@@ -2,7 +2,7 @@ import { type MessagePage, type Messages, type ReadResult, validMarker, validate
 export type ReaderState = Readonly<{
   sceneId: string;
   list: { kind: 'idle' | 'loading' | 'error' } | { kind: 'ready'; page: MessagePage };
-  reader: null | { kind: 'loading' | 'error'; id: string } | ({ id: string } & ReadResult);
+  reader: null | { kind: 'loading' | 'error'; id: string } | ({ id: string; checking?: true } & ReadResult);
 }>;
 /** Network/local adapters are injected. No React, fixtures, SQL or global requests. */
 export function createMessageReader(source: Messages) {
@@ -42,18 +42,25 @@ export function createMessageReader(source: Messages) {
         if (generation === listGeneration) emit({ ...state, list: { kind: 'error' } });
       }
     },
-    async open(id: string) {
+    async open(id: string, mode: 'select' | 'revalidate' = 'select') {
+      const previous = state.reader;
+      // Periodic checks must not unmount a body being read, restart another read,
+      // or reopen a closed/unavailable/failed selection.
+      if (mode === 'revalidate' && (previous?.kind !== 'found' || previous.id !== id || previous.checking)) return;
       const generation = ++readGeneration, sceneId = state.sceneId;
       reading?.abort();
       const request = new AbortController(); reading = request;
-      emit({ ...state, reader: { kind: 'loading', id } });
+      emit({ ...state, reader: mode === 'revalidate' && previous?.kind === 'found'
+        ? { ...previous, checking: true } : { kind: 'loading', id } });
       try {
         const result = await source.read(sceneId, id, request.signal);
         if (generation !== readGeneration || sceneId !== state.sceneId) return;
         if (result.kind !== 'unavailable' && (result.kind !== 'found'
           || !validMarker(result.message, sceneId) || result.message.id !== id
           || typeof result.message.body !== 'string' || validateBody(result.message.body))) throw new Error('Invalid message');
-        emit({ ...state, reader: { ...result, id } });
+        // Checking is UI state owned here, never accepted from an adapter response.
+        emit({ ...state, reader: result.kind === 'found'
+          ? { kind: 'found', message: result.message, id } : { kind: 'unavailable', id } });
       } catch {
         if (generation === readGeneration && sceneId === state.sceneId) emit({ ...state, reader: { kind: 'error', id } });
       }

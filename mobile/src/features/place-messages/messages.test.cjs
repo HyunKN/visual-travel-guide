@@ -100,6 +100,64 @@ test('missing message, retried failure and genuinely empty list remain distinct'
   await r.load('a'); assert.equal(r.snapshot().list.kind, 'error'); fail = false; await r.load('a'); assert.equal(r.snapshot().list.kind, 'ready');
   await r.open('deleted'); assert.equal(r.snapshot().reader.kind, 'unavailable');
 });
+test('background revalidation retains current body data instead of replacing it with loading', async () => {
+  const pending=deferred(),body=message('x');let reads=0;
+  const r=createMessageReader({list:async()=>({items:[marker('x')],nextCursor:null}),
+    read:async()=>++reads===1?{kind:'found',message:body}:pending.promise});
+  await r.load('a');await r.open('x');
+  const poll=r.open('x','revalidate');
+  try{
+    assert.equal(r.snapshot().reader.kind,'found');
+    assert.equal(r.snapshot().reader.message,body);
+    assert.equal(r.snapshot().reader.checking,true);
+  }finally{pending.resolve({kind:'found',message:{...body,body:'서버에서 수정한 본문'},checking:true});await poll;}
+  assert.equal(r.snapshot().reader.kind,'found');assert.equal(r.snapshot().reader.checking,undefined);
+  assert.equal(r.snapshot().reader.message.body,'서버에서 수정한 본문');
+});
+test('periodic checks coalesce and cannot select another ID or override an explicit selection', async () => {
+  const pending=deferred();let reads=0,signal;
+  const r=createMessageReader({list:async()=>({items:[],nextCursor:null}),read:async(_,id,s)=>{
+    reads++;if(reads===2){signal=s;return pending.promise;}return {kind:'found',message:message(id)};
+  }});
+  await r.load('a');await r.open('x');const poll=r.open('x','revalidate');
+  await r.open('x','revalidate');await r.open('other','revalidate');
+  assert.equal(reads,2);assert.equal(signal.aborted,false);assert.equal(r.snapshot().reader.id,'x');
+  await r.open('next');assert.equal(signal.aborted,true);
+  pending.resolve({kind:'found',message:message('x')});await poll;
+  assert.equal(r.snapshot().reader.id,'next');r.close();await r.open('next','revalidate');
+  assert.equal(r.snapshot().reader,null);assert.equal(reads,3);
+});
+test('deleted, hidden, invalid or failed revalidation removes old body and waits for manual retry', async () => {
+  for(const result of [{kind:'unavailable'},{kind:'found',message:message('x','wrong-scene')},new Error('offline')]){
+    let reads=0;
+    const r=createMessageReader({list:async()=>({items:[],nextCursor:null}),read:async()=>{
+      reads++;if(reads===1||reads===3)return {kind:'found',message:message('x')};
+      if(result instanceof Error)throw result;return result;
+    }});
+    await r.load('a');await r.open('x');await r.open('x','revalidate');
+    assert.equal(r.snapshot().reader.kind,result.kind==='unavailable'?'unavailable':'error');
+    assert.equal(r.snapshot().reader.message,undefined);assert.equal(r.snapshot().reader.checking,undefined);
+    await r.open('x','revalidate');assert.equal(reads,2);
+    await r.open('x');assert.equal(r.snapshot().reader.kind,'found');assert.equal(reads,3);
+  }
+});
+test('revalidation preserves the open presentation token and close/scene change invalidate late responses', async () => {
+  const {createReaderPresentation}=require(path.join(built,'presentation.js'));
+  for(const leave of ['close','scene']){
+    const pending=deferred(),presentation=createReaderPresentation();let reads=0;
+    const r=createMessageReader({list:async()=>({items:[],nextCursor:null}),read:async()=>++reads===1?
+      {kind:'found',message:{...message('x'),body:'긴 본문\n'.repeat(100)}}:pending.promise});
+    const unsubscribe=r.subscribe(()=>presentation.sync(r.snapshot().reader,'top'));
+    await r.load('a');await r.open('x');presentation.finish(presentation.snapshot().token);
+    const before=presentation.snapshot(),poll=r.open('x','revalidate');
+    assert.equal(presentation.snapshot().phase,'open');assert.equal(presentation.snapshot().token,before.token);
+    assert.equal(presentation.snapshot().reader.message,before.reader.message);assert.deepEqual(presentation.snapshot().anchor,before.anchor);
+    if(leave==='close')r.close();else await r.load('other');
+    presentation.finish(presentation.snapshot().token);
+    pending.resolve({kind:'found',message:message('x')});await poll;
+    assert.equal(r.snapshot().reader,null);assert.equal(presentation.snapshot().phase,'hidden');unsubscribe();
+  }
+});
 test('UTF-8 guard matches real encoding and supports free text beyond fifty chars', () => {
   for (const s of ['한글\n본문', 'a'.repeat(16384), '🙂', '\ud800', '\udc00']) assert.equal(bodyBytes(s), Buffer.byteLength(s));
   assert.equal(validateBody('한'.repeat(60)), null);
