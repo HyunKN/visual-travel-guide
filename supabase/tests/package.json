@@ -1,0 +1,6 @@
+{
+  "name": "vtg-public-message-policy-tests",
+  "private": true,
+  "scripts": { "test": "node --test policies.test.mjs" },
+  "devDependencies": { "@electric-sql/pglite": "0.5.15" }
+}

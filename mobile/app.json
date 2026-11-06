@@ -11,6 +11,7 @@
       "supportsTablet": true
     },
     "android": {
+      "allowBackup": false,
       "package": "com.visualtravelguide.app",
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF",
@@ -25,12 +26,22 @@
     },
     "plugins": [
       "expo-router",
-      "expo-font",
-      ["expo-image-picker", {
-        "cameraPermission": "사진을 촬영하려면 카메라 접근이 필요해요.",
-        "photosPermission": "선택한 사진을 가져와요.",
-        "microphonePermission": false
-      }]
+      ["expo-font", {"android":{"fonts":[{
+        "fontFamily":"SpoqaHanSans",
+        "fontDefinitions":[
+          {"path":"./assets/fonts/SpoqaHanSansRegular.ttf","weight":400},
+          {"path":"./assets/fonts/SpoqaHanSansBold.ttf","weight":700}
+        ]
+      }]}}],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "사진을 촬영하려면 카메라 접근이 필요해요.",
+          "photosPermission": "선택한 사진을 가져와요.",
+          "microphonePermission": false
+        }
+      ],
+      "expo-sqlite"
     ]
   }
 }

@@ -1,5 +1,13 @@
 # Android 앱 개발 검증
 
+## 2026-11-07 R3 홈·공통 사진·기기 저장
+
+- [상세 설계](../docs/design/APP_SPRINT1_SPEC.md) 기준. 세 곳의 이미지 해시와 좌표, 겹침·페이지 이동, 오래된 읽기 무효화, 실제 SQLite 파일 재열기·rollback·초안 보존, 거리/위치 품질을 호스트에서 검사했다. `test:messages` 16/16, 기존 콘텐츠 6/6·사진 8/8, typecheck·lint 통과. 저장 시각이 같은 글 61개도 페이지에서 중복되거나 누락되지 않았다.
+- [공유 migration·권한 테스트](../supabase/README.md)는 별도 in-process PostgreSQL 1/1 통과. 로컬 역할로 검사했으며 실제 Supabase 세션/원격 전달/Android에서의 게시 증거가 아니다. 공개 선택 초안은 기기 안에만 남는다.
+- SQLite 57.0.4, Location 57.0.23, react-native-maps 1.27.2를 lockfile에 추가했다. Expo 앱 설정에서 Android 백업 비활성, 지도 키 미설정 상태, 신규 플러그인 목록을 검사했다. 공식 TTF 두 파일은 upstream Git blob hash를 대조했다. 새 native 빌드·폰트 렌더·Android GPS/지도 타일·기기 재실행·TalkBack/큰 글자는 미실행이다.
+- 온라인 Expo 의존성 검사는 기존 expo/constant(s)/dev-client/image-picker/router 다섯 패키지의 새 패치 권장으로 종료 코드 1. 설치된 SDK 로컬 기준의 offline check는 통과했으나 온라인 검사 대체가 아니다. 기존 Windows native 빌드 보정은 함께 바꾸지 않았다. npm 설치 시 전체 트리 audit 20건(높음 5)이 표시됐으며 이 변경으로 생긴 취약점 수로 해석하지 않는다.
+- 사용자가 직접 하는 [새 APK 검사 순서](README.md#이번-변경을-직접-확인하기)와 [이슈 지도](https://github.com/HyunKN/visual-travel-guide/issues/27)를 따른다. 이번 변경에서 AI가 Android 앱·에뮬레이터·Metro·DB 서버를 실행하지 않았다.
+
 ## 2026-11-05 장소 설명·사진 입력 (#28·#29)
 
 범위: [#28](https://github.com/HyunKN/visual-travel-guide/issues/28) 직접 선택·설명·복귀와 [#29](https://github.com/HyunKN/visual-travel-guide/issues/29) 사진 입력. 진행 원본은 해당 Issue이며 이 기록은 검사 시점의 근거다. Story·Sprint 완료 SP, 사용자 가치, 모델 인식 성능의 증거가 아니다.

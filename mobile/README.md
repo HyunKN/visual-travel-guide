@@ -4,11 +4,11 @@
 
 ## 이번 구현의 범위
 
-현재 홈·장소 설명은 **기능 확인용 기본 UI**다. 최종 디자인을 구현·승인한 상태가 아니다. [후반 공통 UI 작업 #36](https://github.com/HyunKN/visual-travel-guide/issues/36)에서 주요 기능 연결 후 시안 검토 → 사용자 선택 → 공통 UI 적용·회귀 확인을 진행한다. 작업 경계는 [DESIGN](../docs/DESIGN.md#기능-확인용-ui와-후반-최종-ui-작업)을 따른다. 기능 확인과 디자인 승인을 분리하며, 앱·에뮬레이터·개발 서버는 사용자가 직접 실행한다.
+R3 선택을 반영한 이야기 홈과 불투명한 ‘둘러보기 / 내 글’ 탭을 적용 중이다. [상세 설계](../docs/design/APP_SPRINT1_SPEC.md)와 [공통 UI #36](https://github.com/HyunKN/visual-travel-guide/issues/36)에서 화면 기준·남은 검수를 확인한다. 새 화면의 Android 시각·접근성 확인은 아직 하지 않았다. 앱·에뮬레이터·개발 서버는 사용자가 직접 실행한다.
 
-Expo SDK 57 + React Native + TypeScript의 로컬 Development Build다. [App 기능 지도 #27](https://github.com/HyunKN/visual-travel-guide/issues/27)에서 진행 순서와 상태를 관리한다. [#28](https://github.com/HyunKN/visual-travel-guide/issues/28)의 첫 흐름은 근정전·교태전·광화문 선택 → 이야기 → 출처 → 이전 화면 복귀다. [#29](https://github.com/HyunKN/visual-travel-guide/issues/29)는 사진 촬영·갤러리 선택과 미리보기를 맡는다. 모델 인식·위치·글 저장·실제 공유는 아직 연결하지 않았다. 기능 구현, Android 검사, 사용자 가치 검증은 구분한다.
+Expo SDK 57 + React Native + TypeScript의 로컬 Development Build다. [App 기능 지도 #27](https://github.com/HyunKN/visual-travel-guide/issues/27)에서 진행 순서와 상태를 관리한다. 근정전·교태전·광화문 선택 → 이야기 → 공통 사진 → 위치 선택 → 자유 글 → 기기 저장/복귀를 구현했다. 개인 촬영 사진은 보관하지 않는다. 위치는 사용자 요청 시에만 읽는다. 모델 미탑재 시 직접 선택할 수 있다.
 
-2026-11-04 읽기 시안: 개발용 시작 화면의 `근정전 메시지 시안`에서 공통 사진, 흔적 3개, 반투명 쪽지, 추천 토글을 확인할 수 있다. [메시지 설계](../docs/design/PLACE_MESSAGES.md)의 첫 시연 범위다. 글과 추천수는 화면 확인용이며 공유·작성·영구 저장은 미연결이다. 사진은 [프로토타입 자료의 동일 원본](../docs/prototype/content/assets/geunjeongjeon.jpg)으로 국가유산청 궁능유적본부, 공공누리 제1유형이다. 원본 파일은 변경하지 않고 화면에 맞춰 중앙 크롭해 표시한다.
+실제 장면은 이 기기에 저장한 글을 읽는다. 개발 빌드의 ‘쪽지 읽기 예시’만 겹친 표식·모서리 예시를 제공한다. 추천은 제외했다. 공개 선택은 초안에 보존되며 아직 전송하지 않는다. 공개용 SQL·권한 검사와 실제 서비스 연결은 [공유 설정 안내](../supabase/README.md)를 참고한다.
 
 기존 AI·검색과 비교할 사용자 가치 가설은 [PRODUCT](../docs/PRODUCT.md#개발-핵심-원칙-사용자가-선택할-이유)를 따른다. 직접 선택·사진 입력은 같은 장소의 설명과 이후 흔적 경험을 잇기 위한 기반이다. 출처를 따라 읽는 이야기 초안과 관람 포인트를 제공하지만, 사용자가 기존 검색보다 흥미를 느끼고 실제 대상을 다시 보는지는 아직 검증하지 않았다. 사람 비교·실기기·모델 연결의 결과를 이 구현으로 대신하지 않는다.
 
@@ -22,12 +22,41 @@ npm ci
 npm run typecheck
 npm run test:content
 npm run test:photo
+npm run test:messages
 npm run lint
 npm run check:dependencies
 npx expo-doctor@1.21.5
 ```
 
 Android SDK·Java와 실행 중인 Emulator 또는 USB 디버깅 기기가 필요하다. 2026-11-02 이 PC의 도구·캐시는 `D:\Android`로 이동했다. 프로젝트 소스는 C:에 유지한다. SDK는 `D:\Android\Sdk`, 가상 기기는 `D:\Android\User\avd`, Gradle/JDK는 `D:\Android\Gradle`에 있다. Android Studio는 `D:\Android\android-studio`에 있다.
+
+### 이번 변경을 직접 확인하기
+
+SQLite·지도 모듈과 Android 폰트를 추가했다. 이전 APK에 JS만 갱신하면 이 변경을 확인할 수 없다. Android Studio Device Manager에서 `VTG_API_36`을 직접 켠 후 저장소 루트에서 아래 순서로 진행한다. 이미 설치한 이 PC에서는 npm ci를 반복할 필요가 없다. Android 생성 폴더를 지우는 `--clean`은 사용하지 않는다. 앱 build/.cxx가 계속 D:를 가리키는지 prebuild 전후에 확인한다. 아래 명령은 이번 검증에서 실행하지 않았다.
+
+```powershell
+. .\scripts\use-android-tools.ps1
+Set-Location mobile
+adb devices
+# emulator-5554 device 같은 행이 보일 때 진행
+Get-Item .\android\app\build, .\android\app\.cxx | Select-Object Name, LinkType, Target
+npx expo prebuild --platform android --no-install
+Get-Item .\android\app\build, .\android\app\.cxx | Select-Object Name, LinkType, Target
+adb reverse tcp:8083 tcp:8083
+# 별도 PowerShell의 mobile 폴더에서, 이 프로젝트의 Metro가 없을 때만 실행:
+# node --dns-result-order=ipv4first node_modules/expo/bin/cli start --dev-client --localhost --port 8083
+npx expo run:android --device --port 8083 --no-bundler
+```
+
+이 PC의 기존 x86_64 빌드에는 짧은 경로가 필요했던 이력이 있다. Ninja 경로 길이 오류가 나면 드라이브를 새로 만들거나 파일을 옮기지 말고 [기존 빌드 근거](VERIFICATION.md)를 확인한다. 새 빌드의 시간·여유 공간은 아직 측정하지 않았다.
+
+1. 홈 ‘마당의 돌은 자리를 알려줘요’ → 같은 제목의 근정전 이야기 → ‘쪽지 보기’. 처음 확대 사진과 ‘전체 사진’ 전환을 비교한다.
+2. ‘글 남기기’ → 사진을 눌러 위치 선택 → ‘글 쓰기’. 공개 범위 미선택인지 확인한다. 한글 두 줄 입력 → ‘나만 보기’ → ‘저장’. 표식을 열고 본문을 확인한다.
+3. ‘내 글’에서 편집 도중 닫아 초안으로 남긴다. 앱을 종료했다 다시 열어 ‘이어 쓰기’를 확인한다. ‘초안 버리기’는 편집 전 저장한 글을 지우지 않아야 한다.
+4. ‘사진에서 보기’로 돌아가 같은 표식·본문인지 확인한다. 다른 새 글에서 ‘공개’를 선택하면 전송되지 않고 초안만 남아야 한다.
+5. ‘주변 장소’는 키 없이도 목록에서 직접 선택 가능해야 한다. 실제 지도 타일·GPS는 아래 설정 후 별도 확인한다.
+
+지도 연결(#31): 본인 Google Cloud 프로젝트에서 [Maps SDK for Android](https://developers.google.com/maps/documentation/android-sdk/get-api-key)를 활성화하고 Android 앱 패키지 `com.visualtravelguide.app`·사용하는 서명 인증서 SHA-1 및 해당 SDK로 키를 제한한다. Google Cloud 결제 연결이 필요한 경우 본인이 요금·할당량을 확인하고 결정한다. 키 값은 채팅/저장소에 넣지 않고 빌드 세션의 `VTG_ANDROID_MAPS_KEY`로 제공한 뒤 prebuild·새 Android 빌드에 반영한다. 이 변수를 쓸 때는 공개할 용도의 config 출력물을 게시하지 않는다. 개발용 좌표는 [OpenStreetMap](https://www.openstreetmap.org/copyright) 건물 도형의 경계 상자 중심이며 위치 인증이 아니다.
 
 ```powershell
 # 저장소 루트에서 현재 PowerShell 세션에 적용한다.
@@ -74,9 +103,11 @@ SDK 57 사진 선택기를 추가한 빌드에서는 Expo가 네이티브 모듈
 2. `src/app/_layout.tsx`: Expo Router의 native Stack과 화면 제목.
 3. `src/features/place-content/PlaceScreens.tsx`: 장소 선택·설명·출처 화면. `src/app/`에서는 화면을 라우트로 내보낸다.
 4. `src/app/development-check.tsx`: 임시 상세와 뒤로가기 확인.
-5. `src/features/place-message-preview/PlaceMessagePreview.tsx`: 사진과 흔적의 좌표, 쪽지와 추천 토글을 확인하는 Android 시안.
+5. `src/features/place-messages/`: 사진 좌표 변환(geometry), 요청 경합 방지(reader), 사진·쪽지 화면(SceneScreen). 개발 예시는 별도 경로다.
 6. `src/features/place-content/catalog.json` → `content.ts`: 장소·설명·출처·사진의 ID 관계와 검수 여부를 확인하는 조회 함수. 없는 자료는 다른 장소로 대체하지 않는다.
 7. `src/features/photo-input/photoInput.ts` → `nativePhotoInput.ts` → `PhotoInputScreen.tsx`: 임시 사진 계약 → SDK 연결 → 미리보기 화면. 입력과 추론의 책임을 나눈다.
+8. `src/features/local-notes/`: 저장 규칙(store), Expo SQLite 연결(device), 작성 화면(Editor).
+9. `src/features/location/`: 출처 있는 좌표·위치 판정과 지도 표시.
 
 ## 콘텐츠·사진 입력 경계
 
@@ -88,19 +119,9 @@ SDK 57 사진 선택기를 추가한 빌드에서는 Expo가 네이티브 모듈
 
 조회 6개 검사는 `test:content`, 사진 상태·오류·경합 8개 검사는 `test:photo`로 실행한다. 실제 시스템 카메라·사진 선택기 동작은 이 단위 검사와 별개이며 [검증 기록](VERIFICATION.md) 및 해당 Issue에 결과를 남긴다. 새 테스트는 구현을 미러링하기보다 다른 장소 혼입·이전 입력 손실·원본 삭제·늦은 응답의 위험을 확인한다.
 
-## 다음 기능을 연결할 최소 데이터 계약
+## 데이터 계약
 
-아래는 기존 착수 계획에서 가져온 **초기 계약 초안**이다. 이번 화면 두 개가 아래 기능을 구현했다는 뜻은 아니다. 세부 schema·저장 방식은 해당 기능을 연결할 때 검증한다.
-
-| 경계 | 계약과 지켜야 할 조건 |
-| --- | --- |
-| 장소 | `locationId`는 콘텐츠·인식 라벨·개인 기록·공개 글의 동일 장소를 연결한다. 첫 지원 대상은 근정전·교태전·광화문. 사람이 직접 고른 결과는 인식 결과와 구분한다. |
-| 입력 사진 | `photoId`, `source`(camera/gallery), 임시 로컬 URI를 갖는다. 개인 기록으로 저장할 때 영구 사본을 만들며 사용자 사진·로컬 URI는 원격 DTO에 넣지 않는다. |
-| 인식 | `requestId`·`photoId`·콘텐츠 버전이 현재 입력과 일치하는 응답만 반영한다. 상태는 identified/uncertain/cancelled/error. 재선택·취소 뒤 늦게 도착한 결과를 폐기한다. 판단 정책이 검증되기 전에는 점수를 정답 확률·확정 답으로 노출하지 않는다. |
-| 개인 기록 | `privateRecordId`·`locationId`·영구 사진 사본·감상은 비공개 로컬 저장. 실패 시 입력을 보존하며 앱 재실행 뒤 복원 여부를 검사한다. |
-| 공개 글 | `publicTraceId`·작성자·`locationId`·선택한 짧은 텍스트·공개 상태·중복 요청 ID를 사용한다. 공개 동의 기본값 false. 개인 저장과 공개 동의를 분리하고, 공개·수정·삭제 권한은 서버에서 검사한다. |
-
-50자 계산 규칙·익명 사용자 복구·판단 임계값은 아직 확정하지 않았다. 해당 기능 구현 전 정하며 이번 환경 작업에서 임의로 채우지 않는다.
+현재 계약은 [Sprint 1 상세 설계](../docs/design/APP_SPRINT1_SPEC.md) §4~8을 따른다. 사용자 사진은 장소 찾기의 임시 입력이다. 글은 불변 공통 사진 ID와 원본 기준 u/v에 연결하며 개인 사진 사본은 만들지 않는다. 초안의 공개 범위는 기본값이 없다. 16KiB 상한 안에서 본문과 줄바꿈을 보존한다. ‘공개’를 고른 초안도 서버가 확인하기 전에는 공개 글이 아니다.
 
 ## 검증
 
