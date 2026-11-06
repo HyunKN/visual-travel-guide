@@ -6,6 +6,8 @@
 
 ### 기능 확인용 UI와 후반 최종 UI 작업
 
+폰트·색상·구성 기술·동작별 모션은 [App UI 상세 사양](design/APP_UI_REFERENCE.md#61-폰트색상기술모션-상세-사양)에 연결한다. 2026-11-06 추가안은 현재 설치/적용 상태와 Android 구현 전 제안을 구분하며, Prompt Motion·사용자 제공 영상의 확인 범위와 후속 검증 조건을 포함한다.
+
 2026-11-06 후속 구성안: [App UI 레퍼런스·두 차례 설계 검토](design/APP_UI_REFERENCE.md)와 [여섯 화면 HTML](design/app-ui-reference/index.html)에 홈·이야기·공통 사진/쪽지·작성·사진 입력·내 글의 배치와 상태를 모았다. [두 차례 화면 캡처·수정 전후](design/app-ui-reference/review.html)와 15개 HTML 검사 결과를 보존했다. 최종 사용자 선택·Android 적용·기업 앱 대비 우수성을 뜻하지 않는다. 하단 목적지·초기 사진 확대·공개 선택 방식은 아직 제안이다.
 
 2026-11-06 사용자 재확인: 현재 Android 장소 선택·설명 화면은 기능 확인용 기본 UI다. 사진·텍스트·버튼과 일부 색·간격을 적용한 것을 최종 디자인 완료로 보고하지 않는다. 후반 공통 작업은 [UI/UX 최종 구성·적용·사용자 검수 #36](https://github.com/HyunKN/visual-travel-guide/issues/36)에서 추적한다.

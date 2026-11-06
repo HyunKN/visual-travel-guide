@@ -162,6 +162,94 @@ K-style 기준 pin: `a5b1955bd628657b2fbb18c4b05c9aff58d2284d`. [기존 vendor C
 
 사진은 [catalog](../../mobile/src/features/place-content/catalog.json)의 3장과 출처를 재사용한다. 사진 자산은 새로 다운로드하거나 생성하지 않았다. 첫 이야기 제목·본문은 `geunjeongjeon-2`의 내용이며, 방문자 문장은 명시한 fixture다.
 
+### 6.1 폰트·색상·기술·모션 상세 사양
+
+2026-11-06 후속 요청으로 추가한 **Android 적용 전 제안**이다. 기존 HTML의 160ms 예시와 캡처는 그대로 보존하며, 아래 값까지 실행 검증됐다는 뜻은 아니다. 사진 속 장소와 방문자의 시선을 연결하고 조작 결과를 알아보기 쉽게 하는 것이 목적이다.
+
+#### 폰트와 색상
+
+합의한 **원본 Spoqa Han Sans Regular/Bold**를 유지한다. Neo·Pretendard로 바꾸지 않는다. 웹용 파일·출처·OFL은 [기존 fonts](../../prototype/src/fonts/SOURCE.txt)에 있다. 현재 native 소스에는 `fontFamily` 지정이 없고 [앱 설정](../../mobile/app.json)의 `expo-font`에는 파일 매핑이 없다. 설치와 실제 적용은 다르다. Android에는 같은 원본 계열의 정적 TTF/OTF를 확보해 400/700을 매핑하고 라이선스를 보존한다. WOFF2를 그대로 복사하지 않는다. [Expo 지원 형식](https://docs.expo.dev/develop/user-interface/fonts/), [SDK 57 font 설정](https://docs.expo.dev/versions/v57.0.0/sdk/font/).
+
+| 역할 | 크기 / 행간 / 굵기 제안 | 용도 |
+| --- | --- | --- |
+| 이야기 제목 | 28 / 38 / Bold | 홈 첫 이야기·상세 제목 |
+| 구획 제목 | 21 / 30 / Bold | 장소·다른 이야기 |
+| 읽기 본문 | 17 / 29 / Regular | 이야기·쪽지 |
+| 행동 이름 | 16 / 24 / Bold | 사진으로 찾기·닫기·저장 |
+| 필요한 출처·날짜 | 14 / 21 / Regular | 근거·기록 정보. 불필요한 보조 문구는 추가하지 않음 |
+
+RN 논리 단위 기준이며 OS 글자 배율을 따른다. 큰 글자는 줄바꿈·높이 증가·본문 스크롤로 수용한다. 400/700 파일에 가짜 500/600 굵기를 섞지 않는다. native 자간은 0부터 비교하며 HTML 음수 em 값을 그대로 옮기지 않는다.
+
+| 의미 토큰 | 제안 값 | 사용 규칙 |
+| --- | --- | --- |
+| `text.primary` | `#243247` | 제목·본문·주요 조작 |
+| `text.secondary` | `#526071` | 출처·날짜. 긴 본문을 흐리게 만들지 않음 |
+| `text.onSolid` | `#FFFFFF` | 먹청색 채움 버튼. 사진 위 글자는 별도 대비 검증 |
+| `accent` | `#B45440` | 작은 선택·추천 강조. 색만으로 상태를 전달하지 않음 |
+| `surface.base / subtle` | `#FFFFFF / #F3F5F7` | 읽기·작성·하단바 / 입력·로딩 면 |
+| `line.decorative / focus` | `#E8E9EA / #243247` | 장식 구분선 / 식별 가능한 포커스선. 옅은 구분선을 조작의 유일한 경계로 쓰지 않음 |
+
+현재 HTML의 일부 보조색 `#4E525A`와 다르므로 후속 공통 토큰 적용 때 통일한다. 오류는 구체적인 문장·재시도로 구분하며 주홍을 무조건 오류색으로 쓰지 않는다. 유리 쪽지는 흰색 alpha .86부터 비교하되 사진별 대비를 확인한다. [기존 재질 규칙](INTERACTION_MATERIALS.md)의 작은 유리 조작부 alpha .06을 긴 본문에 그대로 적용하지 않는다. 어두운 테마는 이번 범위에 추가하지 않는다.
+
+#### UI 구성 기술과 현재 상태
+
+2026-11-06 [package.json](../../mobile/package.json)과 실제 소스를 확인했다. Expo 57, RN 0.86, Reanimated 4.5.1이 현재 기반이다. 아래 후보를 위해 설치·빌드·앱 실행을 하지 않았다.
+
+| UI | 구현 방법 / 후보 | 상태와 남은 일 |
+| --- | --- | --- |
+| 글자·버튼·입력·평면 하단바 | RN Text/Pressable/TextInput/View, safe-area | 기존 기능 코드를 공통 토큰으로 정리. K-style CSS를 RN에 직접 적용하지 않음 |
+| 화면 이동 | Expo Router/native Stack | 사용 중. 기본 전환 위에 별도 진입 효과를 중복하지 않음 |
+| 사진·쪽지 표식 | Image + 같은 좌표 변환 + Pressable | `sceneId + u/v` 유지. 움직일 때도 사진과 표식 변환 일치 |
+| 눌림·쪽지 열림·선택 | Reanimated shared value/animated style/withTiming | 라이브러리 설치됨. 아래 모션의 화면 적용은 예정 |
+| 유리 쪽지 | 현재 사진 복제 blurRadius + 흰 tint. 배경 blur 후보 expo-blur | [현재 시안](../../mobile/src/features/place-message-preview/PlaceMessagePreview.tsx)은 굴절 없음. expo-blur 미설치, native 추가 시 재빌드 필요 |
+| 정교한 굴절·테두리 광학 | 별도 렌더링 실험 후보 | Skia 등 미설치·미채택. 기본 blur와 시각·성능을 비교한 뒤 결정 |
+| 뼈대 로딩 | Skullet 형태를 RN View로 각색, 필요 시 Reanimated opacity | 실제 기다리는 영역만. Skullet RN 직접 호환성 미확인. 로컬 콘텐츠에 가짜 로딩 없음 |
+| 앱 소개용 모션그래픽 | 별도 HTML 시간축·영상 제작 후보 | 앱 조작과 분리. Remotion/Lottie/Rive를 지금 제품 의존성으로 추가하지 않음 |
+
+[SDK 57 BlurView](https://docs.expo.dev/versions/v57.0.0/sdk/blur-view/)는 Android에서 BlurTargetView 연결을 요구하고 SDK 31 미만의 성능 비용과 blur 없는 대체 경로를 설명한다. 구형 기기는 불투명 대체부터 비교한다. [GlassEffect](https://docs.expo.dev/versions/v57.0.0/sdk/glass-effect/)는 iOS native 효과이며 지원하지 않는 플랫폼에서는 일반 View로 대체된다. 설치만으로 Android Liquid Glass가 생기지 않는다. **유리 쪽지 요구는 유지하되 광학 효과·실기기 성능은 미검증**이다.
+
+#### 동작별 모션 제안
+
+| 동작 | 시작 → 끝 / 시간 | 중단·접근성·실패 처리 |
+| --- | --- | --- |
+| 일반 버튼 | scale 1 → .98, 100ms / 복귀 140ms | 누름 취소도 복귀. 모션 완료를 기다려 요청하지 않음 |
+| 작은 유리 조작부 | scale 1 → 1.025, 100ms / 복귀 180ms | 기존 재질의 미세한 부풀림 방향. 본문 전체를 출렁이게 하지 않음 |
+| 쪽지 열기 | 선택 즉시 강조, opacity 0 → 1, y 8 → 0, 220ms | 시작부터 배경 조작 비활성·닫기 접근. 사진 고정, 글자별 등장 없음 |
+| 쪽지 닫기 | opacity 1 → 0, 140ms | 종료 후 선택 표식에 포커스 복귀. 열림 도중 닫아도 잔상·투명 차단층 없음 |
+| 다른 쪽지 | 내용 교체 fade 120ms | 오래된 응답이 새 선택을 덮지 않음. 추천은 messageId별 상태 |
+| 추천 | 선택색 120ms, 아이콘 반응 160ms 이내 | 실패 시 값·색 복구, 중복 요청 방지. 폭죽·큰 숫자 튀김 없음 |
+| 사진 로드 완료 | 자리 확보 후 opacity 0 → 1, 180ms | 비율 유지. 오류 시 재시도, 이전 사진 선택 보호 |
+| 뼈대 로딩 | opacity .55 ↔ 1, 1200ms 주기 | 준비 즉시 종료·앱 비활성 시 정지. 동작 감소는 정지 면. 가짜 진행률 없음 |
+| 이야기 펼침·이동 | 즉시 펼침 / native 이동 기본값부터 | 스크롤·읽기 순서 보호. 긴 본문 높이·타이핑 효과 제외 |
+
+기본 easing 후보는 진입 `bezier(.2, 0, 0, 1)`, 종료 `bezier(.4, 0, 1, 1)`이다. 레퍼런스에서 측정한 수치가 아니라 비교 출발값이다. transform/opacity 중심으로 구성하며 큰 blur·그림자를 매 프레임 변경하지 않는다. 읽는 동안 반복 발광·자동 줌·패럴랙스는 사용하지 않는다. 탄성은 필요성이 확인된 조작부만 다음 비교 단계에서 조정한다.
+
+동작 감소는 [Reanimated ReduceMotion.System](https://docs.swmansion.com/react-native-reanimated/docs/animations/withTiming/)과 연결한다. 크기·이동·반복을 제거해도 같은 상태·행동을 제공한다. 투명도 감소는 별도 재질 정책이며 Android OS 신호를 자동 수신한다고 가정하지 않는다. 불투명 대체를 유지한다.
+
+작은 코드 예제 — **설계 예제로 실제 앱에 추가하거나 typecheck한 코드가 아니다.** 상태·포커스·종료 처리는 기존 화면에 맞춰 함께 구현한다.
+
+```ts
+const motion = { readerEnter: 220, readerExit: 140, readerOffset: 8 };
+// progress는 useSharedValue(0). style은 useAnimatedStyle에서 계산한다.
+progress.value = withTiming(open ? 1 : 0, {
+  duration: open ? motion.readerEnter : motion.readerExit,
+  easing: open ? Easing.bezier(.2, 0, 0, 1) : Easing.bezier(.4, 0, 1, 1),
+  reduceMotion: ReduceMotion.System,
+});
+// opacity: progress.value, translateY: (1 - progress.value) * motion.readerOffset
+```
+
+빠른 열기/닫기는 현재 진행값에서 반대 방향으로 전환한다. 오래된 완료 콜백이 새 reader를 해제하지 않도록 현재 상태를 확인한다. 모션 완료를 저장·추천 성공으로 처리하지 않는다. 터치·접근성 상태는 시각 효과와 별도로 관리한다.
+
+#### 제공받은 레퍼런스의 활용
+
+- [Prompt Motion](https://prompt-motion.com/)은 영상과 프롬프트·스킬을 연결하는 사례 모음이다. [Meng To HTML app demo](https://prompt-motion.com/mengto-a7f4679)는 React 기반 데모를 하나의 시간축에서 반복·탐색·정지하는 방식으로 소개한다. 소개문을 확인했으며 스킬 설치·코드 검증·영상 전체 분석은 하지 않았다. 검토용 모션을 같은 시작/중간/끝에서 비교하는 방법으로 참고한다.
+- [BUGI 게시글](https://x.com/Bugi952/status/2118290476722000151/video/1)은 모션 사례를 익혀 다음 제작에 재사용한다는 취지의 본문을 확인했다. 영상은 브라우저에서 ‘미디어를 재생할 수 없습니다’로 표시됐고 재생 시도 후에도 같았다. 타이밍·기법·제작 도구를 추측해 채택하지 않는다. 영상 파일 확보 시 분석한다.
+- 우리 기록 단위: `원본 URL·확인 범위 → 필요한 사용자 행동 → 시간·거리·easing → RN 코드 → 취소/감소/오류 → 검토 결과`. 모델을 재학습했다는 뜻이 아니라 저장소 규칙과 재사용 구현으로 남긴다.
+- 홍보 영상의 연출을 매번 기다려야 하는 앱 진입 영상으로 가져오지 않는다. 외부 프롬프트·스킬은 자료이며 프로젝트 지침을 덮어쓰지 않는다. 코드 복사 시 원본 라이선스를 별도로 확인한다.
+
+**후속 순서:** 폰트·색상 토큰 → 한 쪽지 열림/닫힘 → 일반/감소 모션·긴 글·연타·뒤로가기 → 같은 Android 기기의 blur 없는 기준선과 비교 → 선택된 패턴 확장. 취소·실패 복구, 입력 보호, 포커스 복귀를 확인한다. 실기기 빌드 종류·OS·화면 주사율·동작별 프레임 지연을 기록하며 60/120fps를 사전 보장하지 않는다. 기존 15개 HTML 검사를 새 폰트·모션 검증으로 계산하지 않는다. 진행·인수 원본은 #36이다.
+
 ## 7. 후속 개발자가 이 레퍼런스를 쓰는 방법
 
 1. DESIGN의 합의와 이 문서의 ‘후보’를 구분한다. 대표 콘텐츠 배치·2탭·초기 확대·공개 범위 선택은 사용자 선택을 먼저 기록한다.
