@@ -1,7 +1,7 @@
 export type Anchor = Readonly<{ u: number; v: number }>;
 export type Marker = Readonly<{ id: string; sceneId: string; anchor: Anchor; createdAt: string }>;
-export type Message = Marker & Readonly<{ body: string }>;
-export type MessagePage = Readonly<{ items: readonly Marker[]; nextCursor: string | null }>;
+export type Message = Marker & Readonly<{ body: string; origin?:'private'|'public'; owned?:boolean }>;
+export type MessagePage = Readonly<{ items: readonly Marker[]; nextCursor: string | null; publicStatus?:'ready'|'error'|'unconfigured' }>;
 export type ReadResult = { kind: 'found'; message: Message } | { kind: 'unavailable' };
 export interface Messages {
   list(sceneId: string, cursor: string | null, signal: AbortSignal): Promise<MessagePage>;

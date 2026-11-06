@@ -10,6 +10,7 @@ const require=createRequire(import.meta.url);
 const {createStore,migrate}=require('../../.codex-build/app-message-tests/local-notes/store.js');
 const {createPublisher}=require('../../.codex-build/app-message-tests/public-messages/publication.js');
 const {createPublicationRemote}=require('../../.codex-build/app-message-tests/public-messages/remote.js');
+const {createSceneMessages}=require('../../.codex-build/app-message-tests/public-messages/sceneMessages.js');
 test('applies migration; anonymous and independent owners cannot bypass publication rules',async()=>{
   const pg=new PGlite();
   try{
@@ -17,6 +18,7 @@ test('applies migration; anonymous and independent owners cannot bypass publicat
     await pg.exec(`create role anon; create role authenticated; create schema auth;
       create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('test.uid',true),'')::uuid$$;`);
     await pg.exec(await readFile(new URL('../migrations/202611070001_place_messages.sql',import.meta.url),'utf8'));
+    await pg.exec(await readFile(new URL('../migrations/202611070002_read_snapshot.sql',import.meta.url),'utf8'));
     const a=randomUUID(),b=randomUUID(),msg=randomUUID(),req=randomUUID(),scene='geunjeongjeon-front-v1';
     const session=async(role,id='')=>{await pg.exec('reset role');await pg.query("select set_config('test.uid',$1,false)",[id]);await pg.exec('set role '+role);};
     const write=(request=req,expected=0,body='  실제 글\n둘째 줄',withdraw=false)=>pg.query('select public.vtg_write($1,$2,$3,$4,.2,.7,$5,$6) v',[request,msg,expected,scene,body,withdraw]);
@@ -45,6 +47,7 @@ test('actual app SQLite job delivers through server SQL, recovers lost reply and
     await pg.exec(`create role anon; create role authenticated; create schema auth;
       create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('test.uid',true),'')::uuid$$;`);
     await pg.exec(await readFile(new URL('../migrations/202611070001_place_messages.sql',import.meta.url),'utf8'));
+    await pg.exec(await readFile(new URL('../migrations/202611070002_read_snapshot.sql',import.meta.url),'utf8'));
     const c={execAsync:async s=>db.exec(s),runAsync:async(s,...a)=>db.prepare(s).run(...a),
       getFirstAsync:async(s,...a)=>db.prepare(s).get(...a)??null,getAllAsync:async(s,...a)=>db.prepare(s).all(...a)};
     const tx=async work=>{db.exec('BEGIN');try{await work(c);db.exec('COMMIT');}catch(e){db.exec('ROLLBACK');throw e;}};
@@ -66,6 +69,19 @@ test('actual app SQLite job delivers through server SQL, recovers lost reply and
     assert.equal((await store.getPublication(d.id)).requestId,job.requestId);
     const [row]=(await pg.query('select * from public.vtg_read($1,$2)',[d.sceneId,d.id])).rows;
     assert.equal(row.body,d.body);assert.equal(row.u,d.u);assert.equal(row.v,d.v);
+    await pg.exec('reset role; set role anon');
+    const feed=createSceneMessages({markers:store.privateMarkers,read:store.privateRead,owned:async()=>false},async(name,p)=>{
+      if(name==='vtg_snapshot')return (await pg.query(`select to_char(public.vtg_snapshot() at time zone 'UTC','YYYY-MM-DD"T"HH24:MI:SS.US"Z"') v`)).rows[0].v;
+      const fields=`id,u,v,to_char(created_at at time zone 'UTC','YYYY-MM-DD"T"HH24:MI:SS.US"Z"') created_at`;
+      if(name==='vtg_markers')return (await pg.query('select '+fields+' from public.vtg_markers($1,$2,$3,$4)',[p.p_scene,p.p_snapshot,p.p_before,p.p_id])).rows;
+      return (await pg.query('select '+fields+',body,version from public.vtg_read($1,$2)',[p.p_scene,p.p_id])).rows;
+    });
+    const abort=new AbortController();
+    assert.equal((await feed.list(d.sceneId,null,abort.signal)).items[0].id,d.id);
+    assert.equal((await feed.read(d.sceneId,d.id,abort.signal)).message.body,d.body);
+    await pg.exec('reset role');await pg.query('update vtg.messages set hidden=true where id=$1',[d.id]);await pg.exec('set role anon');
+    assert.equal((await feed.read(d.sceneId,d.id,abort.signal)).kind,'unavailable');
+    await pg.exec('reset role; set role authenticated');
     await store.preparePublication(d,owner,'test-project',true);
     assert.equal((await publisher.deliver(d.id)).state,'withdrawn');
     assert.equal((await pg.query('select * from public.vtg_read($1,$2)',[d.sceneId,d.id])).rows.length,0);

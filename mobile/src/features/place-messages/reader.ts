@@ -20,6 +20,11 @@ export function createMessageReader(source: Messages) {
     subscribe(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener); }; },
     close,
     cancel() { listGeneration++; listing?.abort(); close(); },
+    async refresh(sceneId:string,cursor:string|null=null,selectedId?:string) {
+      const id=state.reader?.id??selectedId,listToken=listGeneration+1,readToken=readGeneration+1;
+      await this.load(sceneId,cursor);
+      if(id && listGeneration===listToken && readGeneration===readToken)await this.open(id);
+    },
     async load(sceneId: string, cursor: string | null = null) {
       const generation = ++listGeneration;
       listing?.abort(); close();

@@ -11,6 +11,15 @@ const { createMessageReader } = require(path.join(built, 'reader.js'));
 const { getScene } = require(path.join(built, 'scenes.js'));
 const { bodyBytes, validateBody } = require(path.join(built, 'contract.js'));
 const scenes = require('./scenes.json');
+test('foreground refresh reopens current selection but close during refresh stays closed',async()=>{
+  let finish;
+  const source={list:async()=>({items:[],nextCursor:null}),read:async()=>({kind:'unavailable'})};
+  const c=createMessageReader(source);await c.load('scene');await c.open('gone');
+  await c.refresh('scene');assert.equal(c.snapshot().reader.kind,'unavailable');
+  source.list=()=>new Promise(resolve=>{finish=resolve;});
+  const refresh=c.refresh('scene');c.close();finish({items:[],nextCursor:null});await refresh;
+  assert.equal(c.snapshot().reader,null);
+});
 const marker = (id, sceneId = 'a', anchor = { u: .5, v: .5 }) => ({ id, sceneId, anchor, createdAt: '2026-11-07T00:00:00Z' });
 const message = (id, sceneId = 'a') => ({ ...marker(id, sceneId), body: '실제 내용\n두 번째 줄' });
 function deferred() { let resolve; const promise = new Promise(r => { resolve = r; }); return { promise, resolve }; }

@@ -1,5 +1,6 @@
 import { validAnchor, validateBody, type Anchor, type Messages } from '../place-messages/contract';
 import type { PublicationJob, PublicationState } from '../public-messages/publication';
+import type {Boundary} from '../public-messages/sceneMessages';
 
 export type Visibility = 'private' | 'public' | null;
 export type Draft = { id: string; sceneId: string; u: number; v: number; body: string; visibility: Visibility; revision: number; updatedAt: string };
@@ -78,6 +79,21 @@ export function createStore(transaction: Transaction, newId: () => string, now =
   };
   return {
     messages,
+    privateMarkers: (sceneId:string,b:Boundary) => transact(async tx=>{
+      const time="substr(createdAt,1,23)||'000Z'";
+      const rows=await tx.getAllAsync<{id:string;sceneId:string;u:number;v:number;createdAt:string}>(`SELECT id,sceneId,u,v,createdAt FROM notes
+        WHERE sceneId=? AND (${time})<=? AND (? IS NULL OR ((${time}),id)<(?,?))
+        AND NOT EXISTS(SELECT 1 FROM publication_jobs j WHERE j.noteId=notes.id AND
+          (j.state IN ('pending','uncertain','published','conflict') OR (j.state='rejected' AND j.serverVersion IS NOT NULL)))
+        ORDER BY createdAt DESC,id DESC LIMIT 61`,sceneId,b.snapshot,b.before,b.before,b.id);
+      return rows.map(({u,v,...r})=>({...r,anchor:{u,v}}));
+    }),
+    privateRead: (sceneId:string,id:string) => transact(async tx=>{
+      const r=await tx.getFirstAsync<Draft & {createdAt:string}>(`SELECT * FROM notes WHERE sceneId=? AND id=?
+        AND NOT EXISTS(SELECT 1 FROM publication_jobs j WHERE j.noteId=notes.id AND
+          (j.state IN ('pending','uncertain','published','conflict') OR (j.state='rejected' AND j.serverVersion IS NOT NULL)))`,sceneId,id);
+      return r?{kind:'found' as const,message:{id:r.id,sceneId,createdAt:r.createdAt,anchor:{u:r.u,v:r.v},body:r.body}}:{kind:'unavailable' as const};
+    }),
     publicationOwner: (serviceId:string) => transact(async tx=>{
       const rows=await tx.getAllAsync<{ownerId:string}>('SELECT DISTINCT ownerId FROM publication_jobs WHERE serviceId=?',serviceId);
       if(rows.length>1)throw new Error('Multiple author bindings');

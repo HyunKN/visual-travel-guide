@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
-import { AccessibilityInfo, findNodeHandle, Image, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { AccessibilityInfo, AppState, findNodeHandle, Image, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Text } from '../../ui/Text';
 import { Stack, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -11,6 +11,7 @@ import type { Anchor, Messages } from './contract';
 import { deviceNotes } from '../local-notes/device';
 import type { Draft } from '../local-notes/store';
 import Editor from '../local-notes/Editor';
+import {productSceneMessages,getPublicService,publicServiceConfigured} from '../public-messages/nativeService';
 
 type FocusTarget = React.ElementRef<typeof View> | null;
 function focus(target: FocusTarget) {
@@ -20,9 +21,10 @@ function focus(target: FocusTarget) {
 function Button({ label, onPress, disabled = false }: { label: string; onPress: () => void; disabled?: boolean }) {
   return <Pressable accessibilityRole="button" accessibilityState={{ disabled }} disabled={disabled} onPress={onPress} style={[s.button, disabled && s.disabled]}><Text style={s.action}>{label}</Text></Pressable>;
 }
-export default function SceneScreen({ sceneId, source = deviceNotes.messages, messageId, draftId }: { sceneId: string; source?: Messages; messageId?: string; draftId?:string }) {
+export default function SceneScreen({ sceneId, source, messageId, draftId }: { sceneId: string; source?: Messages; messageId?: string; draftId?:string }) {
   const scene = getScene(sceneId), insets = useSafeAreaInsets();
-  const local = source === deviceNotes.messages;
+  const local = source===undefined || source === deviceNotes.messages;
+  const actual=source??productSceneMessages();
   const [positioning,setPositioning] = useState(false), [anchor,setAnchor] = useState<Anchor|null>(null);
   const [editing,setEditing] = useState<Draft|null>(null), [moving,setMoving] = useState<Draft|null>(null);
   const [writeError,setWriteError] = useState(''), [saving,setSaving] = useState(false);
@@ -39,7 +41,7 @@ export default function SceneScreen({ sceneId, source = deviceNotes.messages, me
     },()=>{if(active)setWriteError('초안을 불러오지 못했어요. 내 글에서 다시 열어 주세요.');});
     return ()=>{active=false;};
   },[local,draftId,sceneId]);
-  const controller = useMemo(() => createMessageReader(source), [source]);
+  const controller = useMemo(() => createMessageReader(actual), [actual]);
   const state = useSyncExternalStore(controller.subscribe, controller.snapshot);
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [stageOrigin, setStageOrigin] = useState({ x: 0, y: 0 });
@@ -52,6 +54,28 @@ export default function SceneScreen({ sceneId, source = deviceNotes.messages, me
   const markerRefs = useRef(new Map<string, FocusTarget>());
   const returnId = useRef<string | null>(null);
   const cursor = cursors[cursors.length - 1];
+  const [reportState,setReportState]=useState<{id:string;busy:boolean;message:string}|null>(null);
+  const reporting=useRef(false);
+  const foregroundId=useRef<string|undefined>(undefined);
+  const [reportFor,setReportFor]=useState<string|null>(null);
+  useFocusEffect(useCallback(()=>{
+    if(!local)return;
+    const sub=AppState.addEventListener('change',state=>{
+      if(state==='active'){void controller.refresh(sceneId,cursor,foregroundId.current);foregroundId.current=undefined;}
+      else {foregroundId.current=controller.snapshot().reader?.id??foregroundId.current;controller.cancel();}
+    });
+    return ()=>sub.remove();
+  },[local,controller,sceneId,cursor]));
+  async function report(id:string,reason:'spam'|'abuse'|'personal_info'|'other'){
+    if(reporting.current)return;
+    reporting.current=true;setReportState({id,busy:true,message:''});
+    try{await getPublicService().report(id,reason);setReportState({id,busy:false,message:'신고를 접수했어요.'});}
+    catch{setReportState({id,busy:false,message:'신고 접수를 확인하지 못했어요. 다시 시도해 주세요.'});}
+    finally{reporting.current=false;}
+  }
+  function chooseReport(id:string){
+    setReportFor(id);
+  }
   useFocusEffect(useCallback(() => {
     let active = true;
     void controller.load(sceneId, cursor).then(() => {
@@ -63,6 +87,12 @@ export default function SceneScreen({ sceneId, source = deviceNotes.messages, me
     ? imageRect({ width: scene.imageWidth, height: scene.imageHeight }, size, fit) : null;
   const page = state.list.kind === 'ready' ? state.list.page : null;
   const reader = state.reader;
+  const readingId=reader?.id;
+  useEffect(()=>{
+    if(!local || !readingId)return;
+    const timer=setInterval(()=>{if(AppState.currentState==='active')void controller.open(readingId);},30000);
+    return ()=>clearInterval(timer);
+  },[local,readingId,controller]);
   const selected = reader?.kind === 'found' ? reader.message : page?.items.find(m => m.id === reader?.id);
   const p = baseRect && selected ? project(selected.anchor,baseRect) : null;
   const outside = !!p && (p.x < 0 || p.y < 0 || p.x > size.width || p.y > size.height);
@@ -84,6 +114,7 @@ export default function SceneScreen({ sceneId, source = deviceNotes.messages, me
     finally { writing.current=false; setSaving(false); }
   }
   function close() {
+    foregroundId.current=undefined;
     if (outside) setFit('contain');
     controller.close();
     // Android Modal has no onDismiss callback; restore after its next render.
@@ -131,7 +162,8 @@ export default function SceneScreen({ sceneId, source = deviceNotes.messages, me
     <View style={[s.footer, { paddingBottom: insets.bottom + 8 }]} importantForAccessibility={reader ? 'no-hide-descendants' : 'auto'}>
       {state.list.kind === 'loading' && <Text accessibilityLiveRegion="polite" style={s.meta}>쪽지를 불러오는 중이에요.</Text>}
       {state.list.kind === 'error' && <><Text style={s.meta}>쪽지를 불러올 수 없어요.</Text><Button label="다시 시도" onPress={() => { void controller.load(sceneId, cursor); }} /></>}
-      {page?.items.length === 0 && !positioning && <Text style={s.meta}>{local ? '이 사진에 남긴 내 글이 없어요.' : '아직 쪽지가 없어요.'}</Text>}
+      {page?.publicStatus==='error' && <><Text style={s.meta}>공개 쪽지를 불러오지 못했어요. 기기의 글만 보여요.</Text><Button label="공개 쪽지 다시 불러오기" onPress={()=>{setCursors([null]);void controller.load(sceneId,null);}} /></>}
+      {page?.items.length === 0 && !positioning && page.publicStatus!=='error' && <Text style={s.meta}>{local && page.publicStatus!=='ready' ? '이 사진에 남긴 내 글이 없어요.' : '아직 쪽지가 없어요.'}</Text>}
       {local && <View style={s.row}>{positioning ? <>
         <Button label="취소" disabled={saving} onPress={()=>{setPositioning(false);setEditing(moving);setMoving(null);setAnchor(null);}} />
         {!anchor && <Button label="사진 중앙 선택" onPress={()=>setAnchor({u:.5,v:.5})} />}
@@ -154,6 +186,13 @@ export default function SceneScreen({ sceneId, source = deviceNotes.messages, me
           <View style={s.row}><Text accessibilityRole="header" style={s.heading}>쪽지</Text><Pressable ref={closeRef} accessibilityRole="button" onPress={close} style={s.button}><Text style={s.action}>닫기</Text></Pressable></View>
           <ScrollView style={s.bodyScroll} contentContainerStyle={s.bodyContent}>
             {reader?.kind === 'found' && <Text selectable style={s.body}>{reader.message.body}</Text>}
+            {reader?.kind==='found' && reportFor===reader.id && <View>
+              <Text style={s.meta}>신고 이유</Text>
+              <Text style={s.meta}>신고를 위해 익명 세션을 사용해요.</Text>
+              {([['spam','스팸'],['abuse','불쾌한 내용'],['personal_info','개인정보'],['other','기타']] as const).map(([reason,label])=>
+                <Button key={reason} label={label} disabled={reportState?.busy} onPress={()=>{setReportFor(null);void report(reader.id,reason);}} />)}
+              <Button label="취소" onPress={()=>setReportFor(null)} />
+            </View>}
             {reader?.kind === 'loading' && <Text accessibilityLiveRegion="polite" style={s.body}>불러오는 중이에요.</Text>}
             {reader?.kind === 'unavailable' && <Text style={s.body}>지금은 볼 수 없는 글이에요.</Text>}
             {reader?.kind === 'error' && <><Text style={s.body}>글을 불러오지 못했어요.</Text><Button label="다시 시도" onPress={() => { void controller.open(reader.id); }} /></>}
@@ -161,7 +200,10 @@ export default function SceneScreen({ sceneId, source = deviceNotes.messages, me
           <View style={s.row}>
             {groupIds.length > 1 && <><Button label="이전 글" disabled={groupIndex <= 0} onPress={() => { void controller.open(groupIds[groupIndex - 1]); }} /><Text style={s.meta}>{groupIndex + 1}/{groupIds.length}</Text><Button label="다음 글" disabled={groupIndex < 0 || groupIndex >= groupIds.length - 1} onPress={() => { void controller.open(groupIds[groupIndex + 1]); }} /></>}
             <Button label={opaque ? '투명 배경' : '불투명 배경'} onPress={() => setOpaque(x => !x)} />
-            {local && reader?.kind === 'found' && <Button label="편집" disabled={saving} onPress={()=>{void openEditor(reader.id);}} />}
+            {local && reader?.kind === 'found' && reader.message.owned!==false && <Button label="편집" disabled={saving} onPress={()=>{void openEditor(reader.id);}} />}
+            {local && publicServiceConfigured && reader?.kind==='found' && reader.message.origin==='public' && !reader.message.owned &&
+              <Button label="신고" disabled={reportState?.busy} onPress={()=>chooseReport(reader.id)} />}
+            {reader && reportState?.id===reader.id && !!reportState.message && <Text accessibilityLiveRegion="polite" style={s.meta}>{reportState.message}</Text>}
             {reader && !!writeError && <Text accessibilityRole="alert" style={s.meta}>{writeError}</Text>}
           </View>
         </View>

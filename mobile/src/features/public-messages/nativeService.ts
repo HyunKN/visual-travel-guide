@@ -6,6 +6,7 @@ import {createPublicationRemote,serverRejection} from './remote';
 import {createPublisher} from './publication';
 import {deviceNotes} from '../local-notes/device';
 import type {Draft} from '../local-notes/store';
+import {createSceneMessages} from './sceneMessages';
 
 export function publicConfiguration(url:unknown,key:unknown) {
   if(typeof url!=='string' || typeof key!=='string' || !/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/.test(url) || !/^sb_publishable_[a-zA-Z0-9_-]+$/.test(key)) return null;
@@ -43,7 +44,28 @@ function build(c:NonNullable<typeof config>) {
       return extract(data.session);
     },
   });
+  // Public reads use a separate client with no author identity or session.
+  const reader=createClient(c.url,c.key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
   return {
+    messages:createSceneMessages({
+      markers:deviceNotes.privateMarkers,read:deviceNotes.privateRead,
+      owned:async id=>(await deviceNotes.getPublication(id))?.serviceId===c.url,
+    },async(name,args,signal)=>{
+      const controller=new AbortController(),abort=()=>controller.abort();
+      if(signal.aborted)abort();else signal.addEventListener('abort',abort,{once:true});
+      const timer=setTimeout(abort,15000);
+      try{const {data,error}=await reader.rpc(name,args).abortSignal(controller.signal);if(error)throw new Error('Public read failed');return data;}
+      finally{clearTimeout(timer);signal.removeEventListener('abort',abort);}
+    }),
+    async report(id:string,reason:'spam'|'abuse'|'personal_info'|'other') {
+      const existing=await deviceNotes.getPublication(id);
+      if(existing?.serviceId===c.url)throw new Error('Cannot report own message');
+      const bound=await deviceNotes.publicationOwner(c.url);
+      return author.run(bound,true,async()=>{
+        const {error}=await client.rpc('vtg_report',{p_id:id,p_reason:reason});
+        if(error)throw new Error('Report was not confirmed');
+      });
+    },
     async publish(draft:Draft,withdraw=false) {
       const previous=await deviceNotes.getPublication(draft.id);
       const bound=await deviceNotes.publicationOwner(c.url);
@@ -65,3 +87,8 @@ export function getPublicService(){
   if(!config)throw new Error('Public service is not configured');
   return service??=build(config);
 }
+export const localSceneMessages=createSceneMessages({
+  markers:deviceNotes.privateMarkers,read:deviceNotes.privateRead,
+  owned:async()=>true,
+},null);
+export function productSceneMessages(){return config?getPublicService().messages:localSceneMessages;}

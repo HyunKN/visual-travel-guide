@@ -57,3 +57,15 @@ test('unsupported schema is not reset; wrong coordinates and oversized final bod
   c.db.exec('PRAGMA user_version=4');await assert.rejects(c.tx(migrate));assert.equal(c.db.prepare('PRAGMA user_version').get().user_version,4);
   assert.equal((await c.store.list())[0].id,d.id);
 });
+test('private scene reads never substitute old personal copy for a public message',async t=>{
+  const c=connect(':memory:');t.after(()=>c.db.close());await c.tx(migrate);
+  const d={...await c.store.createDraft('scene',{u:0,v:1}),body:'원래 개인 글',visibility:'private',revision:1};
+  await c.store.savePrivate(d);
+  const edit=await c.store.edit(d.id),pub={...edit,body:'새 공개 내용',visibility:'public',revision:2};
+  const job=await c.store.preparePublication(pub,'a','service');
+  assert.equal((await c.store.privateRead('scene',d.id)).kind,'unavailable');
+  assert.equal((await c.store.privateMarkers('scene',{snapshot:'2099-01-01T00:00:00.000000Z',before:null,id:null})).length,0);
+  await c.store.settlePublication(d.id,job.requestId,'published',1);
+  assert.equal((await c.store.privateRead('scene',d.id)).kind,'unavailable');
+  assert.equal((await c.store.list())[0].body,'새 공개 내용');
+});
