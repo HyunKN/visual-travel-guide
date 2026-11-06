@@ -155,6 +155,14 @@ SDK 57 사진 선택기를 추가한 빌드에서는 Expo가 네이티브 모듈
 
 `createLocationController`의 요청·취소·만료 검사는 기존 `npm run test:messages`에 포함된다. adapter는 [Expo 57 Location](https://docs.expo.dev/versions/v57.0.0/sdk/location/), 설정 버튼은 [RN 0.86 Linking](https://reactnative.dev/docs/0.86/linking)과 [Android 위치 설정 Intent](https://developer.android.com/reference/android/provider/Settings#ACTION_LOCATION_SOURCE_SETTINGS)를 기준으로 작성했다. 실제 권한창·설정 복귀·GPS·Google Maps 타일은 사용자 Android 확인이 필요하다. 지도 공급자 설정이 없어도 위치/직접 선택 코드는 유지하며, 지도 키는 위 설정 절차와 새 native 빌드를 따른다.
 
+## R3 공통 화면 적용
+
+`src/ui/theme.ts`는 k-style 원본 토큰과 승인된 Sprint 1 R3 수치를 native 색·글자·간격으로 대응한다. 원본 CSS/MIT는 `docs/design/place-messages/vendor/`에 보존하며 CSS를 React Native에서 실행하는 라이브러리로 취급하지 않는다. 원본 Spoqa 400/700과 폰트 배율을 유지하고, 사진은 기존 공식 자산의 비율 전체를 표시한다. 홈은 한 이야기·직접 선택·실제 공개 글 미리보기, 상세는 첫 이야기 → 쪽지 입구 → 나머지 이야기 펼침으로 구성한다. 개인 글 관리는 간결한 목록이며 초안·공개 상태는 필요한 정보로 유지한다.
+
+`TapArea`는 100/140ms opacity 피드백, OS 동작 감소 설정, 키보드 focus 테두리를 제공한다. scale 후보 대신 크기가 바뀌지 않는 피드백부터 적용했다. 터치 영역을 줄이거나 요청/저장 완료를 애니메이션 뒤로 미루지 않는다. `Action`은 이 경계를 써서 primary/quiet/soft/danger와 radio·busy/disabled 상태를 공유한다. 내 글 로딩은 실제 SQLite 조회 동안만 Skullet 각색 뼈대를 표시한다. 하단바는 불투명 흰색이며 두 목적지와 선택 표시를 유지한다.
+
+현재 적용은 #36의 일부다. 실제 Android 큰 글자·사진·눌림·포커스·스크롤/뒤로·키보드·TalkBack은 사용자 실행 후 검수한다. 사진 입력·공통 사진/유리 쪽지의 공통 스타일/모션 확대와 광학·실기기 검증도 남아 있다. 타입·번들 성공을 시각 승인이나 Liquid Glass 완성으로 보지 않는다.
+
 ## 사진 인식 연결 경계
 
 사진 인식의 앱 쪽 요청 흐름은 `src/features/recognition/`에 있다. `createRequest` → `recognize`가 현재 사진·콘텐츠 버전을 고정하고, `cancelRecognition`은 화면의 기다림과 결과 적용을 취소한다. 30초는 개발용 대기 상한이며 추론 성능 목표가 아니다. 취소·시간 초과 뒤에도 adapter의 Promise가 실제 네이티브 작업 종료를 알릴 때까지 새 추론은 `BUSY`다. 화면 이탈·백그라운드 전환·사진 교체/해제에서도 이전 결과를 적용하지 않는다. 사진 파일은 삭제하지 않는다.

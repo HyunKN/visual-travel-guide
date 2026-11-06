@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Modal, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { Text } from '../../ui/Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { validateBody } from '../place-messages/contract';
@@ -8,11 +8,9 @@ import type { Draft } from './store';
 import {getPublicService,publicServiceConfigured} from '../public-messages/nativeService';
 import type {PublicationJob} from '../public-messages/publication';
 import {editorAction} from '../public-messages/editorAction';
+import { Action } from '../../ui/Action';
+export { Action } from '../../ui/Action';
 
-export function Action({label,onPress,disabled=false,selected}: {label:string;onPress:()=>void;disabled?:boolean;selected?:boolean}) {
-  return <Pressable accessibilityRole={selected === undefined ? 'button' : 'radio'} accessibilityState={{disabled,checked:selected}} disabled={disabled}
-    onPress={onPress} style={[s.action,selected && s.chosen,disabled && s.disabled]}><Text style={s.label}>{label}</Text></Pressable>;
-}
 export default function Editor({initial,onClose,onMove}: {initial:Draft;onClose:()=>void;onMove?: (draft:Draft)=>void}) {
   const insets = useSafeAreaInsets();
   const [value,setValue] = useState(initial), [busy,setBusy] = useState(false), [error,setError] = useState('');
@@ -95,9 +93,9 @@ export default function Editor({initial,onClose,onMove}: {initial:Draft;onClose:
         {error !== '' && <Text accessibilityRole="alert" style={s.meta}>{error}</Text>}
         {!jobLoaded && <Action label="공개 상태 다시 확인" disabled={busy} onPress={()=>{void refreshJob().catch(()=>setError('공개 상태를 확인하지 못했어요.'));}} />}
       </ScrollView>
-      <View style={s.row}><Action label="초안 버리기" disabled={busy||!action.canDiscard} onPress={() => Alert.alert('작성 중인 초안을 버릴까요?',undefined,[
+      <View style={s.row}><Action label="초안 버리기" variant="danger" disabled={busy||!action.canDiscard} onPress={() => Alert.alert('작성 중인 초안을 버릴까요?',undefined,[
         {text:'취소',style:'cancel'},{text:'버리기',style:'destructive',onPress:()=>{ void finish('discard'); }},
-      ])} /><Action label={action.label}
+      ])} /><Action label={action.label} variant="primary" busy={busy}
         disabled={busy || action.disabled}
         onPress={()=>{if(action.operation!=='private')confirmPublish();else void finish('save');}} /></View>
     </KeyboardAvoidingView>
@@ -105,7 +103,6 @@ export default function Editor({initial,onClose,onMove}: {initial:Draft;onClose:
 }
 export const s = StyleSheet.create({
   page:{flex:1,backgroundColor:'#FFFFFF',paddingHorizontal:20},form:{gap:16,paddingVertical:16},row:{flexDirection:'row',flexWrap:'wrap',alignItems:'center',justifyContent:'space-between',gap:8},
-  action:{minWidth:48,minHeight:48,justifyContent:'center',alignItems:'center',paddingHorizontal:12,borderRadius:12},chosen:{backgroundColor:'#E4EBEF',borderWidth:1,borderColor:'#243247'},
-  disabled:{opacity:.45},label:{color:'#243247',fontSize:16,fontWeight:'700'},title:{fontSize:22,lineHeight:32,color:'#243247',fontWeight:'700'},
+  label:{color:'#243247',fontSize:16,fontWeight:'700'},title:{fontSize:22,lineHeight:32,color:'#243247',fontWeight:'700'},
   input:{minHeight:140,fontFamily:'SpoqaHanSans',fontSize:17,lineHeight:29,color:'#243247',backgroundColor:'#F3F5F7',borderRadius:12,padding:16},meta:{fontSize:15,lineHeight:23,color:'#526071'},
 });
