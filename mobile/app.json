@@ -41,7 +41,8 @@
           "microphonePermission": false
         }
       ],
-      "expo-sqlite"
+      "expo-sqlite",
+      ["expo-secure-store",{"configureAndroidBackup":true}]
     ]
   }
 }

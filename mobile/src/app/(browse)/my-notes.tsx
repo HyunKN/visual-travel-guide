@@ -26,7 +26,9 @@ export default function MyNotes() {
     {!rows && !error && <Text style={s.meta}>불러오는 중이에요.</Text>}
     {rows?.length===0 && <><Text style={s.meta}>아직 남긴 글이 없어요.</Text><Action label="장소 둘러보기" onPress={()=>router.navigate('/')} /></>}
     <FlatList data={rows} keyExtractor={item=>item.id} renderItem={({item})=><View style={s.form}>
-      <Text style={s.label}>{getScene(item.sceneId)?.name} · {item.kind==='draft'?'초안':'나만 보기'}</Text>
+      <Text style={s.label}>{getScene(item.sceneId)?.name} · {item.publicationState==='published'?'공개됨':
+        item.publicationState==='pending'||item.publicationState==='uncertain'?'공개 상태 확인 중':
+        item.publicationState==='conflict'||item.publicationState==='rejected'?'공개 상태 확인 필요':item.kind==='draft'?'초안':'나만 보기'}</Text>
       <Text numberOfLines={3} style={s.meta}>{item.body || '빈 초안'}</Text>
       <View style={s.row}><Action label={item.kind==='draft'?'이어 쓰기':'편집'} onPress={()=>{void edit(item.id);}} />
         {item.kind==='note' && <Action label="사진에서 보기" onPress={()=>router.push({pathname:'/scenes/[sceneId]',params:{sceneId:item.sceneId,messageId:item.id}})} />}

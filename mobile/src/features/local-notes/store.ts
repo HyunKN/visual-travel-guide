@@ -3,7 +3,7 @@ import type { PublicationJob, PublicationState } from '../public-messages/public
 
 export type Visibility = 'private' | 'public' | null;
 export type Draft = { id: string; sceneId: string; u: number; v: number; body: string; visibility: Visibility; revision: number; updatedAt: string };
-export type LocalItem = Draft & { kind: 'draft' | 'note' };
+export type LocalItem = Draft & { kind: 'draft' | 'note'; publicationState?:PublicationState|null };
 type Param = string | number | null;
 export interface Connection {
   execAsync(sql: string): Promise<void>;
@@ -78,6 +78,11 @@ export function createStore(transaction: Transaction, newId: () => string, now =
   };
   return {
     messages,
+    publicationOwner: (serviceId:string) => transact(async tx=>{
+      const rows=await tx.getAllAsync<{ownerId:string}>('SELECT DISTINCT ownerId FROM publication_jobs WHERE serviceId=?',serviceId);
+      if(rows.length>1)throw new Error('Multiple author bindings');
+      return rows[0]?.ownerId??null;
+    }),
     getDraft: (id: string, sceneId: string) => transact(tx => tx.getFirstAsync<Draft>(`SELECT ${columns} FROM drafts WHERE id=? AND sceneId=?`,id,sceneId)),
     createDraft: (sceneId: string, a: Anchor) => transact(async tx => {
       if (!sceneId || !validAnchor(a)) throw new Error('Invalid position');
@@ -103,8 +108,11 @@ export function createStore(transaction: Transaction, newId: () => string, now =
         ON CONFLICT(id) DO UPDATE SET body=excluded.body,u=excluded.u,v=excluded.v,revision=excluded.revision,updatedAt=excluded.updatedAt`,now(),d.id);
       await tx.runAsync('DELETE FROM drafts WHERE id=?',d.id);
     }),
-    list: () => transact(tx => tx.getAllAsync<LocalItem>(`SELECT ${columns},'draft' AS kind FROM drafts UNION ALL
-      SELECT ${columns},'note' AS kind FROM notes WHERE id NOT IN (SELECT id FROM drafts) ORDER BY updatedAt DESC,id DESC`)),
+    list: () => transact(tx => tx.getAllAsync<LocalItem>(`SELECT local.*,
+      (SELECT state FROM publication_jobs WHERE noteId=local.id) AS publicationState FROM (
+      SELECT ${columns},'draft' AS kind FROM drafts UNION ALL
+      SELECT ${columns},'note' AS kind FROM notes WHERE id NOT IN (SELECT id FROM drafts)
+      ) AS local ORDER BY updatedAt DESC,id DESC`)),
     discardDraft: (id: string) => transact(async tx => {
       await protectPublication(tx,id);
       return tx.runAsync('DELETE FROM drafts WHERE id=?',id);
