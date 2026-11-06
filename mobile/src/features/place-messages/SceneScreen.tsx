@@ -12,6 +12,7 @@ import { deviceNotes } from '../local-notes/device';
 import type { Draft } from '../local-notes/store';
 import Editor from '../local-notes/Editor';
 import {productSceneMessages,getPublicService,publicServiceConfigured} from '../public-messages/nativeService';
+import {Skeleton} from '../../ui/Skeleton';
 
 type FocusTarget = React.ElementRef<typeof View> | null;
 function focus(target: FocusTarget) {
@@ -193,7 +194,7 @@ export default function SceneScreen({ sceneId, source, messageId, draftId }: { s
                 <Button key={reason} label={label} disabled={reportState?.busy} onPress={()=>{setReportFor(null);void report(reader.id,reason);}} />)}
               <Button label="취소" onPress={()=>setReportFor(null)} />
             </View>}
-            {reader?.kind === 'loading' && <Text accessibilityLiveRegion="polite" style={s.body}>불러오는 중이에요.</Text>}
+            {reader?.kind === 'loading' && <Skeleton />}
             {reader?.kind === 'unavailable' && <Text style={s.body}>지금은 볼 수 없는 글이에요.</Text>}
             {reader?.kind === 'error' && <><Text style={s.body}>글을 불러오지 못했어요.</Text><Button label="다시 시도" onPress={() => { void controller.open(reader.id); }} /></>}
           </ScrollView>

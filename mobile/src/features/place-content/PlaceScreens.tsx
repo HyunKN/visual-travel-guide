@@ -5,6 +5,7 @@ import { Text } from '../../ui/Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { content } from './content';
 import { photos } from './photos';
+import HomePreview from '../public-messages/HomePreviewCard';
 
 // Native mapping of k-style's ink, page-x, r-l and spacing tokens.
 const ink = '#243247';
@@ -36,6 +37,7 @@ export function PlaceHomeScreen() {
       <View style={styles.options}>{places.map(place=><Pressable key={place.id} accessibilityRole="button" accessibilityLabel={`${place.name} 이야기 열기`}
         style={styles.choice} onPress={()=>router.push({pathname:'/places/[placeId]',params:{placeId:place.id}})}><Text style={styles.action}>{place.name}</Text></Pressable>)}</View>
       <Pressable accessibilityRole="button" style={styles.secondary} onPress={()=>router.push('/nearby')}><Text style={styles.link}>주변 장소</Text></Pressable></View>
+    <HomePreview />
     {__DEV__ && <View style={styles.section}>
       <Pressable accessibilityRole="button" onPress={() => router.push('/place-message-preview')} style={styles.secondary}><Text style={styles.link}>쪽지 읽기 예시</Text></Pressable>
       <Pressable accessibilityRole="button" onPress={() => router.push('/development-check')} style={styles.secondary}><Text style={styles.link}>개발 실행 확인</Text></Pressable>

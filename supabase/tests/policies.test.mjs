@@ -19,6 +19,7 @@ test('applies migration; anonymous and independent owners cannot bypass publicat
       create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('test.uid',true),'')::uuid$$;`);
     await pg.exec(await readFile(new URL('../migrations/202611070001_place_messages.sql',import.meta.url),'utf8'));
     await pg.exec(await readFile(new URL('../migrations/202611070002_read_snapshot.sql',import.meta.url),'utf8'));
+    await pg.exec(await readFile(new URL('../migrations/202611070003_home_preview.sql',import.meta.url),'utf8'));
     const a=randomUUID(),b=randomUUID(),msg=randomUUID(),req=randomUUID(),scene='geunjeongjeon-front-v1';
     const session=async(role,id='')=>{await pg.exec('reset role');await pg.query("select set_config('test.uid',$1,false)",[id]);await pg.exec('set role '+role);};
     const write=(request=req,expected=0,body='  실제 글\n둘째 줄',withdraw=false)=>pg.query('select public.vtg_write($1,$2,$3,$4,.2,.7,$5,$6) v',[request,msg,expected,scene,body,withdraw]);
@@ -30,6 +31,9 @@ test('applies migration; anonymous and independent owners cannot bypass publicat
     await assert.rejects(write(randomUUID(),1,'   '),/invalid_body/);
     await assert.rejects(write(randomUUID(),1,'\u00a0\u3000'),/invalid_body/);
     await session('anon');assert.equal((await read()).rows[0].body,'  실제 글\n둘째 줄');await assert.rejects(pg.query('select * from vtg.messages'),/permission denied/);
+    const preview=()=>pg.query('select * from public.vtg_home_preview($1)',[[scene]]);
+    assert.equal((await preview()).rows[0].id,msg);
+    assert.equal((await pg.query('select * from public.vtg_home_preview($1)',[['unknown']])).rows.length,0);
     const markers=await pg.query('select * from public.vtg_markers($1,now())',[scene]);assert.deepEqual(Object.keys(markers.rows[0]).sort(),['id','u','v','created_at'].sort());
     await session('authenticated',b);await assert.rejects(write(randomUUID(),1,'타인 수정'),/conflict/);
     assert.equal((await pg.query('select public.vtg_request_status($1) v',[req])).rows[0].v,null);
@@ -37,6 +41,7 @@ test('applies migration; anonymous and independent owners cannot bypass publicat
     await pg.exec('reset role');assert.equal((await pg.query('select count(*)::int n from vtg.reports')).rows[0].n,1);
     await pg.query('update vtg.messages set hidden=true where id=$1',[msg]);
     await session('anon');assert.equal((await read()).rows.length,0);
+    assert.equal((await preview()).rows.length,0);
     await session('authenticated',a);await assert.rejects(write(randomUUID(),1,'숨김을 덮기'),/conflict/);
     assert.equal((await write(randomUUID(),1,null,true)).rows[0].v,2);assert.equal((await read()).rows.length,0);
   }finally{await pg.close();}

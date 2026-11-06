@@ -47,6 +47,12 @@ function build(c:NonNullable<typeof config>) {
   // Public reads use a separate client with no author identity or session.
   const reader=createClient(c.url,c.key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
   return {
+    async homePreview(scenes:readonly string[],signal:AbortSignal) {
+      const controller=new AbortController(),abort=()=>controller.abort(),timer=setTimeout(abort,15000);
+      if(signal.aborted)abort();else signal.addEventListener('abort',abort,{once:true});
+      try{const {data,error}=await reader.rpc('vtg_home_preview',{p_scenes:[...scenes]}).abortSignal(controller.signal);if(error)throw new Error('Home preview unavailable');return data;}
+      finally{clearTimeout(timer);signal.removeEventListener('abort',abort);}
+    },
     messages:createSceneMessages({
       markers:deviceNotes.privateMarkers,read:deviceNotes.privateRead,
       owned:async id=>(await deviceNotes.getPublication(id))?.serviceId===c.url,
