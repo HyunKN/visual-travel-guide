@@ -4,7 +4,7 @@ import { Text } from '../ui/Text';
 import {router,Stack,useFocusEffect} from 'expo-router';
 import Constants from 'expo-constants';
 import {Action,s} from '../features/local-notes/Editor';
-import {nearbyPlaces} from '../features/location/location';
+import {locationDetails,nearbyPlaces} from '../features/location/location';
 import {createLocationController,type LocationState} from '../features/location/controller';
 import {nativeLocation} from '../features/location/nativeLocation';
 import {content} from '../features/place-content/content';
@@ -22,6 +22,7 @@ export default function Nearby(){
   const [error,setError]=useState('');
   const active=useRef(false);
   const fix=state.kind==='ready'?state.fix:null,busy=state.kind==='locating';
+  const details=locationDetails(fix,state.kind==='ready'?state.checkedAt:0);
   useFocusEffect(useCallback(()=>{
     active.current=true; controller.refreshAge();
     const subscription=AppState.addEventListener('change',value=>{
@@ -48,6 +49,9 @@ export default function Nearby(){
     {unavailable&&<Action label="지도 다시 시도" onPress={()=>{setUnavailable(false);setAttempt(a=>a+1);}}/>}
     <Action label={busy?'위치 확인 중':'현재 위치 확인'} disabled={busy} onPress={()=>{if(active.current&&AppState.currentState==='active'){setError('');void controller.locate();}}}/>
     {busy&&<Action label="취소" onPress={()=>controller.clear()}/>}
+    {details&&<Text accessibilityLiveRegion="polite" style={s.meta}>
+      {new Date(details.timestamp).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false})} 측정 · 위치 오차 {details.accuracyMeters<1?'1m 미만':`약 ${Math.ceil(details.accuracyMeters)}m`}
+    </Text>}
     {!!locationText[state.kind]&&<Text accessibilityLiveRegion="polite" style={s.meta}>{locationText[state.kind]}</Text>}
     {state.kind==='denied'&&!state.canAskAgain&&<Action label="앱 권한 설정 열기" onPress={()=>{void settings();}}/>}
     {state.kind==='disabled'&&<Action label="위치 설정 열기" onPress={()=>{void settings(true);}}/>}

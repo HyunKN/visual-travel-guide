@@ -6,6 +6,11 @@ export function classify(fix:Fix,now:number):'good'|'invalid'|'stale'|'imprecise
   if(fix.accuracy===null||!Number.isFinite(fix.accuracy)||fix.accuracy<0||fix.accuracy>100)return 'imprecise';
   return 'good';
 }
+/** Display the measurement's own time/uncertainty, never a fresh UI check time. */
+export function locationDetails(fix:Fix|null,now:number){
+  if(!fix||classify(fix,now)!=='good'||!Number.isFinite(new Date(fix.timestamp).getTime()))return null;
+  return {timestamp:fix.timestamp,accuracyMeters:fix.accuracy!};
+}
 export function meters(a:Point,b:Point) {
   const rad=Math.PI/180;
   const h=Math.sin((b.latitude-a.latitude)*rad/2)**2+Math.cos(a.latitude*rad)*Math.cos(b.latitude*rad)*Math.sin((b.longitude-a.longitude)*rad/2)**2;

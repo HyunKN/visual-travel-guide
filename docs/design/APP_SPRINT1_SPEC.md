@@ -131,6 +131,8 @@ Supabase 기존 선택을 유지한다. 읽기는 로그인 없이, 첫 공개 �
 
 위치는 사용자 행동 시 foreground 권한만 요청한다. expo-location SDK 57, requestForegroundPermissionsAsync/getCurrentPositionAsync를 adapter 뒤에 둔다. 15초 대기 상한, 늦은 결과 무효화. 관측 시각 60초 이내·accuracy 100m 이내부터 현재 위치 안내에 사용하고 나머지는 stale/imprecise 상태로 분리한다. 이 값은 방문 인증·인식 임곗값이 아니다. [Location API](https://docs.expo.dev/versions/v57.0.0/sdk/location/).
 
+유효한 위치에는 측정한 현지 시각과 보고된 오차(m)를 표시한다. 화면에서 다시 검사한 시각을 새 측정 시각처럼 표시하지 않는다. 만료·거부·정확도 미확보에서는 이 정보를 내리고 직접 선택을 유지한다. 현재 위치의 정밀 숫자 좌표를 별도 보조 레이블로 추가하지 않는다.
+
 검수된 좌표+출처가 있는 장소만 지도·거리 계산에 사용한다. react-native-maps의 2D 지도에 현재 위치/정확도와 지원 장소 marker를 표시하고 같은 placeId 설명으로 이동한다. [SDK 57 지도 문서](https://docs.expo.dev/versions/v57.0.0/sdk/map-view/)에 따른 공급자 설정·제한된 Android 키·새 빌드가 필요하다. 지도 키/타일 실패를 가짜 지도로 감추지 않고 목록·직접 선택으로 복구한다. 지도 설정과 장소 좌표가 미확보이면 #31 인수는 남는다. 위치 기록을 영구 저장/서버 전송하지 않는다.
 
 ## 9. 검증 계약과 개발 순서
