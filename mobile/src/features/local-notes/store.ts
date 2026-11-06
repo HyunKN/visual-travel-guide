@@ -1,5 +1,6 @@
 import { validAnchor, validateBody, type Anchor, type Messages } from '../place-messages/contract';
-import type { PublicationJob, PublicationState } from '../public-messages/publication';
+import type { PublicationJob, PublicationState, WritePayload } from '../public-messages/publication';
+import type {Inspection} from '../public-messages/recovery';
 import type {Boundary} from '../public-messages/sceneMessages';
 
 export type Visibility = 'private' | 'public' | null;
@@ -19,18 +20,20 @@ const table = `id TEXT PRIMARY KEY NOT NULL, sceneId TEXT NOT NULL, u REAL NOT N
   revision INTEGER NOT NULL CHECK(revision>=0), updatedAt TEXT NOT NULL`;
 export async function migrate(tx: Connection) {
   const version = (await tx.getFirstAsync<{ user_version: number }>('PRAGMA user_version'))?.user_version;
-  if (version === 2) return;
-  if (version !== 0 && version !== 1) throw new Error('Unsupported database version');
+  if (version === 3) return;
+  if (version !== 0 && version !== 1 && version !== 2) throw new Error('Unsupported database version');
   if (version === 0) await tx.execAsync(`CREATE TABLE drafts(${table});
     CREATE TABLE notes(${table}, createdAt TEXT NOT NULL, CHECK(visibility IS 'private'));
     CREATE INDEX notes_scene ON notes(sceneId,createdAt DESC,id DESC);
     PRAGMA user_version=1;`);
-  await tx.execAsync(`CREATE TABLE publication_jobs(
+  if(version!==2) await tx.execAsync(`CREATE TABLE publication_jobs(
     noteId TEXT PRIMARY KEY NOT NULL, requestId TEXT NOT NULL UNIQUE,
     ownerId TEXT NOT NULL, serviceId TEXT NOT NULL, submittedRevision INTEGER NOT NULL, payload TEXT NOT NULL,
     state TEXT NOT NULL CHECK(state IN ('pending','uncertain','published','withdrawn','conflict','rejected')),
     serverVersion INTEGER, updatedAt TEXT NOT NULL);
     PRAGMA user_version=2;`);
+  await tx.execAsync(`ALTER TABLE publication_jobs ADD COLUMN stateSource TEXT NOT NULL DEFAULT 'request'
+    CHECK(stateSource IN ('request','observation')); PRAGMA user_version=3;`);
 }
 export function createStore(transaction: Transaction, newId: () => string, now = () => new Date().toISOString()) {
   let tail = Promise.resolve();
@@ -62,6 +65,33 @@ export function createStore(transaction: Transaction, newId: () => string, now =
     }
     await tx.runAsync('UPDATE drafts SET u=?,v=?,body=?,visibility=?,revision=?,updatedAt=? WHERE id=?',
       d.u,d.v,d.body,d.visibility,d.revision,now(),d.id);
+  }
+  async function savePrivate(tx:Connection,d:Draft) {
+    await protectPublication(tx,d.id);
+    if(d.visibility!=='private'||validateBody(d.body))throw new Error('Invalid note');
+    if(!(await draft(tx,d.id))){
+      const n=await tx.getFirstAsync<Draft>('SELECT * FROM notes WHERE id=?',d.id);
+      if(n&&n.revision===d.revision&&n.body===d.body&&n.sceneId===d.sceneId&&n.u===d.u&&n.v===d.v)return;
+      throw new Error('Missing draft');
+    }
+    await write(tx,d);
+    await tx.runAsync(`INSERT INTO notes(${columns},createdAt) SELECT ${columns},? FROM drafts WHERE id=?
+      ON CONFLICT(id) DO UPDATE SET body=excluded.body,u=excluded.u,v=excluded.v,revision=excluded.revision,updatedAt=excluded.updatedAt`,now(),d.id);
+    await tx.runAsync('DELETE FROM drafts WHERE id=?',d.id);
+  }
+  async function pending(tx:Connection,d:Draft,ownerId:string,serviceId:string,payload:WritePayload,revision:number,version:number|null) {
+    await tx.runAsync(`INSERT INTO publication_jobs(noteId,requestId,ownerId,serviceId,submittedRevision,payload,state,serverVersion,updatedAt,stateSource)
+      VALUES(?,?,?,?,?,?,'pending',?,?,'request') ON CONFLICT(noteId) DO UPDATE SET requestId=excluded.requestId,
+      submittedRevision=excluded.submittedRevision,payload=excluded.payload,state='pending',serverVersion=excluded.serverVersion,
+      updatedAt=excluded.updatedAt,stateSource='request'`,d.id,newId(),ownerId,serviceId,revision,JSON.stringify(payload),version,now());
+    return (await job(tx,d.id))!;
+  }
+  async function conflict(tx:Connection,d:Draft,ownerId:string,serviceId:string,inspection:Inspection) {
+    const previous=await job(tx,d.id),state=inspection.state;
+    if(!previous||previous.state!=='conflict'||previous.requestId!==inspection.requestId||previous.ownerId!==ownerId||previous.serviceId!==serviceId||
+      inspection.noteId!==d.id||state.id!==d.id||state.sceneId!==d.sceneId||previous.payload.p_scene!==d.sceneId||
+      (state.kind==='found'&&(!Number.isSafeInteger(state.version)||state.version<1||!validAnchor(state))))throw new Error('Stale conflict inspection');
+    return previous;
   }
   const messages: Messages = {
     list: (sceneId, cursor) => transact(async tx => {
@@ -111,19 +141,7 @@ export function createStore(transaction: Transaction, newId: () => string, now =
       return draft(tx,id);
     }),
     saveDraft: (d: Draft) => transact(tx => write(tx,d)),
-    savePrivate: (d: Draft) => transact(async tx => {
-      await protectPublication(tx,d.id);
-      if (d.visibility !== 'private' || validateBody(d.body)) throw new Error('Invalid note');
-      if (!(await draft(tx,d.id))) {
-        const n = await tx.getFirstAsync<Draft>('SELECT * FROM notes WHERE id=?',d.id);
-        if (n && n.revision === d.revision && n.body === d.body && n.sceneId === d.sceneId && n.u === d.u && n.v === d.v) return;
-        throw new Error('Missing draft');
-      }
-      await write(tx,d);
-      await tx.runAsync(`INSERT INTO notes(${columns},createdAt) SELECT ${columns},? FROM drafts WHERE id=?
-        ON CONFLICT(id) DO UPDATE SET body=excluded.body,u=excluded.u,v=excluded.v,revision=excluded.revision,updatedAt=excluded.updatedAt`,now(),d.id);
-      await tx.runAsync('DELETE FROM drafts WHERE id=?',d.id);
-    }),
+    savePrivate: (d: Draft) => transact(tx => savePrivate(tx,d)),
     list: () => transact(tx => tx.getAllAsync<LocalItem>(`SELECT local.*,
       (SELECT state FROM publication_jobs WHERE noteId=local.id) AS publicationState FROM (
       SELECT ${columns},'draft' AS kind FROM drafts UNION ALL
@@ -153,11 +171,27 @@ export function createStore(transaction: Transaction, newId: () => string, now =
       const payload=withdraw ? {...previous!.payload,p_expected:previous!.serverVersion!,p_withdraw:true,p_body:null} : {
         p_id:d.id,p_expected:previous?.serverVersion??0,p_scene:d.sceneId,p_u:d.u,p_v:d.v,p_body:d.body,p_withdraw:false,
       };
-      const requestId=newId();
-      await tx.runAsync(`INSERT INTO publication_jobs(noteId,requestId,ownerId,serviceId,submittedRevision,payload,state,serverVersion,updatedAt)
-        VALUES(?,?,?,?,?,?,'pending',?,?) ON CONFLICT(noteId) DO UPDATE SET requestId=excluded.requestId,submittedRevision=excluded.submittedRevision,payload=excluded.payload,
-        state='pending',updatedAt=excluded.updatedAt`,d.id,requestId,ownerId,serviceId,withdraw?previous!.submittedRevision:d.revision,JSON.stringify(payload),previous?.serverVersion??null,now());
-      return (await job(tx,d.id))!;
+      return pending(tx,d,ownerId,serviceId,payload,withdraw?previous!.submittedRevision:d.revision,previous?.serverVersion??null);
+    }),
+    prepareConflictPublication: (d:Draft,ownerId:string,serviceId:string,inspection:Inspection,withdraw:boolean) => transact(async tx=>{
+      const previous=await conflict(tx,d,ownerId,serviceId,inspection),state=inspection.state;
+      if(withdraw){if(state.kind!=='found'||!state.visible)throw new Error('No visible publication');}
+      else if(d.visibility!=='public'||validateBody(d.body)||(state.kind==='found'&&state.hidden))throw new Error('Public consent required');
+      await write(tx,d);
+      const version=state.kind==='found'?state.version:null;
+      const anchor=withdraw&&state.kind==='found'?state:d;
+      return pending(tx,d,ownerId,serviceId,{
+        p_id:d.id,p_expected:version??0,p_scene:d.sceneId,p_u:anchor.u,p_v:anchor.v,p_body:withdraw?null:d.body,p_withdraw:withdraw,
+      },withdraw?previous.submittedRevision:d.revision,version);
+    }),
+    saveConflictPrivate: (d:Draft,ownerId:string,serviceId:string,inspection:Inspection) => transact(async tx=>{
+      await conflict(tx,d,ownerId,serviceId,inspection);
+      const state=inspection.state;
+      if(state.kind==='found'&&state.visible)throw new Error('Withdraw publication first');
+      // This is an observation of current absence, never a receipt for the failed request.
+      await tx.runAsync("UPDATE publication_jobs SET state='withdrawn',stateSource='observation',serverVersion=?,updatedAt=? WHERE noteId=?",
+        state.kind==='found'?state.version:null,now(),d.id);
+      await savePrivate(tx,d);
     }),
     settlePublication: (id:string,requestId:string,state:PublicationState,version:number|null=null) => transact(async tx=>{
       const current=await job(tx,id);

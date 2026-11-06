@@ -1,5 +1,15 @@
 # Android 앱 개발 검증
 
+## 2026-11-07 공개 글 충돌 복구 (#34·33 보완)
+
+- 관찰: 기존 `editorAction`은 conflict에서 반영·철회·개인 저장을 모두 막았다. 기존 소유권/초안 보호·version 계약 안에서 복구 경로를 보완했다. 새 계정 복구·자동 병합·추천 정책은 추가하지 않았다. 기존 AI/검색보다 흔적 발견이 유용하다는 가설은 별도 사용자 비교가 필요하며 이번 실패 복구 검사로 입증하지 않는다.
+- `vtg_owner_state`(migration 0005)는 본인 서버 글의 version·본문·위치·노출/숨김만 인증된 관리 조회로 반환한다. 타인/없는 ID는 같은 빈 결과, 비로그인은 EXECUTE 불가다. 숨김 글의 일반 공개 읽기와 기본 테이블 직접 접근은 계속 차단한다.
+- `createConflictRecovery.inspect/act`와 편집기를 연결했다. 서버 글은 메모리에서만 별도 표시하고 초안을 대입하지 않는다. 반영/철회/개인 저장을 명시적으로 확인한 뒤 서버를 재조회한다. 상태가 달라지면 요청 생성 전 중단하고 다시 확인한다. 새 요청도 서버 expected-version을 검사하며, 철회에는 초안 본문을 넣지 않는다. 숨김 재공개를 막고, 응답 유실은 같은 request/동의로 확인한다. 세션 유실 시 자동 익명 재가입은 하지 않는다.
+- SQLite schema 3은 기존 v1/v2 글·동의 snapshot을 보존하며 `stateSource`를 추가한다. 이미 철회/본인 사본 없음을 조회한 개인 저장은 `observation`으로 남기고 실패한 request의 성공 영수증으로 바꾸지 않는다. 원본 request/payload/revision을 보존하며 관측 version·개인 저장을 원자적으로 처리한다. 이후 재공개는 새 request 근거로 바뀐다. 다른 세션의 향후 재공개를 영구 방지하는 기능은 아니다.
+- 실행: 메시지/실제 SDK 합성 HTTP **77/77**, PostgreSQL 엔진 정책·실제 SQLite↔SQL **6/6**. 새 복구 9개와 SQL 2개: 재반영·서버 재수정·숨김·철회·없는 사본·잘못된 owner/service/scene·stale draft·migration/개인 저장 rollback·응답 유실 후 같은 요청 확인. SQL은 기존 게시 후 upgrade와 비로그인/다른 사용자/owner 없는 인증·숨김/철회 접근도 검사했다. SDK 인증 헤더 분리 검사에 관리 조회를 추가했다.
+- TypeScript·lint(오류/경고 0), Android JS/Hermes 컴파일 **1,737 modules·30 assets** 통과. Node SQLite experimental 및 기존 색상 환경 경고는 있었으며 검사 실패는 없었다. 실제 Supabase Auth/PostgREST·원격 migration 0005·Android 복구 화면·기기 DB migration/프로세스 종료·최종 사용자 인수는 **미실행**이다. 로컬 엔진/합성 HTTP 통과는 실제 전달 검증이 아니다.
+- 앱·에뮬레이터·개발 HTTP 서버·새 native APK 빌드/설치·의존성 다운로드는 실행하지 않았다. [공유 안내](../supabase/README.md#버전-충돌에서-복구)에 0001→0005 적용과 실제 충돌 재현 순서를 갱신했다. #34·33의 사람 완료 상태는 유지한다. 공통 소유권/흐름은 유지하며 세부 계약을 기존 명세·공유 안내에 기록했다. 다른 스레드의 공통 ARCHITECTURE 등 미커밋 변경은 포함하지 않는다.
+
 ## 2026-11-07 공유 제한의 재시도 시각 (#34 보완)
 
 - 남은 조건 대조에서 SQL의 `rate_limited`에 재시도 시각이 없는 것을 확인했다. 기존 상세 설계 §7의 누락을 구현했으며 새 횟수 정책/제품 기능을 추가하지 않았다. 읽기 전용 프로세스 조회에서는 adb·emulator/qemu·Node 실행 항목이 없었으므로 기존 기기 실행 증거를 재사용하지 않았다.

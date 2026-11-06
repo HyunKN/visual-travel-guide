@@ -108,6 +108,7 @@ Supabase 기존 선택을 유지한다. 읽기는 로그인 없이, 첫 공개 �
 - 앱은 publishable key만 사용. service-role·DB password는 앱/저장소에 넣지 않는다. 서버는 owner=auth.uid(), scene 존재/게시 가능, finite 좌표, 본문 byte·공백 제한을 검증한다.
 - 공개 읽기는 visible만. 숨김/삭제는 일반 목록·단건에서 제외한다. 작성자 관리 조회는 본인만. 타인 수정/삭제 거부, owner/createdAt/moderation 임의 변경 금지. RLS뿐 아니라 column grant/RPC 입력도 제한한다.
 - 쓰기는 publish/update/withdraw RPC로 묶고 client 직접 DML을 제한한다. request UUID+owner+payload hash가 같으면 이전 결과 반환, 다른 payload 재사용은 conflict. version 조건부 수정으로 오래된 편집 덮어쓰기 거부.
+- 충돌 복구는 본인 서버 글과 초안을 구분해 확인한 뒤 명시적으로 반영/철회한다. 행동 직전에 서버 상태를 재조회하고, 달라졌으면 중단한다. 숨김 글 재공개는 금지한다. 이미 철회됐거나 본인 공개 사본이 없으면 조회 근거와 실패한 요청의 결과를 구분해 개인 저장한다. 서버 본문은 메모리에만 두고 자동 덮어쓰기/재반영하지 않는다. 구체 RPC·기기 schema 계약은 [공유 구현 안내](../../supabase/README.md#버전-충돌에서-복구)를 따른다.
 - publish timeout은 uncertain. 같은 requestId 상태 조회 후 결정하며 새 UUID로 자동 재게시하지 않는다. 조회에서 아직 미확인인 동안 로컬 초안을 유지한다. 중복 버튼도 같은 job을 사용한다.
 - 공개 → 나만 보기: 철회 확인 후에만 private로 표시. 오프라인이면 ‘철회 확인 중’이며 공개되지 않는다고 약속하지 않는다. 철회 후 재공개는 새 requestId와 증가 version, 같은 noteId로 명시 처리.
 - 신고는 인증된 세션에서 messageId+사유(스팸/불쾌한 내용/개인정보/기타)를 전달. 같은 작성자의 같은 글 중복 신고는 하나. 일반 사용자는 신고 내역을 읽지 못한다. 관리자의 숨김은 서버 전용 권한으로 수행한다. 신고만으로 자동 숨김하지 않는다.

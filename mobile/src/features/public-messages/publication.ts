@@ -1,6 +1,6 @@
 export type PublicationState='pending'|'uncertain'|'published'|'withdrawn'|'conflict'|'rejected';
 export type WritePayload={p_id:string;p_expected:number;p_scene:string;p_u:number;p_v:number;p_body:string|null;p_withdraw:boolean};
-export type PublicationJob={noteId:string;requestId:string;ownerId:string;serviceId:string;submittedRevision:number;payload:WritePayload;state:PublicationState;serverVersion:number|null;updatedAt:string};
+export type PublicationJob={noteId:string;requestId:string;ownerId:string;serviceId:string;submittedRevision:number;payload:WritePayload;state:PublicationState;serverVersion:number|null;stateSource:'request'|'observation';updatedAt:string};
 export type RateLimitInfo=Readonly<{reason:'rate-limited';retryAt:string|null}>;
 /** Feedback describes this attempt only; durable job/consent fields remain unchanged. */
 export type DeliveryResult=PublicationJob & {rateLimit?:RateLimitInfo};

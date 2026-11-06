@@ -68,7 +68,9 @@ test('rejected update retains withdrawal control; missing status or conflict can
   const job={state:'rejected',payload:{p_withdraw:false},serverVersion:1};
   assert.equal(editorAction(draft,job,true,true).canWithdraw,true);
   assert.equal(editorAction(draft,job,true,true).disabled,true);
-  assert.equal(editorAction(draft,{...job,state:'conflict'},true,true).disabled,true);
+  const conflict=editorAction({...draft,body:''},{...job,state:'conflict'},true,true);
+  assert.equal(conflict.disabled,false);assert.equal(conflict.operation,'inspect');
+  assert.equal(conflict.canDiscard,false);assert.equal(conflict.canWithdraw,false);
   assert.equal(editorAction(draft,null,true,false).disabled,true);
   assert.equal(editorAction(draft,{...job,state:'withdrawn'},true,true).disabled,false);
 });

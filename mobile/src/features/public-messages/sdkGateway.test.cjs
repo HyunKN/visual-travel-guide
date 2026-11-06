@@ -14,13 +14,16 @@ const user={id:owner,aud:'authenticated',role:'authenticated',is_anonymous:true}
 const authReply={access_token:jwt,refresh_token:'synthetic-refresh',token_type:'bearer',expires_in:3600,user};
 const json=(value,status=200)=>new Response(JSON.stringify(value),{status,headers:{'Content-Type':'application/json'}});
 test('real SDK signs in, saves before authenticated RPC and keeps public reads anonymous',async()=>{
-  let saved=null,posts=0,publicReads=0;
+  let saved=null,posts=0,publicReads=0,ownerReads=0;
   const gateway=createSdkGateway('https://synthetic.supabase.co','sb_publishable_synthetic',async(input,init)=>{
     const path=new URL(String(input)).pathname,headers=new Headers(init.headers);
     if(path==='/auth/v1/signup'){assert.equal(JSON.parse(init.body).data!==undefined,true);return json(authReply);}
     if(path==='/auth/v1/user')return json(user);
     if(path==='/rest/v1/rpc/vtg_write'){
       assert.ok(saved);assert.equal(headers.get('Authorization'),'Bearer '+jwt);posts++;return json(1);
+    }
+    if(path==='/rest/v1/rpc/vtg_owner_state'){
+      assert.ok(saved);assert.equal(headers.get('Authorization'),'Bearer '+jwt);ownerReads++;return json([]);
     }
     if(path==='/rest/v1/rpc/vtg_snapshot'){
       assert.notEqual(headers.get('Authorization'),'Bearer '+jwt);publicReads++;return json('2026-11-07T00:00:00Z');
@@ -31,7 +34,8 @@ test('real SDK signs in, saves before authenticated RPC and keeps public reads a
   await author.run(null,true,()=>gateway.write('vtg_write',{p_request:'synthetic-request'}));
   await gateway.read('vtg_snapshot',{},new AbortController().signal);
   await author.run(owner,false,()=>gateway.write('vtg_write',{p_request:'same-synthetic-request'}));
-  assert.equal(saved.ownerId,owner);assert.equal(posts,2);assert.equal(publicReads,1);
+  await author.run(owner,false,()=>gateway.write('vtg_owner_state',{p_id:'synthetic-id',p_scene:'scene'}));
+  assert.equal(saved.ownerId,owner);assert.equal(posts,2);assert.equal(publicReads,1);assert.equal(ownerReads,1);
 });
 test('real SDK refreshes expired session and persists rotated tokens before RPC',async()=>{
   const expired={ownerId:owner,accessToken:token(Math.floor(Date.now()/1000)-3600),refreshToken:'synthetic-old'};

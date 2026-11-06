@@ -7,6 +7,7 @@ import {createPublisher} from './publication';
 import {deviceNotes} from '../local-notes/device';
 import type {Draft} from '../local-notes/store';
 import {createSceneMessages} from './sceneMessages';
+import {createConflictRecovery,createOwnStateRemote,type Inspection,type RecoveryOperation} from './recovery';
 
 export function publicConfiguration(url:unknown,key:unknown) {
   if(typeof url!=='string' || typeof key!=='string' || !/^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/.test(url) || !/^sb_publishable_[a-zA-Z0-9_-]+$/.test(key)) return null;
@@ -23,7 +24,14 @@ function build(c:NonNullable<typeof config>) {
     async remove(key){const s=await import('expo-secure-store');await s.deleteItemAsync(key);},
   },'vtg-author-'+new URL(c.url).hostname,()=>uuid.v4());
   const author=createAuthorSession(vault,gateway.auth);
+  async function recovery<T>(work:(value:ReturnType<typeof createConflictRecovery>)=>Promise<T>) {
+    const bound=await deviceNotes.publicationOwner(c.url);
+    return author.run(bound,false,owner=>work(createConflictRecovery(deviceNotes,
+      createPublicationRemote(owner,c.url,gateway.write),createOwnStateRemote(gateway.write))));
+  }
   return {
+    inspectPublication:(id:string)=>recovery(value=>value.inspect(id)),
+    recoverPublication:(draft:Draft,inspection:Inspection,operation:RecoveryOperation)=>recovery(value=>value.act(draft,inspection,operation)),
     async homePreview(scenes:readonly string[],signal:AbortSignal) {
       return gateway.read('vtg_home_preview',{p_scenes:[...scenes]},signal);
     },
