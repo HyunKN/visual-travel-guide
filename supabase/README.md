@@ -4,11 +4,17 @@
 
 서비스는 아직 없으며 현재 Android 앱은 글을 전송하지 않는다. [migration](migrations/202611070001_place_messages.sql)은 공개를 명시한 글만 받는다. 개인 글·초안·사용자 사진은 이 스키마에 없다. 모바일과 별도로 아래 SQL을 로컬 PostgreSQL 엔진에서 검사할 수 있다. 서버 프로세스·클라우드 계정이 필요하지 않다.
 
+기기 게시 경계는 [publication.ts](../mobile/src/features/public-messages/publication.ts), [RPC adapter](../mobile/src/features/public-messages/remote.ts), [SQLite 저장소](../mobile/src/features/local-notes/store.ts)에 구현했다. 게시를 누른 시점의 본문·위치·revision·작성자·서비스·요청 ID를 한 트랜잭션으로 보호한다. `createPublisher().deliver(noteId)`는 상태 확인 후 같은 요청을 재전송하며 중복 호출을 합친다. 아직 실제 Supabase 클라이언트·세션이나 작성 화면에서 호출하지 않는다.
+
+미확인 요청이 있으면 새 게시·나만 보기 저장·초안/기기 삭제를 거부한다. 수정 초안은 별도로 보존한다. 서버가 철회를 확인하기 전에는 비공개 전환을 완료하지 않는다. 공개 글의 수정이 거부돼도 이전 공개 사본이 사라졌다고 표시하지 않는다. DB schema 1→2 migration은 기존 개인 글을 보존한다.
+
 ```powershell
 cd supabase/tests
 npm ci --ignore-scripts
 npm test
 ```
+
+먼저 `mobile/` 의존성이 설치돼 있어야 한다. pretest가 실제 앱의 게시·SQLite 코드를 컴파일하고, 서버 정책과 앱↔SQL 전달 검사를 실행한다. 후자는 실제 SQLite와 PostgreSQL을 사용하지만 네트워크·Supabase Auth·Android의 검사를 대신하지 않는다.
 
 **본인이 준비할 것:** 공유를 검증할 때 [Supabase Dashboard](https://supabase.com/dashboard)에서 별도의 개발 프로젝트를 만든다. 본인 조직·지역·플랜을 확인하고 DB 비밀번호를 직접 보관한다. Authentication에서 [Anonymous Sign-Ins](https://supabase.com/docs/guides/auth/auth-anonymous)를 활성화한다. 프로젝트 URL/이름만 알려주면 연결 대상 확인이 가능하다. DB 비밀번호·secret/service-role 키·세션 토큰을 전달하지 않는다. Android 앱에는 프로젝트 URL과 클라이언트용 publishable key만 사용한다.
 
