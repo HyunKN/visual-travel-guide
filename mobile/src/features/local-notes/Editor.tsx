@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, TextInput, View, type ImageSourcePropType } from 'react-native';
-import { Text } from '../../ui/Text';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Alert, AppState, BackHandler, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, View, type ImageSourcePropType } from 'react-native';
+import { usePreventRemove } from 'expo-router/react-navigation';
+import { useNavigation } from 'expo-router';
+import { PhotoReadingText as Text,PhotoReadingAction as Action,photoReadingSurface } from '../../ui/PhotoReading';
 import { validateBody } from '../place-messages/contract';
 import { deviceNotes } from './device';
 import type { Draft } from './store';
@@ -9,21 +10,20 @@ import {getPublicService,publicServiceConfigured} from '../public-messages/nativ
 import type {DeliveryResult,PublicationJob} from '../public-messages/publication';
 import {RecoveryChanged,recoveryOptions,type Inspection,type RecoveryOperation} from '../public-messages/recovery';
 import {editorAction} from '../public-messages/editorAction';
-import { Action } from '../../ui/Action';
 import { color, layout, textStyles } from '../../ui/theme';
 import { rateLimitText } from '../public-messages/feedback';
 import { PhotoGlass } from '../../ui/PhotoGlass';
 import type { Rect } from '../place-messages/geometry';
 export { Action } from '../../ui/Action';
 
-export default function Editor({initial,onClose,onMove,photo}: {initial:Draft;onClose:()=>void;onMove?: (draft:Draft)=>void;photo?:{source:ImageSourcePropType;rect:Rect}}) {
-  const insets = useSafeAreaInsets();
+export default function Editor({initial,onClose,onMove,photo,side='bottom',stage,viewport,compact=false}: {initial:Draft;onClose:()=>void;onMove?: (draft:Draft)=>void;photo?:{source:ImageSourcePropType;rect:Rect};side?:'top'|'bottom';stage?:Rect;viewport?:Rect;compact?:boolean}) {
+  const navigation=useNavigation();
   const [value,setValue] = useState(initial), [busy,setBusy] = useState(false), [error,setError] = useState('');
-  const last = useRef(initial), timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const last = useRef(initial);
   const lock = useRef(false), mounted = useRef(true);
   const [job,setJob]=useState<PublicationJob|null>(null),[jobLoaded,setJobLoaded]=useState(false);
   const [inspection,setInspection]=useState<Inspection|null>(null);
-  const inputRef=useRef<TextInput>(null),panelRef=useRef<View>(null);
+  const inputRef=useRef<TextInput>(null),panelRef=useRef<View>(null),focused=useRef(false),closeAction=useRef(()=>{});
   const [panel,setPanel]=useState<Rect>({x:0,y:0,width:0,height:0});
   const publication=job?.state??null;
   async function refreshJob(){
@@ -31,24 +31,33 @@ export default function Editor({initial,onClose,onMove,photo}: {initial:Draft;on
     if(mounted.current){setJob(next);setJobLoaded(true);}
   }
   useEffect(()=>{let active=true;void deviceNotes.getPublication(initial.id).then(next=>{if(active){setJob(next);setJobLoaded(true);}},()=>{if(active)setError('공개 상태를 확인하지 못했어요.');});return ()=>{active=false;};},[initial.id]);
-  useEffect(() => { mounted.current = true; return () => { mounted.current = false; clearTimeout(timer.current); }; },[]);
+  useEffect(() => {
+    mounted.current = true;
+    const background=AppState.addEventListener('change',state=>{if(state!=='active')void deviceNotes.saveDraft(last.current).catch(()=>{if(mounted.current)setError('초안을 저장하지 못했어요. 입력은 이 화면에 남아 있어요.');});});
+    const back=BackHandler.addEventListener('hardwareBackPress',()=>{closeAction.current();return true;});
+    return () => { mounted.current = false;background.remove();back.remove(); };
+  },[]);
+  usePreventRemove(true,({data})=>{void finish('leave',()=>requestAnimationFrame(()=>navigation.dispatch(data.action)));});
+  closeAction.current=()=>{void finish('leave');};
   function change(patch: Partial<Pick<Draft,'body'|'visibility'>>) {
     if (lock.current) return;
     const next = {...last.current,...patch,revision:last.current.revision+1};
-    last.current = next; setValue(next); setError(''); clearTimeout(timer.current);
-    timer.current = setTimeout(() => { void deviceNotes.saveDraft(next).catch(() => {
+    last.current = next; setValue(next); setError('');
+    // Queue every edit immediately: backgrounding or route changes cannot cancel a debounce.
+    void deviceNotes.saveDraft(next).catch(() => {
       if (mounted.current && last.current === next && !lock.current) setError('초안을 저장하지 못했어요.');
-    }); },500);
+    });
   }
-  async function finish(mode:'leave'|'save'|'discard'|'move') {
+  async function finish(mode:'leave'|'save'|'discard'|'move',after?:()=>void) {
     if (lock.current) return;
-    lock.current = true; setBusy(true); clearTimeout(timer.current);
+    lock.current = true; setBusy(true);
     try {
       const d = last.current;
       if (mode === 'save') await deviceNotes.savePrivate(d);
       else if (mode === 'discard') await deviceNotes.discardDraft(d.id);
       else await deviceNotes.saveDraft(d);
       if (mode === 'move' && onMove) onMove(d); else onClose();
+      after?.();
     } catch { setError('저장소에 변경을 반영하지 못했어요. 입력은 그대로 있어요.'); }
     finally { lock.current = false; if (mounted.current) setBusy(false); }
   }
@@ -63,7 +72,7 @@ export default function Editor({initial,onClose,onMove,photo}: {initial:Draft;on
   }
   async function recover(operation:RecoveryOperation|'inspect') {
     if(lock.current)return;
-    lock.current=true;setBusy(true);clearTimeout(timer.current);setError('');
+    lock.current=true;setBusy(true);setError('');
     try{
       await deviceNotes.saveDraft(last.current);
       const service=getPublicService();
@@ -91,7 +100,7 @@ export default function Editor({initial,onClose,onMove,photo}: {initial:Draft;on
   }
   async function publish(withdraw=false) {
     if(lock.current)return;
-    lock.current=true;setBusy(true);clearTimeout(timer.current);setError('');
+    lock.current=true;setBusy(true);setError('');
     try {
       await deviceNotes.saveDraft(last.current);
       const job=await getPublicService().publish(last.current,withdraw);
@@ -110,15 +119,10 @@ export default function Editor({initial,onClose,onMove,photo}: {initial:Draft;on
       {text:'취소',style:'cancel'},{text:'공개하기',onPress:()=>{void publish();}},
     ]);
   }
-  return <Modal visible transparent statusBarTranslucent navigationBarTranslucent onRequestClose={() => { void finish('leave'); }} animationType="none"
-    onShow={()=>requestAnimationFrame(()=>{if(mounted.current)inputRef.current?.focus();})}>
-    <KeyboardAvoidingView style={[s.overlay,{paddingTop:insets.top+16,paddingBottom:insets.bottom+8}]} behavior={Platform.OS==='ios'?'padding':'height'}>
-    <View ref={panelRef} collapsable={false} style={s.page} accessibilityViewIsModal onAccessibilityEscape={()=>{void finish('leave');}}
-      onLayout={()=>panelRef.current?.measureInWindow((x,y,width,height)=>setPanel({x,y,width,height}))}>
-      {photo&&<PhotoGlass source={photo.source} image={photo.rect} frame={panel} tint={.82}/>}
+  const form=<>
       <View style={s.row}><Text style={s.title} accessibilityRole="header">쪽지 쓰기</Text><Action label="닫기" disabled={busy} onPress={() => { void finish('leave'); }} /></View>
-      <ScrollView style={s.scroll} keyboardShouldPersistTaps="handled" keyboardDismissMode="none" contentContainerStyle={s.form}>
-        <TextInput ref={inputRef} showSoftInputOnFocus multiline accessibilityLabel="쪽지 내용" placeholder="무엇을 발견했나요?" placeholderTextColor={color.secondary} value={value.body}
+      <View style={s.form}>
+        <TextInput ref={inputRef} showSoftInputOnFocus multiline accessibilityLabel="쪽지 내용" placeholder="무엇을 발견했나요?" placeholderTextColor="#353535" value={value.body}
           underlineColorAndroid="transparent" selectionColor={color.accent} cursorColor={color.ink} submitBehavior="newline"
           editable={!busy} onChangeText={body => change({body})} textAlignVertical="top" style={s.input} />
         {onMove && <Action label="위치 변경" disabled={busy} onPress={() => { void finish('move'); }} />}
@@ -144,19 +148,25 @@ export default function Editor({initial,onClose,onMove,photo}: {initial:Draft;on
         {invalid === 'too-large' && <Text accessibilityRole="alert" style={s.meta}>글이 너무 길어요. 내용을 줄여 주세요.</Text>}
         {error !== '' && <Text accessibilityRole="alert" style={s.meta}>{error}</Text>}
         {!jobLoaded && <Action label="공개 상태 다시 확인" disabled={busy} onPress={()=>{void refreshJob().catch(()=>setError('공개 상태를 확인하지 못했어요.'));}} />}
-      </ScrollView>
+      </View>
       <View style={s.row}><Action label="초안 버리기" variant="danger" disabled={busy||!action.canDiscard} onPress={() => Alert.alert('작성 중인 초안을 버릴까요?',undefined,[
         {text:'취소',style:'cancel'},{text:'버리기',style:'destructive',onPress:()=>{ void finish('discard'); }},
       ])} /><Action label={action.label} variant="primary" busy={busy}
         disabled={busy || action.disabled}
         onPress={()=>{if(action.operation==='inspect')void recover('inspect');else if(action.operation!=='private')confirmPublish();else void finish('save');}} /></View>
-    </View></KeyboardAvoidingView>
-  </Modal>;
+  </>;
+  return <KeyboardAvoidingView pointerEvents="box-none" style={[s.overlay,{justifyContent:side==='top'?'flex-start':'flex-end'},viewport&&{top:viewport.y,left:viewport.x,width:viewport.width,height:viewport.height,bottom:undefined,right:undefined}]} behavior={Platform.OS==='ios'?'padding':undefined}>
+    <View ref={panelRef} collapsable={false} style={[s.page,compact&&s.compactPage]} accessibilityViewIsModal onAccessibilityEscape={()=>{void finish('leave');}}
+      onLayout={({nativeEvent:{layout}})=>{setPanel(layout);if(!focused.current){focused.current=true;requestAnimationFrame(()=>{if(mounted.current)inputRef.current?.focus();});}}}>
+      {photo&&<PhotoGlass source={photo.source} image={photo.rect} frame={{...panel,x:panel.x+(viewport?.x??0),y:panel.y+(viewport?.y??0)}} stageClip={stage} tint={.12}/>}
+      <ScrollView keyboardShouldPersistTaps="handled" keyboardDismissMode="none" style={s.scroll}>{form}</ScrollView>
+    </View></KeyboardAvoidingView>;
 }
 export const s = StyleSheet.create({
-  overlay:{flex:1,justifyContent:'flex-end',paddingHorizontal:12},
+  overlay:{...StyleSheet.absoluteFill,paddingHorizontal:12,paddingVertical:8},
+  compactPage:{maxHeight:'100%'},unboundedScroll:{flexShrink:0},
   page:{width:'100%',maxHeight:'78%',maxWidth:layout.readingWidth,alignSelf:'center',backgroundColor:color.page,paddingHorizontal:16,paddingVertical:8,borderRadius:24,overflow:'hidden',borderWidth:1,borderColor:'#FFFFFF',boxShadow:'0px 6px 24px rgba(0,0,0,.16)'},scroll:{flexGrow:0,flexShrink:1},form:{gap:12,paddingVertical:8},row:{flexDirection:'row',flexWrap:'wrap',alignItems:'center',justifyContent:'space-between',gap:8},
   label:textStyles.action,title:textStyles.heading,
   server:{gap:16,borderTopWidth:1,borderTopColor:color.secondary,paddingTop:16},
-  input:{...textStyles.body,minHeight:120,maxHeight:220,fontFamily:'SpoqaHanSans',backgroundColor:'rgba(255,255,255,.4)',borderRadius:layout.radius,padding:12},meta:textStyles.source,
+  input:{...textStyles.body,minHeight:120,maxHeight:220,fontFamily:'SpoqaHanSans',backgroundColor:photoReadingSurface,borderRadius:layout.radius,padding:12},meta:{...textStyles.source,color:'#353535'},
 });

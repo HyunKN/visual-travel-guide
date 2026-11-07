@@ -2,6 +2,7 @@ import { validAnchor, validateBody, type Anchor, type Messages } from '../place-
 import type { PublicationJob, PublicationState, WritePayload } from '../public-messages/publication';
 import type {Inspection} from '../public-messages/recovery';
 import type {Boundary} from '../public-messages/sceneMessages';
+import { decodeEditorial, nextEditorial } from '../place-content/editorial';
 
 export type Visibility = 'private' | 'public' | null;
 export type Draft = { id: string; sceneId: string; u: number; v: number; body: string; visibility: Visibility; revision: number; updatedAt: string };
@@ -108,6 +109,13 @@ export function createStore(transaction: Transaction, newId: () => string, now =
     }),
   };
   return {
+    nextEditorial: (ids: string[]) => transact(async tx => {
+      await tx.execAsync('CREATE TABLE IF NOT EXISTS editorial_state (key TEXT PRIMARY KEY NOT NULL, value TEXT NOT NULL)');
+      const stored = await tx.getFirstAsync<{ value: string }>('SELECT value FROM editorial_state WHERE key=?', 'home-story-v1');
+      const next = nextEditorial(ids, decodeEditorial(stored?.value ?? null));
+      await tx.runAsync('INSERT INTO editorial_state(key,value) VALUES(?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value', 'home-story-v1', JSON.stringify(next.state));
+      return next;
+    }),
     messages,
     privateMarkers: (sceneId:string,b:Boundary) => transact(async tx=>{
       const time="substr(createdAt,1,23)||'000Z'";

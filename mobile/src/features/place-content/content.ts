@@ -40,6 +40,14 @@ export function createPlaceContent(data: Catalog) {
       return data.places.filter(p => building(p.id).status === 'ok' && normalize(p.name).includes(term));
     },
     getBuilding: building,
+    listEditorialStories: () => data.places.filter(p => building(p.id).status === 'ok').flatMap(place => {
+      const photo = data.assets.find(a => a.id === place.assetId && a.placeId === place.id
+        && a.license && a.licenseUrl && a.credit && safeSource(source(a.sourceId)));
+      return photo ? place.entryIds.flatMap(id => {
+        const result = entry(id, place.id);
+        return result.status === 'ok' ? [{ place, entry: result.data, photo }] : [];
+      }) : [];
+    }),
     getEntry: entry,
     getSource(id: string): ContentResult<Source> {
       const item = source(id);

@@ -1,5 +1,14 @@
 # Android 앱 개발 검증
 
+## 2026-11-08 사진 안 작성·홈 탐색·Android 유리 (#32/33/36)
+
+- 기준선: `568b83b`에선 검수 이야기 하나가 홈에 고정됐고, 쪽지 입력에 별도 native Modal을 썼다. 사용자 보고는 이전 화면의 흐름이 작동했고 PC 입력과 탭 후 화면 키보드가 작동하지 않았다는 것이다. [13개 요구의 설계·수용 기준](../docs/design/APP_SPRINT1_SPEC.md)과 이번 변경 후 기기 결과를 구분한다.
+- 적용: 홈 재방문에 검수 이야기 9개 순환(상세에서 복귀 시 같은 이야기 유지), 양방향 터치 카드·검색 캡슐·하단 사진 찾기. 읽기/작성은 공통 사진과 같은 화면에서 유지하며 작성 중 사진 배치를 고정한다. 글자·조작 아래만 밝히고 나머지 사진을 남긴다. 사진이 차지하는 공간과 실제 키보드 입력 결과는 기기에서 확인한다.
+- **자동 검사 128/128:** 콘텐츠·추천 11, 사진 입력 8, 인식 연결 규약 14, 메시지·저장·위치 등 88, 유리 좌표·네이티브 호환 7. 검수 후보 제외·덱 순환·SQLite 파일 재열기/기존 초안 보존·수평 제스처 판정·모듈 없는 환경·클립 정렬을 포함한다. 타입 검사·전체 lint 통과. HTTP 서버 없는 Android/Hermes export 통과(1,747 modules, 31 assets). 모델 추론이나 실제 터치·한글 입력을 수행한 검사는 아니다.
+- **네이티브 패키징 통과:** 기존 D: SDK·Gradle 캐시로 x86_64 `:app:assembleDebug --offline`, SDK 자동 다운로드 비활성. 5m 8s, 493개 작업 중 56개 실행. Kotlin 컴파일, 생성된 Expo 모듈 목록의 `PhotoGlassModule` 등록, APK `classes2.dex`의 모듈·View, 유일한 ABI `x86_64`, APK의 세 JPEG와 원본 바이트 일치를 확인했다.
+- 개발 APK: `D:\Android\Projects\visual-travel-guide\app-build-20261107-s1\outputs\apk\debug\app-debug.apk`, 98,212,119 bytes, SHA-256 `509d7ed9f2c2ba637b97e72bcde92084ea0a805f3a2c4da247f8f4fee8fb5bbc`. 이는 에뮬레이터용 debug APK이고 Metro가 필요하다. ARM 실기기용 배포 파일이나 모델 추론 결과가 아니다.
+- **기기 미확인:** AI가 앱·에뮬레이터·Metro를 시작하거나 APK를 설치하지 않았다. AGSL은 지원 기기의 GPU에서 실행 시 컴파일되므로 Kotlin/패키징 성공이 실제 굴절 표시를 보증하지 않는다. 한글 IME·PC 타이핑·표식 원위치·카드 넘김·글자 200%·TalkBack·사진 가독성은 [수동 확인 순서](README.md#이번-변경을-직접-확인하기)를 따른다. 새 화면이 더 흥미로운지도 사용자 비교 전이다.
+
 ## 2026-11-07 에뮬레이터 사용자 피드백: 홈·쪽지·키보드 (#32/33/36)
 
 - 최종 코드: TypeScript·lint(경고/오류 0), 오프라인 Android/Hermes export 통과. 1,743 modules / 31 assets, 로고 PNG 포함, 결과 파일 `entry-65282343ec9986bd94f60fdb70bb1f06.hbc`. 새 APK나 사용자의 Metro 실행 결과가 아니다.

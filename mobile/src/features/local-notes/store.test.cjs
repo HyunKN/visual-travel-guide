@@ -14,6 +14,21 @@ function connect(file) {
   return {db,tx,store:createStore(tx,randomUUID)};
 }
 const point={u:0,v:1};
+test('editorial bag survives reopen, consumes once and does not touch drafts, notes or schema version',async t=>{
+  const dir=mkdtempSync(path.join(tmpdir(),'vtg-editorial-')),file=path.join(dir,'notes.db');
+  let c=connect(file);t.after(()=>{c.db.close();rmSync(dir,{recursive:true});});await c.tx(migrate);
+  const draft=await c.store.createDraft('scene',point),ids=['a','b','c'];
+  const first=await c.store.nextEditorial(ids);
+  c.db.close();c=connect(file);await c.tx(migrate);
+  const second=await c.store.nextEditorial(ids),third=await c.store.nextEditorial(ids);
+  assert.equal(new Set([first.id,second.id,third.id]).size,3);
+  assert.notEqual((await c.store.nextEditorial(ids)).id,third.id);
+  assert.deepEqual(await c.store.getDraft(draft.id,'scene'),draft);
+  assert.equal(c.db.prepare('PRAGMA user_version').get().user_version,3);
+  assert.equal((await c.store.messages.list('scene',null)).items.length,0);
+  assert.equal((await c.store.nextEditorial(['only'])).id,'only');
+  assert.equal((await c.store.nextEditorial([])).id,null);
+});
 test('reopen file: no default, unshared public draft, save/edit/discard and recover original note',async t=>{
   const dir=mkdtempSync(path.join(tmpdir(),'vtg-notes-')),file=path.join(dir,'notes.db');
   let c=connect(file);t.after(()=>{c.db.close();rmSync(dir,{recursive:true});});await c.tx(migrate);

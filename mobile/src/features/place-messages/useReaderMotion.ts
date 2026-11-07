@@ -39,8 +39,8 @@ export function useReaderMotion(presentation: ReturnType<typeof createReaderPres
     if (current.phase === 'hidden') return;
     shown.current = true; animate(current);
   };
-  const cardStyle = useAnimatedStyle(() => ({ opacity: progress.get(), transform: [{ translateY: reduced ? 0 : 8 * (1 - progress.get()) }] }));
-  // Counter the card movement so its cloned image continues sampling the stationary photo.
-  const backdropStyle = useAnimatedStyle(() => ({ transform: [{ translateY: reduced ? 0 : -8 * (1 - progress.get()) }] }));
+  // The lens and the photographed landmark share a stationary stage coordinate system.
+  const cardStyle = useAnimatedStyle(() => ({ opacity: progress.get() }));
+  const backdropStyle = useAnimatedStyle(() => ({ opacity: 1 }));
   return { cardStyle, backdropStyle, onShow };
 }
