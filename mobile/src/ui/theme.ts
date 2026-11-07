@@ -3,8 +3,8 @@ import type { TextStyle } from 'react-native';
 // Native mapping of k-style a5b1955 tokens + approved R3 overrides.
 // Original CSS/MIT notice: docs/design/place-messages/vendor/ (kept unchanged).
 export const color = {
-  ink: '#243247', secondary: '#526071', page: '#FFFFFF', subtle: '#F3F5F7',
-  line: '#DFE3E7', accent: '#B45440', selected: '#E4EBEF',
+  ink: '#292929', secondary: '#626262', page: '#FFFFFF', subtle: '#F5F5F3',
+  line: '#DDDDDA', accent: '#B45440', selected: '#EAEAE7',
 } as const;
 export const textStyles = {
   story: { fontSize: 28, lineHeight: 38, fontWeight: '700', color: color.ink },

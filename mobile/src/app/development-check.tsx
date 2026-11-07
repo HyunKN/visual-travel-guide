@@ -16,6 +16,6 @@ export default function DevelopmentCheckScreen() {
 
 const styles = StyleSheet.create({
   content: { padding: 24, gap: 20 },
-  title: { color: '#172A43', fontSize: 28, fontWeight: '700' },
-  description: { color: '#465466', fontSize: 17, lineHeight: 26 },
+  title: { color: '#292929', fontSize: 28, fontWeight: '700' },
+  description: { color: '#626262', fontSize: 17, lineHeight: 26 },
 });

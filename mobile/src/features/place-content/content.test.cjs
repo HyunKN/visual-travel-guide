@@ -6,6 +6,19 @@ const { createPlaceContent } = require(path.resolve(__dirname, '../../../../.cod
 const bundled = require('./catalog.json');
 const copy = () => structuredClone(bundled);
 
+test('local name search handles spaces, canonical Hangul, partial and missing names', () => {
+  const api=createPlaceContent(copy());
+  assert.deepEqual(api.searchBuildings(' 근 정 전 ').map(p=>p.id),['geunjeongjeon']);
+  assert.deepEqual(api.searchBuildings('교태전'.normalize('NFD')).map(p=>p.id),['gyotaejeon']);
+  assert.equal(api.searchBuildings('전').length,2);
+  assert.equal(api.searchBuildings('부산').length,0);
+  assert.deepEqual(api.searchBuildings('  '),api.listBuildings());
+});
+test('search never promotes unreviewed or broken content to a destination', () => {
+  const data=copy();data.entries.find(e=>e.placeId==='geunjeongjeon').reviewed=false;
+  assert.equal(createPlaceContent(data).searchBuildings('근정전').length,0);
+});
+
 test('all three supported places have their own reviewed entries, photo credit and source', () => {
   const api = createPlaceContent(copy());
   assert.deepEqual(api.getStartOptions().map(option => option.kind), ['direct-selection', 'camera', 'library']);

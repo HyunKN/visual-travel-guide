@@ -10,6 +10,6 @@ export default function PalaceMap({fix,open,onTimeout}:{fix:Fix|null;open:(id:st
   return <MapView ref={map} style={{height:280}} initialRegion={{...locations[0],latitudeDelta:.009,longitudeDelta:.009}} rotateEnabled={false} pitchEnabled={false} toolbarEnabled={false}
     onMapLoaded={()=>clearTimeout(timer.current)}>
     {locations.map(p=>{const b=content.getBuilding(p.placeId);return b.status==='ok' && <Marker key={p.placeId} coordinate={p} title={b.data.name} onCalloutPress={()=>open(p.placeId)} />;})}
-    {fix && <><Marker coordinate={fix} title="현재 위치" pinColor="#243247" /><Circle center={fix} radius={fix.accuracy??0} fillColor="#24324722" strokeColor="#24324788" /></>}
+    {fix && <><Marker coordinate={fix} title="현재 위치" pinColor="#B45440" /><Circle center={fix} radius={fix.accuracy??0} fillColor="#62626222" strokeColor="#62626288" /></>}
   </MapView>;
 }

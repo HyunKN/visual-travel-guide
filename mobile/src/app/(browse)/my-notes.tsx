@@ -3,17 +3,16 @@ import { useCallback, useRef, useState } from 'react';
 import { Alert, FlatList, StyleSheet, View } from 'react-native';
 import { Text } from '../../ui/Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Editor from '../../features/local-notes/Editor';
 import { Action } from '../../ui/Action';
 import { Skeleton } from '../../ui/Skeleton';
 import { color, layout, textStyles } from '../../ui/theme';
 import { deviceNotes } from '../../features/local-notes/device';
-import type { Draft, LocalItem } from '../../features/local-notes/store';
+import type { LocalItem } from '../../features/local-notes/store';
 import { getScene } from '../../features/place-messages/scenes';
 
 export default function MyNotes() {
   const insets=useSafeAreaInsets(), [rows,setRows]=useState<LocalItem[]|null>(null), [error,setError]=useState('');
-  const [editor,setEditor]=useState<Draft|null>(null), gen=useRef(0),editRequest=useRef(0);
+  const gen=useRef(0),editRequest=useRef(0);
   const [opening,setOpening]=useState<string|null>(null);
   const load=useCallback(async()=>{
     const id=++gen.current; setError(''); setRows(null);
@@ -23,7 +22,7 @@ export default function MyNotes() {
   useFocusEffect(useCallback(()=>{setOpening(null);void load();return ()=>{gen.current++;editRequest.current++;};},[load]));
   async function edit(id:string) {
     const request=++editRequest.current;setOpening(id);setError('');
-    try {const d=await deviceNotes.edit(id); if(!d)throw new Error();if(request===editRequest.current)setEditor(d);}
+    try {const d=await deviceNotes.edit(id); if(!d)throw new Error();if(request===editRequest.current)router.push({pathname:'/scenes/[sceneId]',params:{sceneId:d.sceneId,draftId:d.id}});}
     catch {if(request===editRequest.current)setError('글을 열지 못했어요.');}
     finally {if(request===editRequest.current)setOpening(null);}
   }
@@ -47,8 +46,6 @@ export default function MyNotes() {
         <Action label={item.kind==='draft'?'초안 버리기':'삭제'} variant="danger" disabled={opening!==null} onPress={()=>Alert.alert(item.kind==='draft'?'작성 중인 초안을 버릴까요?':'이 기기에서 글을 삭제할까요?',undefined,[{text:'취소',style:'cancel'},
           {text:'삭제',style:'destructive',onPress:()=>{void (item.kind==='draft'?deviceNotes.discardDraft(item.id):deviceNotes.deleteNote(item.id)).then(load,()=>setError('삭제하지 못했어요.'));}}])} /></View>
     </View>} />
-    {editor && <Editor initial={editor} onClose={()=>{setEditor(null);void load();}}
-      onMove={d=>{setEditor(null);router.push({pathname:'/scenes/[sceneId]',params:{sceneId:d.sceneId,draftId:d.id}});}} />}
   </View>;
 }
 const styles=StyleSheet.create({

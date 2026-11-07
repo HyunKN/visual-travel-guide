@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Alert, KeyboardAvoidingView, Modal, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, TextInput, View, type ImageSourcePropType } from 'react-native';
 import { Text } from '../../ui/Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { validateBody } from '../place-messages/contract';
@@ -12,15 +12,19 @@ import {editorAction} from '../public-messages/editorAction';
 import { Action } from '../../ui/Action';
 import { color, layout, textStyles } from '../../ui/theme';
 import { rateLimitText } from '../public-messages/feedback';
+import { PhotoGlass } from '../../ui/PhotoGlass';
+import type { Rect } from '../place-messages/geometry';
 export { Action } from '../../ui/Action';
 
-export default function Editor({initial,onClose,onMove}: {initial:Draft;onClose:()=>void;onMove?: (draft:Draft)=>void}) {
+export default function Editor({initial,onClose,onMove,photo}: {initial:Draft;onClose:()=>void;onMove?: (draft:Draft)=>void;photo?:{source:ImageSourcePropType;rect:Rect}}) {
   const insets = useSafeAreaInsets();
   const [value,setValue] = useState(initial), [busy,setBusy] = useState(false), [error,setError] = useState('');
   const last = useRef(initial), timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const lock = useRef(false), mounted = useRef(true);
   const [job,setJob]=useState<PublicationJob|null>(null),[jobLoaded,setJobLoaded]=useState(false);
   const [inspection,setInspection]=useState<Inspection|null>(null);
+  const inputRef=useRef<TextInput>(null),panelRef=useRef<View>(null);
+  const [panel,setPanel]=useState<Rect>({x:0,y:0,width:0,height:0});
   const publication=job?.state??null;
   async function refreshJob(){
     const next=await deviceNotes.getPublication(initial.id);
@@ -106,11 +110,16 @@ export default function Editor({initial,onClose,onMove}: {initial:Draft;onClose:
       {text:'취소',style:'cancel'},{text:'공개하기',onPress:()=>{void publish();}},
     ]);
   }
-  return <Modal visible onRequestClose={() => { void finish('leave'); }} animationType="none">
-    <KeyboardAvoidingView style={[s.page,{paddingTop:insets.top+8,paddingBottom:insets.bottom+8}]} behavior="height">
+  return <Modal visible transparent statusBarTranslucent navigationBarTranslucent onRequestClose={() => { void finish('leave'); }} animationType="none"
+    onShow={()=>requestAnimationFrame(()=>{if(mounted.current)inputRef.current?.focus();})}>
+    <KeyboardAvoidingView style={[s.overlay,{paddingTop:insets.top+16,paddingBottom:insets.bottom+8}]} behavior={Platform.OS==='ios'?'padding':'height'}>
+    <View ref={panelRef} collapsable={false} style={s.page} accessibilityViewIsModal onAccessibilityEscape={()=>{void finish('leave');}}
+      onLayout={()=>panelRef.current?.measureInWindow((x,y,width,height)=>setPanel({x,y,width,height}))}>
+      {photo&&<PhotoGlass source={photo.source} image={photo.rect} frame={panel} tint={.82}/>}
       <View style={s.row}><Text style={s.title} accessibilityRole="header">쪽지 쓰기</Text><Action label="닫기" disabled={busy} onPress={() => { void finish('leave'); }} /></View>
-      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={s.form}>
-        <TextInput multiline accessibilityLabel="쪽지 내용" placeholder="무엇을 발견했나요?" placeholderTextColor={color.secondary} value={value.body}
+      <ScrollView style={s.scroll} keyboardShouldPersistTaps="handled" keyboardDismissMode="none" contentContainerStyle={s.form}>
+        <TextInput ref={inputRef} showSoftInputOnFocus multiline accessibilityLabel="쪽지 내용" placeholder="무엇을 발견했나요?" placeholderTextColor={color.secondary} value={value.body}
+          underlineColorAndroid="transparent" selectionColor={color.accent} cursorColor={color.ink} submitBehavior="newline"
           editable={!busy} onChangeText={body => change({body})} textAlignVertical="top" style={s.input} />
         {onMove && <Action label="위치 변경" disabled={busy} onPress={() => { void finish('move'); }} />}
         <View accessibilityRole="radiogroup" style={s.row}><Action label="공개" selected={value.visibility==='public'} disabled={busy} onPress={() => change({visibility:'public'})} />
@@ -141,12 +150,13 @@ export default function Editor({initial,onClose,onMove}: {initial:Draft;onClose:
       ])} /><Action label={action.label} variant="primary" busy={busy}
         disabled={busy || action.disabled}
         onPress={()=>{if(action.operation==='inspect')void recover('inspect');else if(action.operation!=='private')confirmPublish();else void finish('save');}} /></View>
-    </KeyboardAvoidingView>
+    </View></KeyboardAvoidingView>
   </Modal>;
 }
 export const s = StyleSheet.create({
-  page:{flex:1,width:'100%',maxWidth:layout.readingWidth,alignSelf:'center',backgroundColor:color.page,paddingHorizontal:layout.gutter},form:{gap:16,paddingVertical:16},row:{flexDirection:'row',flexWrap:'wrap',alignItems:'center',justifyContent:'space-between',gap:8},
+  overlay:{flex:1,justifyContent:'flex-end',paddingHorizontal:12},
+  page:{width:'100%',maxHeight:'78%',maxWidth:layout.readingWidth,alignSelf:'center',backgroundColor:color.page,paddingHorizontal:16,paddingVertical:8,borderRadius:24,overflow:'hidden',borderWidth:1,borderColor:'#FFFFFF',boxShadow:'0px 6px 24px rgba(0,0,0,.16)'},scroll:{flexGrow:0,flexShrink:1},form:{gap:12,paddingVertical:8},row:{flexDirection:'row',flexWrap:'wrap',alignItems:'center',justifyContent:'space-between',gap:8},
   label:textStyles.action,title:textStyles.heading,
   server:{gap:16,borderTopWidth:1,borderTopColor:color.secondary,paddingTop:16},
-  input:{...textStyles.body,minHeight:140,fontFamily:'SpoqaHanSans',backgroundColor:color.subtle,borderRadius:layout.radius,padding:16},meta:textStyles.source,
+  input:{...textStyles.body,minHeight:120,maxHeight:220,fontFamily:'SpoqaHanSans',backgroundColor:'rgba(255,255,255,.4)',borderRadius:layout.radius,padding:12},meta:textStyles.source,
 });

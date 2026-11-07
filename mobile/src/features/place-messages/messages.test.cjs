@@ -6,11 +6,43 @@ const { readFileSync } = require('node:fs');
 const { createHash } = require('node:crypto');
 const path = require('node:path');
 const built = path.resolve(__dirname, '../../../../.codex-build/app-message-tests/place-messages');
-const { imageRect, project, unproject, layoutMarkers } = require(path.join(built, 'geometry.js'));
+const { imageRect, project, unproject, layoutMarkers,zoomedRect,pinchView } = require(path.join(built, 'geometry.js'));
 const { createMessageReader } = require(path.join(built, 'reader.js'));
 const { getScene } = require(path.join(built, 'scenes.js'));
 const { bodyBytes, validateBody } = require(path.join(built, 'contract.js'));
 const scenes = require('./scenes.json');
+
+test('pinch and pan preserve anchors using the same transformed photo rectangle',()=>{
+  const stage={width:390,height:600},base=imageRect({width:2000,height:1151},stage,'contain');
+  const from={x:180,y:290},to={x:195,y:305},anchor=unproject(from,base,stage);
+  // At 4x both axes overflow, so neither edge clamp constrains this midpoint.
+  const view=pinchView(base,stage,base,from,to,4),rect=zoomedRect(base,stage,view);
+  const projected=project(anchor,rect);
+  assert.ok(Math.abs(projected.x-to.x)<1e-8&&Math.abs(projected.y-to.y)<1e-8);
+  const roundtrip=unproject(projected,rect,stage);
+  assert.ok(Math.abs(roundtrip.u-anchor.u)<1e-8&&Math.abs(roundtrip.v-anchor.v)<1e-8);
+  const letterboxed=zoomedRect(base,stage,pinchView(base,stage,base,from,to,2.5));
+  assert.equal(letterboxed.y,(stage.height-letterboxed.height)/2);
+  const bounded=unproject(project(anchor,letterboxed),letterboxed,stage);
+  assert.ok(Math.abs(bounded.v-anchor.v)<1e-8);
+});
+test('zoom bounds and pan edges prevent losing the photo, including resize',()=>{
+  for(const stage of [{width:390,height:600},{width:600,height:320}]){
+    const base=imageRect({width:2000,height:1151},stage,'contain');
+    const rect=zoomedRect(base,stage,{zoom:100,x:100000,y:-100000});
+    assert.equal(rect.width,base.width*4);
+    assert.ok(rect.x<=0&&rect.x+rect.width>=stage.width);
+    assert.ok(rect.y<=0&&rect.y+rect.height>=stage.height);
+    assert.deepEqual(zoomedRect(base,stage,{zoom:0,x:0,y:0}),base);
+  }
+});
+test('zoomed letterbox and invalid pinch cannot create incorrect coordinates',()=>{
+  const stage={width:390,height:600},base=imageRect({width:2000,height:1151},stage,'contain');
+  const rect=zoomedRect(base,stage,{zoom:1,x:400,y:400});
+  assert.equal(unproject({x:5,y:5},rect,stage),null);
+  assert.throws(()=>zoomedRect(base,stage,{zoom:NaN,x:0,y:0}));
+  assert.throws(()=>pinchView(base,stage,base,{x:0,y:0},{x:0,y:0},0));
+});
 test('foreground refresh reopens current selection but close during refresh stays closed',async()=>{
   let finish;
   const source={list:async()=>({items:[],nextCursor:null}),read:async()=>({kind:'unavailable'})};

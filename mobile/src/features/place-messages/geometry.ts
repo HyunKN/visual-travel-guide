@@ -3,6 +3,25 @@ export type Size = Readonly<{ width: number; height: number }>;
 export type Point = Readonly<{ x: number; y: number }>;
 export type Rect = Size & Point;
 export type Fit = 'cover' | 'contain';
+export type PhotoView = { zoom: number; x: number; y: number };
+export const originalView: PhotoView = { zoom: 1, x: 0, y: 0 };
+/** Keep a photo centred when smaller than the stage; otherwise never pan past its edge. */
+export function zoomedRect(base: Rect, stage: Size, view: PhotoView): Rect {
+  validRect(base);
+  if (![view.zoom,view.x,view.y,stage.width,stage.height].every(Number.isFinite) || stage.width<=0 || stage.height<=0) throw new RangeError('Invalid photo view');
+  const zoom=clamp(view.zoom,1,4),width=base.width*zoom,height=base.height*zoom;
+  const x=(stage.width-width)/2+view.x,y=(stage.height-height)/2+view.y;
+  return {width,height,x:width<=stage.width?(stage.width-width)/2:clamp(x,stage.width-width,0),y:height<=stage.height?(stage.height-height)/2:clamp(y,stage.height-height,0)};
+}
+/** A pinch keeps the image point under the starting midpoint under the moving midpoint. */
+export function pinchView(base:Rect, stage:Size, start:Rect, from:Point, to:Point, ratio:number):PhotoView {
+  validRect(base);validRect(start);
+  if(![from.x,from.y,to.x,to.y,ratio].every(Number.isFinite)||ratio<=0)throw new RangeError('Invalid pinch');
+  const zoom=clamp(start.width/base.width*ratio,1,4),width=base.width*zoom,height=base.height*zoom;
+  const x=to.x-(from.x-start.x)/start.width*width,y=to.y-(from.y-start.y)/start.height*height;
+  const rect=zoomedRect(base,stage,{zoom,x:x-(stage.width-width)/2,y:y-(stage.height-height)/2});
+  return {zoom,x:rect.x-(stage.width-rect.width)/2,y:rect.y-(stage.height-rect.height)/2};
+}
 export const TOUCH = 48;
 export const GAP = 8;
 const compare = (a: string, b: string) => a < b ? -1 : a > b ? 1 : 0;

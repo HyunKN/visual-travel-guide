@@ -34,6 +34,11 @@ export function createPlaceContent(data: Catalog) {
   return {
     getStartOptions: () => [{ kind: 'direct-selection' as const }, { kind: 'camera' as const }, { kind: 'library' as const }],
     listBuildings: () => data.places.filter(p => building(p.id).status === 'ok'),
+    searchBuildings(query: string) {
+      const normalize = (value: string) => value.normalize('NFC').replace(/\s+/g, '').toLocaleLowerCase('ko-KR');
+      const term = normalize(query);
+      return data.places.filter(p => building(p.id).status === 'ok' && normalize(p.name).includes(term));
+    },
     getBuilding: building,
     getEntry: entry,
     getSource(id: string): ContentResult<Source> {

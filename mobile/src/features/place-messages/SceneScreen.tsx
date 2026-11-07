@@ -5,7 +5,9 @@ import { Stack, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { photos } from '../place-content/photos';
 import { getScene } from './scenes';
-import { imageRect, layoutMarkers, project, unproject, type Fit } from './geometry';
+import { imageRect, layoutMarkers, originalView, zoomedRect, project, unproject, type Fit } from './geometry';
+import { usePhotoGestures } from './usePhotoGestures';
+import { PhotoGlass } from '../../ui/PhotoGlass';
 import { createMessageReader } from './reader';
 import type { Anchor, Messages } from './contract';
 import { deviceNotes } from '../local-notes/device';
@@ -35,6 +37,8 @@ export default function SceneScreen({ sceneId, source, messageId, draftId }: { s
   const [writeError,setWriteError] = useState(''), [saving,setSaving] = useState(false);
   const writing = useRef(false), consumedLink = useRef('');
   const [fit, setFit] = useState<Fit>('cover');
+  const [photoView,setPhotoView]=useState(originalView);
+  function changeFit(next:Fit){setFit(next);setPhotoView(originalView);}
   const consumedDraft=useRef('');
   useEffect(()=>{
     let active=true;
@@ -42,7 +46,7 @@ export default function SceneScreen({ sceneId, source, messageId, draftId }: { s
       if(!active)return;
       consumedDraft.current=draftId;
       if(!d){setWriteError('이 사진에서 초안을 찾을 수 없어요.');return;}
-      setMoving(d);setFit('contain');setAnchor({u:d.u,v:d.v});setPositioning(true);
+      setEditing(d);setAnchor({u:d.u,v:d.v});
     },()=>{if(active)setWriteError('초안을 불러오지 못했어요. 내 글에서 다시 열어 주세요.');});
     return ()=>{active=false;};
   },[local,draftId,sceneId]);
@@ -53,6 +57,7 @@ export default function SceneScreen({ sceneId, source, messageId, draftId }: { s
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [stageOrigin, setStageOrigin] = useState({ x: 0, y: 0 });
   const [cardOrigin, setCardOrigin] = useState({ x: 0, y: 0 });
+  const [cardSize,setCardSize]=useState({width:0,height:0});
   const [loaded, setLoaded] = useState(false), [imageFailed, setImageFailed] = useState(false);
   const [imageAttempt, setImageAttempt] = useState(0), [cursors, setCursors] = useState<(string | null)[]>([null]);
   const [groupIds, setGroupIds] = useState<string[]>([]);
@@ -99,8 +104,9 @@ export default function SceneScreen({ sceneId, source, messageId, draftId }: { s
     });
     return () => { active = false; controller.cancel(); };
   }, [controller, sceneId, cursor, messageId]));
-  const baseRect = scene && size.width > 48 && size.height > 48
+  const fitRect = scene && size.width > 48 && size.height > 48
     ? imageRect({ width: scene.imageWidth, height: scene.imageHeight }, size, fit) : null;
+  const baseRect=fitRect?zoomedRect(fitRect,size,photoView):null;
   const page = state.list.kind === 'ready' ? state.list.page : null;
   const reader = state.reader ?? (presented.phase === 'hidden' ? null : presented.reader);
   const readingId=state.reader?.id;
@@ -109,11 +115,12 @@ export default function SceneScreen({ sceneId, source, messageId, draftId }: { s
     const timer=setInterval(()=>{if(AppState.currentState==='active')void controller.open(readingId,'revalidate');},30000);
     return ()=>clearInterval(timer);
   },[local,readingId,controller]);
-  const selectedAnchor = reader?.kind === 'found' ? reader.message.anchor : page?.items.find(m => m.id === reader?.id)?.anchor
-    ?? (presented.phase !== 'hidden' && presented.reader.id === reader?.id ? presented.anchor : null);
+  const selectedAnchor = editing ?? (reader?.kind === 'found' ? reader.message.anchor : page?.items.find(m => m.id === reader?.id)?.anchor
+    ?? (presented.phase !== 'hidden' && presented.reader.id === reader?.id ? presented.anchor : null));
   const p = baseRect && selectedAnchor ? project(selectedAnchor,baseRect) : null;
   const outside = !!p && (p.x < 0 || p.y < 0 || p.x > size.width || p.y > size.height);
   const rect = outside && scene ? imageRect({width:scene.imageWidth,height:scene.imageHeight},size,'contain') : baseRect;
+  const gestures=usePhotoGestures(fitRect,baseRect,size,stageOrigin,!reader&&!editing&&loaded&&!imageFailed,setPhotoView);
   const selectedPoint = rect && selectedAnchor ? project(selectedAnchor,rect) : null;
   const groups = rect ? layoutMarkers(page?.items ?? [],rect,size) : [];
   const side = selectedPoint && selectedPoint.y < size.height / 2 ? 'bottom' : 'top';
@@ -139,7 +146,7 @@ export default function SceneScreen({ sceneId, source, messageId, draftId }: { s
   }
   function close() {
     foregroundId.current=undefined;
-    if (outside) setFit('contain');
+    if (outside) changeFit('contain');
     controller.close();
   }
   if (!scene) return <View style={s.fallback}><Text accessibilityRole="alert" style={s.body}>이 장소의 사진을 찾을 수 없어요.</Text></View>;
@@ -147,10 +154,12 @@ export default function SceneScreen({ sceneId, source, messageId, draftId }: { s
   const groupIndex = reader ? groupIds.indexOf(reader.id) : -1;
   return <View style={s.screen}>
     <Stack.Screen options={{ title: scene.name }} />
-    <View importantForAccessibility={reader ? 'no-hide-descendants' : 'auto'}>
-      <View style={s.toolbar}><Button buttonRef={titleRef} label={fit === 'cover' ? '전체 사진' : '확대 보기'} disabled={!!reader} onPress={() => setFit(fit === 'cover' ? 'contain' : 'cover')} /></View>
+    <View style={editing&&s.hidden} importantForAccessibility={reader || editing ? 'no-hide-descendants' : 'auto'}>
+      <View style={s.toolbar}><Button buttonRef={titleRef} label="전체 사진" disabled={!!reader||!!editing} onPress={() => changeFit('contain')} />
+        <Button label="축소" disabled={!!reader||!!editing||photoView.zoom<=1} onPress={()=>setPhotoView(v=>({...v,zoom:Math.max(1,v.zoom-.5)}))}/>
+        <Button label="확대" disabled={!!reader||!!editing||photoView.zoom>=4} onPress={()=>setPhotoView(v=>({...v,zoom:Math.min(4,v.zoom+.5)}))}/></View>
     </View>
-    <View ref={stageRef} collapsable={false} style={s.stage} importantForAccessibility={reader ? 'no-hide-descendants' : 'auto'} onLayout={({ nativeEvent: { layout } }) => {
+    <View {...gestures} ref={stageRef} collapsable={false} style={s.stage} importantForAccessibility={reader || editing ? 'no-hide-descendants' : 'auto'} onLayout={({ nativeEvent: { layout } }) => {
       setSize({ width: layout.width, height: layout.height });
       stageRef.current?.measureInWindow((x, y) => setStageOrigin({ x, y }));
     }}>
@@ -158,7 +167,7 @@ export default function SceneScreen({ sceneId, source, messageId, draftId }: { s
         onLoad={() => { setLoaded(true); setImageFailed(false); }} onError={() => { setLoaded(false); setImageFailed(true); }}
         style={{ position: 'absolute', left: rect.x, top: rect.y, width: rect.width, height: rect.height }} />}
       {imageFailed && <View style={s.fallback}><Text style={s.body}>사진을 불러오지 못했어요.</Text><Button label="다시 시도" onPress={() => { setImageFailed(false); setLoaded(false); setImageAttempt(x => x + 1); }} /></View>}
-      {loaded && !imageFailed && !positioning && groups.map(g => {
+      {loaded && !imageFailed && !positioning && !editing && groups.map(g => {
         const key = g.ids.join(':');
         if (reader) return null;
         return <Pressable key={key} ref={node => { markerRefs.current.set(key, node); }} accessibilityRole="button"
@@ -173,14 +182,14 @@ export default function SceneScreen({ sceneId, source, messageId, draftId }: { s
           </View>
         </Pressable>;
       })}
-      {reader && selectedPoint && loaded && !imageFailed && <View pointerEvents="none" style={[s.selected, { left: selectedPoint.x - 16, top: selectedPoint.y - 16 }]} />}
+      {(reader||editing) && selectedPoint && loaded && !imageFailed && <View pointerEvents="none" style={[s.selected, { left: selectedPoint.x - 7, top: selectedPoint.y - 7 }]} />}
       {positioning && rect && loaded && !imageFailed && <>
         <Pressable accessibilityLabel="사진에서 위치 선택" accessibilityRole="button" style={StyleSheet.absoluteFill}
           onPress={({nativeEvent:e})=>{ const a=unproject({x:e.locationX,y:e.locationY},rect,size); if(a) setAnchor(a); }} />
-        {anchor && <View pointerEvents="none" style={[s.selected,{left:project(anchor,rect).x-16,top:project(anchor,rect).y-16}]} />}
+        {anchor && <View pointerEvents="none" style={[s.selected,{left:project(anchor,rect).x-7,top:project(anchor,rect).y-7}]} />}
       </>}
     </View>
-    <View style={[s.footer, { paddingBottom: insets.bottom + 8 }]} importantForAccessibility={reader ? 'no-hide-descendants' : 'auto'}>
+    <View style={[s.footer, { paddingBottom: insets.bottom + 8 },editing&&s.hidden]} importantForAccessibility={reader || editing ? 'no-hide-descendants' : 'auto'}>
       {state.list.kind === 'loading' && <Text accessibilityLiveRegion="polite" style={s.meta}>쪽지를 불러오는 중이에요.</Text>}
       {state.list.kind === 'error' && <><Text style={s.meta}>쪽지를 불러올 수 없어요.</Text><Button label="다시 시도" onPress={() => { void controller.load(sceneId, cursor); }} /></>}
       {page?.publicStatus==='error' && <><Text style={s.meta}>공개 쪽지를 불러오지 못했어요. 기기의 글만 보여요.</Text><Button label="공개 쪽지 다시 불러오기" onPress={()=>{setCursors([null]);void controller.load(sceneId,null);}} /></>}
@@ -199,11 +208,10 @@ export default function SceneScreen({ sceneId, source, messageId, draftId }: { s
     </View>
     <Modal visible={presented.phase !== 'hidden'} transparent animationType="none" statusBarTranslucent navigationBarTranslucent onRequestClose={close} onShow={() => {motion.onShow();const phase=presentation.snapshot().phase;if(phase === 'opening' || phase === 'open')focus(closeRef.current);}}>
       <View ref={modalRef} collapsable={false} style={[s.modal, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20, justifyContent: presented.phase !== 'hidden' && presented.side === 'bottom' ? 'flex-end' : 'flex-start' }]}>
-        <Animated.View style={[s.card,motion.cardStyle]} pointerEvents={presented.phase === 'closing' ? 'none' : 'auto'} importantForAccessibility={presented.phase === 'closing' ? 'no-hide-descendants' : 'auto'} onLayout={({nativeEvent:{layout:frame}}) => modalRef.current?.measureInWindow((x,y)=>setCardOrigin({x:x+frame.x,y:y+frame.y}))} accessibilityViewIsModal onAccessibilityEscape={close}>
-          {!opaque && loaded && !imageFailed && rect && <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-            <Animated.Image source={photo} blurRadius={12} resizeMode="stretch" style={[{ position: 'absolute', left: stageOrigin.x + rect.x - cardOrigin.x, top: stageOrigin.y + rect.y - cardOrigin.y, width: rect.width, height: rect.height },motion.backdropStyle]} />
-            <View style={s.tint} />
-          </View>}
+        <Animated.View style={[s.card,motion.cardStyle]} pointerEvents={presented.phase === 'closing' ? 'none' : 'auto'} importantForAccessibility={presented.phase === 'closing' ? 'no-hide-descendants' : 'auto'} onLayout={({nativeEvent:{layout:frame}}) => {setCardSize({width:frame.width,height:frame.height});modalRef.current?.measureInWindow((x,y)=>setCardOrigin({x:x+frame.x,y:y+frame.y}));}} accessibilityViewIsModal onAccessibilityEscape={close}>
+          {!opaque && loaded && !imageFailed && rect && <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill,motion.backdropStyle]}>
+            <PhotoGlass source={photo} image={{...rect,x:stageOrigin.x+rect.x,y:stageOrigin.y+rect.y}} frame={{...cardOrigin,...cardSize}} radius={20} tint={.76}/>
+          </Animated.View>}
           <View style={s.row}><Text accessibilityRole="header" style={s.heading}>쪽지</Text><Button buttonRef={closeRef} label="닫기" onPress={close}/></View>
           <ScrollView style={s.bodyScroll} contentContainerStyle={s.bodyContent}>
             {reader?.kind === 'found' && <Text selectable style={s.body}>{reader.message.body}</Text>}
@@ -231,19 +239,20 @@ export default function SceneScreen({ sceneId, source, messageId, draftId }: { s
         </Animated.View>
       </View>
     </Modal>
-    {editing && <Editor key={editing.id} initial={editing} onClose={()=>{setEditing(null);setCursors([null]);void controller.load(sceneId,null);}}
-      onMove={d=>{setEditing(null);setMoving(d);setFit('contain');setAnchor({u:d.u,v:d.v});setPositioning(true);}} />}
+    {editing && <Editor key={editing.id} initial={editing} photo={rect?{source:photo,rect:{...rect,x:rect.x+stageOrigin.x,y:rect.y+stageOrigin.y}}:undefined} onClose={()=>{setEditing(null);setCursors([null]);void controller.load(sceneId,null);}}
+      onMove={d=>{setEditing(null);setMoving(d);setAnchor({u:d.u,v:d.v});setPositioning(true);}} />}
   </View>;
 }
 const s = StyleSheet.create({
+  hidden:{display:'none'},
   screen: { flex: 1, backgroundColor: color.page }, stage: { flex: 1, overflow: 'hidden', backgroundColor: color.subtle },
-  toolbar: { paddingHorizontal: layout.gutter, alignItems: 'flex-end' }, footer: { paddingHorizontal: layout.gutter, paddingTop: 8, gap: 4 },
+  toolbar: { paddingHorizontal: layout.gutter, flexDirection:'row',justifyContent:'flex-end',flexWrap:'wrap' }, footer: { paddingHorizontal: layout.gutter, paddingTop: 8, gap: 4 },
   row: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
   body: textStyles.body, heading: { ...textStyles.heading, paddingLeft: 12 }, meta: textStyles.source,
   target: { position: 'absolute', width: 48, height: 48, justifyContent: 'center', alignItems: 'center' },
-  glyph: { width: 28, height: 28, borderRadius: 14, backgroundColor: '#243247DD', borderColor: '#FFFFFF', borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
-  bubble: { width: 14, height: 11, borderColor: '#FFFFFF', borderWidth: 1.5, borderRadius: 3 }, count: { color: '#FFFFFF', fontSize: 14 },
-  selected: { position: 'absolute', width: 32, height: 32, borderWidth: 2, borderRadius: 16, borderColor: '#FFFFFF', backgroundColor: '#243247' },
+  glyph: { minWidth: 14, height: 14, borderRadius: 7, backgroundColor: 'rgba(255,255,255,.3)', borderColor: '#FFFFFF', borderWidth: 1, alignItems: 'center', justifyContent: 'center',boxShadow:'0px 0px 3px rgba(0,0,0,.6)' },
+  bubble: { width: 4, height: 4, backgroundColor: '#FFFFFF', borderRadius: 2 }, count: { color: color.ink, backgroundColor:'rgba(255,255,255,.8)',fontSize: 10,lineHeight:14,paddingHorizontal:3,borderRadius:7 },
+  selected: { position: 'absolute', width: 14, height: 14, borderWidth: 1.5, borderRadius: 7, borderColor: '#FFFFFF', backgroundColor: 'rgba(255,255,255,.35)',boxShadow:'0px 0px 3px rgba(0,0,0,.65)' },
   modal: { flex: 1, paddingHorizontal: 20 }, card: { width: '100%', maxWidth: 560, alignSelf: 'center', maxHeight: '100%', backgroundColor: '#FFFFFF', borderRadius: 20, overflow: 'hidden', borderWidth: 1, borderColor: '#FFFFFFDD', padding: 8, elevation: 4 },
   bodyScroll: { flexGrow: 0, flexShrink: 1 }, bodyContent: { paddingHorizontal: 12, paddingVertical: 8 }, tint: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(255,255,255,.86)' },
   fallback: { padding: layout.gutter, backgroundColor: color.page, gap: 12 },

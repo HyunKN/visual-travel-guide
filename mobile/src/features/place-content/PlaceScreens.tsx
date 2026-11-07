@@ -5,10 +5,10 @@ import { Text } from '../../ui/Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { content } from './content';
 import { photos } from './photos';
-import HomePreview from '../public-messages/HomePreviewCard';
 import { Action } from '../../ui/Action';
 import { TapArea } from '../../ui/TapArea';
 import { color, layout, textStyles } from '../../ui/theme';
+export { default as PlaceHomeScreen } from './HomeScreen';
 
 function Failure({ text }: { text: string }) {
   return <View style={styles.section}><Text accessibilityRole="alert" style={textStyles.body}>{text}</Text><Action label="장소 선택으로" variant="primary" onPress={() => router.dismissTo('/')} /></View>;
@@ -23,32 +23,6 @@ function PlacePhoto({ placeId }: { placeId: string }) {
     {failed ? <View style={styles.photoFailure}><Text style={textStyles.source}>사진을 표시할 수 없어요.</Text><Action label="다시 시도" onPress={() => setFailed(false)} /></View> :
       <Image accessible accessibilityLabel={photo.credit} source={source} onError={() => setFailed(true)} style={styles.image} resizeMode="contain" />}
   </View>;
-}
-export function PlaceHomeScreen() {
-  const insets = useSafeAreaInsets();
-  const places = content.listBuildings();
-  const featured = content.getEntry('geunjeongjeon-2','geunjeongjeon');
-  return <ScrollView contentContainerStyle={[styles.reading, {paddingTop:insets.top,paddingBottom:32}]}>
-    <View style={styles.mast}><Text accessibilityRole="header" style={styles.brand}>Visual Travel Guide</Text>
-      <Action label="사진으로 찾기" variant="soft" onPress={() => router.push('/photo-input')} /></View>
-    {featured.status==='ok' && <><PlacePhoto placeId="geunjeongjeon" />
-      <TapArea accessibilityRole="button" accessibilityLabel={`근정전, ${featured.data.title} 읽기`} style={styles.feature}
-        onPress={()=>router.push({pathname:'/places/[placeId]',params:{placeId:'geunjeongjeon',entryId:featured.data.id}})}>
-        <Text style={textStyles.source}>근정전</Text>
-        <View style={styles.storyRow}><Text style={[textStyles.story, styles.grow]}>{featured.data.title}</Text><View accessible={false} style={styles.chevron} /></View>
-        <Text numberOfLines={2} style={textStyles.body}>{featured.data.body.split('. ')[0]}.</Text>
-      </TapArea></>}
-    {places.length === 0 && <Failure text="지금은 장소를 불러올 수 없어요." />}
-    <View style={styles.section}><Text accessibilityRole="header" style={textStyles.heading}>장소</Text>
-      <View style={styles.options}>{places.map(place=><Action key={place.id} label={place.name} variant="soft"
-        onPress={()=>router.push({pathname:'/places/[placeId]',params:{placeId:place.id}})} />)}</View>
-      <Action label="주변 장소" style={styles.alignStart} onPress={()=>router.push('/nearby')} /></View>
-    <HomePreview />
-    {__DEV__ && <View style={styles.section}>
-      <Action label="쪽지 읽기 예시" style={styles.alignStart} onPress={() => router.push('/place-message-preview')} />
-      <Action label="개발 실행 확인" style={styles.alignStart} onPress={() => router.push('/development-check')} />
-    </View>}
-  </ScrollView>;
 }
 export function PlaceDetailScreen() {
   const { placeId,entryId } = useLocalSearchParams<{ placeId?: string | string[];entryId?:string|string[] }>();

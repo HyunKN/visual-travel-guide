@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 const photo = require('../../../assets/places/geunjeongjeon.jpg');
 const photoSize = Image.resolveAssetSource(photo);
 // Native adaptation of k-style's surface, brand, page-x, stack-s/m, r-l and h-tab tokens.
-const theme = { white: '#FFFFFF', ink: '#243247', gutter: 20, gap: 8, inset: 12, radius: 16, footer: 64 };
+const theme = { white: '#FFFFFF', ink: '#292929', gutter: 20, gap: 8, inset: 12, radius: 16, footer: 64 };
 const fixture = [
   { id: 'step', u: 0.40, v: 0.70, location: '왼쪽 돌계단 근처', count: 24, body: '돌계단 앞에 서서 올려다봤어요. 멀리서는 지붕이 먼저 보였는데, 여기서는 그 아래에 색이 겹쳐 있는 게 눈에 들어와요.' },
   { id: 'yard', u: 0.60, v: 0.79, location: '오른쪽 앞마당', count: 7, body: '마당을 걷다 보니 돌 틈이 다 다르더라고요. 고개를 들었을 때 처마가 한꺼번에 보여서 잠깐 멈췄어요.' },
@@ -129,8 +129,8 @@ const styles = StyleSheet.create({
   photo: { position: 'absolute', resizeMode: 'stretch' },
   failure: { padding: theme.gutter, color: theme.ink },
   target: { position: 'absolute', width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
-  glyph: { width: 28, height: 28, borderRadius: 16, borderColor: '#FFFFFFB3', borderWidth: 1, backgroundColor: 'rgba(36,50,71,0.82)', alignItems: 'center', justifyContent: 'center' },
-  activeGlyph: { width: 32, height: 32, borderWidth: 2, borderColor: theme.white, backgroundColor: theme.ink },
+  glyph: { width: 14, height: 14, borderRadius: 7, borderColor: '#FFFFFF', borderWidth: 1, backgroundColor: 'rgba(255,255,255,0.35)', alignItems: 'center', justifyContent: 'center' },
+  activeGlyph: { width: 14, height: 14, borderWidth: 1.5, borderColor: theme.white, backgroundColor: 'rgba(255,255,255,.35)' },
   bubble: { width: 13, height: 10, borderColor: theme.white, borderWidth: 1.25, borderRadius: 3, marginBottom: 2 },
   bubbleTail: { position: 'absolute', bottom: -3, left: 2, height: 4, borderLeftWidth: 1.25, borderColor: theme.white, transform: [{ rotate: '27deg' }] },
   card: { position: 'absolute', borderRadius: theme.radius, borderWidth: 1, borderColor: '#FFFFFFC9', overflow: 'hidden', backgroundColor: '#F8FAFC', elevation: 4 },

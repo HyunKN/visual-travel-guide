@@ -19,7 +19,7 @@ export function Skeleton({variant='text'}:{variant?:'text'|'preview'}) {
     return ()=>cancelAnimation(opacity);
   },[active,reduced,opacity]);
   const animated=useAnimatedStyle(()=>({opacity:opacity.value}));
-  const bone:ViewStyle={backgroundColor:'#DCE1E6',borderRadius:4};
+  const bone:ViewStyle={backgroundColor:'#E1E1DE',borderRadius:4};
   return <View accessible accessibilityLabel="불러오는 중" accessibilityRole="progressbar" accessibilityState={{busy:true}} style={{minHeight:88}}>
     <Animated.View importantForAccessibility="no-hide-descendants" style={[animated,{flexDirection:'row',gap:16,paddingVertical:8}]}>
       {variant==='preview'&&<View style={[bone,{width:72,height:72,borderRadius:8}]}/>}
