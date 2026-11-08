@@ -16,13 +16,15 @@ npm test
 
 먼저 `mobile/` 의존성이 설치돼 있어야 한다. pretest가 실제 앱의 게시·SQLite 코드를 컴파일하고, 서버 정책과 앱↔SQL 전달 검사를 실행한다. 후자는 실제 SQLite와 PostgreSQL을 사용하지만 네트워크·Supabase Auth·Android의 검사를 대신하지 않는다.
 
-**본인이 준비할 것:** 공유를 검증할 때 [Supabase Dashboard](https://supabase.com/dashboard)에서 별도의 개발 프로젝트를 만든다. 본인 조직·지역·플랜을 확인하고 DB 비밀번호를 직접 보관한다. Authentication에서 [Anonymous Sign-Ins](https://supabase.com/docs/guides/auth/auth-anonymous)를 활성화한다. 프로젝트 URL/이름만 알려주면 연결 대상 확인이 가능하다. DB 비밀번호·secret/service-role 키·세션 토큰을 전달하지 않는다. Android 앱에는 프로젝트 URL과 클라이언트용 publishable key만 사용한다.
+**2026-11-08 로그인 정책 변경 — 다음 구현 기준:** 가이드(홈·검색·사진 인식·설명·지도)는 비로그인으로 사용하고, 메모 전체 읽기/작성·내 글·직접 링크에는 로그인한다. 익명 로그인은 활성화하지 않는다. 홈 미리보기의 공개 발췌만 예외다. 서버 전체 목록/본문과 쓰기·관리 RPC는 인증된 비익명 사용자만 허용한다. 현재 상단의 비로그인 읽기 성공 기록은 정책 변경 전 증거이며, 이 단락은 적용·검증 완료 기록이 아니다. [상세 인증·기기 저장 계약](../docs/design/APP_SPRINT1_SPEC.md#7-공개권한관리-34)을 함께 따른다.
+
+**본인이 준비할 것:** 기존 개발 프로젝트에서 Google·카카오 앱과 네이버 로그인 앱의 소유/서비스 정보를 확인하고, 각 제공자의 Supabase callback·필요한 동의/테스트 계정·검수 조건을 설정한다. Google·카카오는 기본 provider, 네이버는 [Custom OIDC](https://supabase.com/docs/guides/auth/custom-oauth-providers)의 `custom:naver`, issuer `https://nid.naver.com`, `email_optional=true`를 사용한다. 네이버 [공식 OIDC](https://developers.naver.com/docs/login/devguide)는 `openid`로 식별하며 별도 중계 서버를 전제하지 않는다. 공급자 Client Secret은 Supabase의 안전한 설정 화면에서 본인이 입력한다. 채팅·앱·저장소에 넣지 않는다. 앱에는 프로젝트 URL·publishable key만 사용한다. 작성자 이름/닉네임/사진을 게시물에 노출하거나 프로필 공개 기능을 추가하지 않는다.
 
 **개발자가 이어갈 순서:**
 
 1. 대상이 비어 있는 **개발 프로젝트**인지 대조한 후 SQL Editor 또는 migration 절차로 migrations/의 0001(place_messages) → 0002(read_snapshot) → 0003(home_preview) → 0004(rate_limit_feedback) → 0005(owner_state) 순서로 각각 한 번 적용한다. 이번 개발 프로젝트에는 이미 원격 적용했다. 기존 프로젝트라면 적용 이력을 확인해 미적용 파일만 실행한다. MCP `apply_migration`은 원격 실행 시점의 version을 생성하므로 원본 파일명과 숫자가 다를 수 있다. 이름·순서·SQL을 대조하고 같은 migration을 중복 실행하지 않는다. Data API에 내부 `vtg` 스키마를 추가하지 않는다. 기본 테이블은 RLS·권한으로 직접 접근을 막고 호출용 RPC만 제공한다.
-2. mobile의 git 제외 파일 `.env.local`에 `EXPO_PUBLIC_SUPABASE_URL`과 `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`를 본인이 설정한다. HTTPS의 기본 supabase.co 프로젝트 주소와 sb_publishable_ 키만 허용한다. 비밀 키나 세션은 넣지 않는다. SecureStore가 포함된 새 개발 APK를 직접 빌드·설치한 뒤 Metro를 직접 다시 시작해 설정을 반영한다. 작성 화면의 공개하기→소유권 한계 확인→익명 세션 저장→요청 저장/전송으로 이어진다. 세션이 유실된 기존 글에 새 익명 사용자를 자동 부여하지 않는다.
-3. 비로그인/실제 익명 사용자 A·B를 **독립 세션**으로 검사한다. A 게시 → B가 같은 장면에서 읽기 → B의 A 글 변경·철회 거부 → B 신고 → 서버 관리자 숨김 → 비로그인/B 읽기 불가. A의 철회 결과·불확실한 재시도·기기 재시작도 확인한다. 통과 증거를 이슈에 남긴 뒤 사용자 확인을 받는다.
+2. mobile의 git 제외 파일 `.env.local`에 `EXPO_PUBLIC_SUPABASE_URL`과 `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`를 본인이 설정한다. HTTPS의 기본 supabase.co 프로젝트 주소와 sb_publishable_ 키만 허용한다. 소셜 OAuth용 브라우저와 SecureStore를 쓸 개발 APK·정확한 앱 callback allow list가 필요하다. 로그인 성공 후 원래 메모 목적지로 돌아오되 공개 동의를 자동 실행하지 않는다. 기존 공유 SQLite 파일은 수정·삭제하지 않고, 프로젝트+사용자 ID별 저장소로 새 글을 분리한다. 기존 기기 글 가져오기는 별도 후속의 명시적 행동으로 보류할 수 있으며 자동 귀속은 금지한다.
+3. 비로그인/기존 익명 JWT/실제 소셜 사용자 A·B를 **독립 세션**으로 검사한다. 비로그인은 홈 발췌만 허용하고 전체 목록·본문은 거부하며, 익명 JWT의 전체 읽기·쓰기/신고도 거부한다. A 게시 → B가 같은 장면에서 읽기 → B의 A 글 변경·철회 거부 → B 신고 → 서버 관리자 숨김 → 홈 발췌/B 읽기 불가를 확인한다. A의 철회·불확실 재시도·재시작, 같은 기기 A 로그아웃→B→A의 초안/동의 격리, 3개 공급자별 성공/취소/거부·중복 콜백도 확인한다. 원격 권한 전환 migration과 실제 OAuth 설정 검증을 로컬 fake 검사와 구분해 이슈에 남긴 뒤 사용자 확인을 받는다.
 
 **서버 함수:** `vtg_markers`(본문 없는 페이지), `vtg_read`(한 글), `vtg_write`(게시·수정·철회), `vtg_request_status`(본인 요청 재확인), `vtg_report`(타인 글 신고). 요청값·결과 버전으로 재전송을 구분한다. 관리자 숨김은 서버에서만 하며 신고 자체가 자동 차단을 일으키지 않는다. 노출한 RPC에는 테이블 소유자 권한이 필요하므로 관리 전용 migration 역할로 적용하고 앱에 해당 권한을 주지 않는다.
 
@@ -44,10 +46,16 @@ npm test
 
 로컬 테스트는 PostgreSQL 권한·함수·저장만 검증한다. 실제 Supabase Auth·PostgREST·속도·남용 방지·서로 다른 Android 기기에서의 전달은 미검증이다.
 
-세션 구현: SDK의 자동 영속화·백그라운드 refresh를 끄고 명시적 행동마다 세션 복원/갱신→기기 보관→RPC를 직렬화한다. 토큰은 SecureStore의 작은 조각과 commit pointer로 보호하며 SQLite·로그·route에 넣지 않는다. 안전 저장 실패 시 전송하지 않고 갱신된 세션을 메모리에 유지해 재저장을 시도한다. 앱 재설치·영구 세션 손실의 소유권 복구는 제공하지 않는다. 공개 목록/사진 병합과 신고 UI를 연결했으며 실제 A/B 전달 검사는 남아 있다.
+기존 세션 구현은 SDK의 자동 영속화·백그라운드 refresh를 끄고 명시적 행동마다 세션 복원/갱신→기기 보관→RPC를 직렬화한다. 토큰은 SecureStore의 작은 조각과 commit pointer로 보호하며 SQLite·로그·route에 넣지 않는다. 안전 저장 실패 시 전송하지 않고 갱신된 세션을 메모리에 유지해 재저장을 시도한다. **소셜 로그인 전환 기준:** 익명 계정 생성은 제거하고 Google·카카오·네이버의 인증 결과를 검증한 뒤 보관한다. 앱 callback은 `visual-travel-guide://auth/callback`으로 고정하며 코드 교환/PKCE·취소·재시작 복귀를 검사한다. 같은 사용자 ID로 재로그인하면 소유권을 확인할 수 있으나, 기기 초안의 재설치/다른 기기 복원이나 원격 내 글 전체 동기화까지 제공하는 것은 아니다. 로그아웃 때 저장된 세션·진행 중 로그인·이전 계정 캐시를 무효화하되 계정별 DB는 삭제하지 않는다. 실제 A/B 전달 검사는 남아 있다.
 
-공개 읽기: sceneMessages는 세션 없는 별도 client로 snapshot→marker/본문을 읽으며 개인 본문은 원격으로 보내지 않는다. 서버 기준 페이지와 기기 개인 글을 최대 60개씩 합치며 같은 ID는 하나만 표시한다. 공개 목록이 실패하면 개인 글과 오류 상태를 표시한다. 다른 사람의 공개 글에서 신고 이유를 고른 뒤 안전한 익명 세션으로 접수하며 서버 확인 전 성공을 표시하지 않는다. 대상 프로젝트에서 migration 0002 적용 후 공개 글이 개인 표식과 함께 나타나는지, A/B 신고·숨김·삭제/철회 후 재조회도 확인한다.
+OAuth callback 설정: 위의 고정 주소는 base이며 실제 `redirectTo`는 `visual-travel-guide://auth/callback?attempt=<새 UUID>`다. Supabase allow list의 Dashboard 값은 `visual-travel-guide://auth/callback\?attempt=*`로 설정한다(역슬래시 1개; JSON에서 표현할 때는 2개). [공식 redirect glob](https://supabase.com/docs/guides/auth/redirect-urls)의 `?`는 wildcard이므로 query 구분자만 이스케이프하고 앱 URL에는 역슬래시를 넣지 않는다. Google·카카오·네이버의 callback은 계속 Supabase HTTPS `/auth/v1/callback`이며 앱 query 패턴을 공급자 콘솔에 등록하지 않는다. 앱은 base와 단일 attempt 값·UUID·현재 시도·5분 만료를 검증한 뒤 code를 한 번만 교환한다. 이전 시도 콜백은 현재 브라우저/시도를 취소하지 않고 무시한다. 이 nonce는 SDK PKCE와 함께 사용한다.
 
-홈 미리보기는 vtg_home_preview(읽기 전용 RPC)로 지원 scene의 최신 공개 글 최대 1개만 받는다. 비로그인 읽기를 사용하고 기기 개인 글은 조회하지 않는다. 설정/공개 글 없음/오류일 때 홈 미리보기는 생략한다. 실제 사용자가 글을 숨김/철회한 뒤 홈을 다시 열어 해당 미리보기가 사라지는지도 확인한다.
+OAuth 재시작 경계: SDK `persistSession:false`에서 진행 시도·PKCE verifier는 메모리에만 둔다. 진행 중 앱 프로세스가 종료되면 cold-start 콜백을 교환하지 않고 시도를 취소한 뒤 로그인 선택으로 돌아간다. 로그인 완료 후 SecureStore에 보관한 세션은 재시작 시 복원/검증한다. 두 경우와 늦은 이전 콜백·새 시도의 충돌을 나누어 검사한다. 공급자 키/콘솔 설정과 실제 로그인 성공은 이 최소 설계의 채택만으로 검증된 것이 아니다.
+
+OAuth 취소 검사: 공급자 브라우저를 X로 닫거나 동의를 거부하면 앱의 로그인 선택 화면에서 다른 제공자로 다시 시도할 수 있어야 한다. 여기서 뒤로 또는 ‘가이드로 돌아가기’를 누르면 원래 가이드로 돌아간다(외부 직접 링크라 돌아갈 곳이 없으면 홈). 세 제공자 각각 실제 Android 브라우저에서 두 복귀 경로를 구분해 확인한다.
+
+공개 읽기 전환 기준: sceneMessages의 snapshot→marker/본문은 비익명 인증 client로 읽고 개인 본문은 원격으로 보내지 않는다. 서버 기준 페이지와 현재 계정의 기기 개인 글을 최대 60개씩 합치며 같은 ID는 하나만 표시한다. 네트워크 실패는 공개 목록 오류와 구분하고, 인증 상실 때는 보호 화면과 모든 계정 자료를 즉시 잠근다. 다른 사람의 공개 글에서 신고 이유를 고른 뒤 현재 로그인 세션으로 접수하며 서버 확인 전 성공을 표시하지 않는다. 전체 읽기·쓰기 권한 전환 migration 후 A/B 신고·숨김·삭제/철회와 비로그인/익명 JWT의 우회 거부를 확인한다.
+
+홈 미리보기는 vtg_home_preview(읽기 전용 RPC)로 요청한 지원 scene 전체에서 최신 공개 글 1개만 받는다. 장면별 1개가 아니라 기존 0003의 전체 `LIMIT 1`을 유지한다. 비로그인 읽기를 사용하고 기기 개인 글은 조회하지 않는다. 소셜 로그인 전환 시 서버 반환도 앞 64자로 제한한다. UI 두 줄 표시만으로 전체 본문을 숨긴 것으로 간주하지 않는다. 짧은 글은 전부 노출될 수 있어 메모 전체의 비공개화라고 설명하지 않는다. 설정/공개 글 없음/오류일 때 홈 미리보기는 생략한다. 실제 사용자가 글을 숨김/철회한 뒤 홈을 다시 열어 해당 미리보기가 사라지는지도 확인한다.
 
 SDK 연결부는 mobile/src/features/public-messages/sdkGateway.ts에 있다. 앱의 안전한 세션 보관은 nativeService가 담당하고 gateway는 실제 SDK Auth·공개/인증 RPC와 JSON HTTP의 deadline을 담당한다. mobile의 test:messages는 실제 SDK에 합성 HTTP 응답을 주입해 인증 헤더 분리·갱신·본문 전송 정지·빈 응답·서버 오류 구분을 검사한다. 이는 실제 원격 서비스 검사와 별개다.

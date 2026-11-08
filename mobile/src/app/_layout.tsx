@@ -1,10 +1,12 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { color } from '../ui/theme';
+import {AuthBootstrap} from '../features/auth/MemoGate';
 
 export default function RootLayout() {
   return (
     <>
+      <AuthBootstrap/>
       <StatusBar style="dark" />
       <Stack
         screenOptions={{

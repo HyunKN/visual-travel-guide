@@ -22,7 +22,7 @@ export function createHomePreview(scenes:readonly string[],rpc:PreviewRpc|null) 
         if(!rows.length){emit({kind:'empty'});return;}
         const r=rows[0];
         const message:Message={id:r.id,sceneId:r.scene_id,anchor:{u:r.u,v:r.v},createdAt:timestamp(r.created_at),body:r.body,origin:'public'};
-        if(!scenes.includes(message.sceneId)||!validMarker(message,message.sceneId)||typeof message.body!=='string'||validateBody(message.body))throw new Error('Invalid preview');
+        if(!scenes.includes(message.sceneId)||!validMarker(message,message.sceneId)||typeof message.body!=='string'||[...message.body].length>64||validateBody(message.body))throw new Error('Invalid preview');
         emit({kind:'ready',message});
       }catch{if(current===generation)emit({kind:'error'});}
     },

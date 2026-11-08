@@ -4,7 +4,7 @@ import { usePreventRemove } from 'expo-router/react-navigation';
 import { useNavigation } from 'expo-router';
 import { PhotoReadingText as Text,PhotoReadingAction as Action,photoReadingSurface } from '../../ui/PhotoReading';
 import { validateBody } from '../place-messages/contract';
-import { deviceNotes } from './device';
+import { accountNotes } from './device';
 import type { Draft } from './store';
 import {getPublicService,publicServiceConfigured} from '../public-messages/nativeService';
 import type {DeliveryResult,PublicationJob} from '../public-messages/publication';
@@ -17,6 +17,7 @@ import type { Rect } from '../place-messages/geometry';
 export { Action } from '../../ui/Action';
 
 export default function Editor({initial,onClose,onMove,photo,side='bottom',stage,viewport,compact=false}: {initial:Draft;onClose:()=>void;onMove?: (draft:Draft)=>void;photo?:{source:ImageSourcePropType;rect:Rect};side?:'top'|'bottom';stage?:Rect;viewport?:Rect;compact?:boolean}) {
+  const [deviceNotes]=useState(()=>accountNotes());
   const navigation=useNavigation();
   const [value,setValue] = useState(initial), [busy,setBusy] = useState(false), [error,setError] = useState('');
   const last = useRef(initial);
@@ -30,13 +31,13 @@ export default function Editor({initial,onClose,onMove,photo,side='bottom',stage
     const next=await deviceNotes.getPublication(initial.id);
     if(mounted.current){setJob(next);setJobLoaded(true);}
   }
-  useEffect(()=>{let active=true;void deviceNotes.getPublication(initial.id).then(next=>{if(active){setJob(next);setJobLoaded(true);}},()=>{if(active)setError('공개 상태를 확인하지 못했어요.');});return ()=>{active=false;};},[initial.id]);
+  useEffect(()=>{let active=true;void deviceNotes.getPublication(initial.id).then(next=>{if(active){setJob(next);setJobLoaded(true);}},()=>{if(active)setError('공개 상태를 확인하지 못했어요.');});return ()=>{active=false;};},[initial.id,deviceNotes]);
   useEffect(() => {
     mounted.current = true;
     const background=AppState.addEventListener('change',state=>{if(state!=='active')void deviceNotes.saveDraft(last.current).catch(()=>{if(mounted.current)setError('초안을 저장하지 못했어요. 입력은 이 화면에 남아 있어요.');});});
     const back=BackHandler.addEventListener('hardwareBackPress',()=>{closeAction.current();return true;});
     return () => { mounted.current = false;background.remove();back.remove(); };
-  },[]);
+  },[deviceNotes]);
   usePreventRemove(true,({data})=>{void finish('leave',()=>requestAnimationFrame(()=>navigation.dispatch(data.action)));});
   closeAction.current=()=>{void finish('leave');};
   function change(patch: Partial<Pick<Draft,'body'|'visibility'>>) {
@@ -115,7 +116,7 @@ export default function Editor({initial,onClose,onMove,photo,side='bottom',stage
   }
   function confirmPublish() {
     if(action.operation==='reconcile'){void publish(job!.payload.p_withdraw);return;}
-    Alert.alert('이 글을 공개할까요?','누구나 읽을 수 있어요. 앱을 삭제하거나 세션을 잃으면 공개 글을 수정·철회할 수 없어요.',[
+    Alert.alert('이 글을 공개할까요?','로그인한 사용자가 읽을 수 있고, 홈에는 일부 내용이 공개돼요.',[
       {text:'취소',style:'cancel'},{text:'공개하기',onPress:()=>{void publish();}},
     ]);
   }

@@ -11,21 +11,23 @@ function manifest(raw:string):Manifest {
  * Incomplete writes cannot replace the last usable session. No plaintext fallback. */
 export function createSessionVault(store:SecretStore,key:string,newGeneration:()=>string):SessionVault {
   const part=(m:Manifest,i:number)=>key+'.'+m.generation+'.'+i;
+  let tail=Promise.resolve();
+  function mutate(work:()=>Promise<void>){const result=tail.then(work);tail=result.then(()=>{},()=>{});return result;}
   return {
     async read() {
       const raw=await store.get(key);
-      if(raw===null)return null;
+      if(raw===null||raw==='signed-out')return null;
       const m=manifest(raw),chunks:string[]=[];
       for(let i=0;i<m.count;i++){const s=await store.get(part(m,i));if(s===null)throw new Error('Incomplete author session');chunks.push(s);}
       const value:unknown=JSON.parse(chunks.join(''));
       if(!validSession(value))throw new Error('Invalid author session');
       return value;
     },
-    async write(session:AuthorSession) {
+    write(session:AuthorSession) {return mutate(async()=>{
       if(!validSession(session))throw new Error('Invalid author session');
       const value=JSON.stringify(session);
       if(bodyBytes(value)>64000)throw new Error('Author session too large');
-      const old=await store.get(key),previous=old===null?null:manifest(old);
+      const old=await store.get(key),previous=old===null||old==='signed-out'?null:manifest(old);
       // 400 UTF-16 units fit below 2KiB even for non-ASCII values.
       const m={generation:newGeneration(),count:Math.ceil(value.length/400)};
       manifest(JSON.stringify(m));
@@ -34,6 +36,12 @@ export function createSessionVault(store:SecretStore,key:string,newGeneration:()
       await store.set(key,JSON.stringify(m));
       // Cleanup failure must not invalidate the newly committed session.
       if(previous)for(let i=0;i<previous.count;i++)await store.remove(part(previous,i)).catch(()=>{});
-    },
+    });},
+    clear(){return mutate(async()=>{
+      const old=await store.get(key);
+      // Commit logout before best-effort chunk cleanup. Never resurrect the old pointer.
+      await store.set(key,'signed-out');
+      if(old&&old!=='signed-out')try{const previous=manifest(old);for(let i=0;i<previous.count;i++)await store.remove(part(previous,i)).catch(()=>{});}catch{/* The tombstone is already durable. */}
+    });},
   };
 }

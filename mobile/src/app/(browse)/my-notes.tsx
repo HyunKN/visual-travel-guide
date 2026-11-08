@@ -6,11 +6,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Action } from '../../ui/Action';
 import { Skeleton } from '../../ui/Skeleton';
 import { color, layout, textStyles } from '../../ui/theme';
-import { deviceNotes } from '../../features/local-notes/device';
+import { accountNotes } from '../../features/local-notes/device';
 import type { LocalItem } from '../../features/local-notes/store';
 import { getScene } from '../../features/place-messages/scenes';
+import {MemoGate,AccountActions} from '../../features/auth/MemoGate';
 
 export default function MyNotes() {
+  return <MemoGate cancelToHome><MyNotesContent/></MemoGate>;
+}
+function MyNotesContent() {
+  const [deviceNotes]=useState(()=>accountNotes());
   const insets=useSafeAreaInsets(), [rows,setRows]=useState<LocalItem[]|null>(null), [error,setError]=useState('');
   const gen=useRef(0),editRequest=useRef(0);
   const [opening,setOpening]=useState<string|null>(null);
@@ -18,7 +23,7 @@ export default function MyNotes() {
     const id=++gen.current; setError(''); setRows(null);
     try { const list=await deviceNotes.list(); if(id===gen.current)setRows(list); }
     catch { if(id===gen.current)setError('기기의 글을 불러오지 못했어요.'); }
-  },[]);
+  },[deviceNotes]);
   useFocusEffect(useCallback(()=>{setOpening(null);void load();return ()=>{gen.current++;editRequest.current++;};},[load]));
   async function edit(id:string) {
     const request=++editRequest.current;setOpening(id);setError('');
@@ -29,6 +34,7 @@ export default function MyNotes() {
   return <View style={[styles.page,{paddingTop:insets.top}]}>
     <FlatList style={styles.reading} contentContainerStyle={styles.list} data={rows??[]} keyExtractor={item=>item.id}
       ListHeaderComponent={<View style={styles.header}><Text style={textStyles.story} accessibilityRole="header">내 글</Text>
+        <AccountActions/>
         {!!error&&<><Text accessibilityRole="alert" style={textStyles.source}>{error}</Text><Action label="다시 시도" style={styles.alignStart} onPress={()=>{void load();}}/></>}
       </View>}
       ListEmptyComponent={!rows&&!error?<View style={styles.empty}><Skeleton/><Skeleton/></View>:rows?.length===0?<View style={styles.empty}>

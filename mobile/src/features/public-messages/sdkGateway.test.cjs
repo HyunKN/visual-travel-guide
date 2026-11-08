@@ -5,19 +5,36 @@ const {createSdkGateway,boundedJsonFetch}=require('../../../../.codex-build/app-
 const {createAuthorSession}=require('../../../../.codex-build/app-message-tests/public-messages/session.js');
 const {PublicationRejected}=require('../../../../.codex-build/app-message-tests/public-messages/publication.js');
 const {rateLimitText}=require('../../../../.codex-build/app-message-tests/public-messages/feedback.js');
+const {AuthenticationRequired}=require('../../../../.codex-build/app-message-tests/public-messages/session.js');
 // Deliberately fabricated tokens. No account, secret files or network are used.
 const owner='aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa';
 const token=exp=>[Buffer.from(JSON.stringify({alg:'HS256',typ:'JWT'})).toString('base64url'),
-  Buffer.from(JSON.stringify({sub:owner,role:'authenticated',exp})).toString('base64url'),'synthetic-signature'].join('.');
+  Buffer.from(JSON.stringify({sub:owner,role:'authenticated',is_anonymous:false,exp})).toString('base64url'),'synthetic-signature'].join('.');
 const jwt=token(Math.floor(Date.now()/1000)+3600);
-const user={id:owner,aud:'authenticated',role:'authenticated',is_anonymous:true};
+const user={id:owner,aud:'authenticated',role:'authenticated',is_anonymous:false};
 const authReply={access_token:jwt,refresh_token:'synthetic-refresh',token_type:'bearer',expires_in:3600,user};
 const json=(value,status=200)=>new Response(JSON.stringify(value),{status,headers:{'Content-Type':'application/json'}});
-test('real SDK signs in, saves before authenticated RPC and keeps public reads anonymous',async()=>{
-  let saved=null,posts=0,publicReads=0,ownerReads=0;
+
+test('real SDK refuses anonymous or missing permanence claims and never signs up a substitute author',async()=>{
+  for(const flag of [true,undefined]){
+    let reads=0;
+    const gateway=createSdkGateway('https://synthetic.supabase.co','sb_publishable_synthetic',async(input)=>{
+      assert.equal(new URL(String(input)).pathname,'/auth/v1/user');reads++;return json({...user,is_anonymous:flag});
+    });
+    await assert.rejects(gateway.auth.restore({ownerId:owner,accessToken:jwt,refreshToken:'synthetic-refresh',permanent:true}),AuthenticationRequired);assert.equal(reads,1);
+  }
+});
+test('expired JWT and permanent-login permission responses reach the authentication boundary',async()=>{
+  for(const [status,code] of [[401,'PGRST301'],[403,'PGRST303'],[400,'42501']]){
+    const gateway=createSdkGateway('https://synthetic.supabase.co','sb_publishable_synthetic',async()=>json({code,message:'permanent_login_required'},status));
+    await assert.rejects(gateway.write('vtg_write',{}),AuthenticationRequired);
+    await assert.rejects(gateway.authenticatedRead('vtg_read',{},new AbortController().signal),AuthenticationRequired);
+  }
+});
+test('real SDK restores permanent login, saves before authenticated RPC and keeps home preview anonymous',async()=>{
+  let saved={ownerId:owner,accessToken:jwt,refreshToken:'synthetic-refresh',permanent:true},posts=0,publicReads=0,ownerReads=0;
   const gateway=createSdkGateway('https://synthetic.supabase.co','sb_publishable_synthetic',async(input,init)=>{
     const path=new URL(String(input)).pathname,headers=new Headers(init.headers);
-    if(path==='/auth/v1/signup'){assert.equal(JSON.parse(init.body).data!==undefined,true);return json(authReply);}
     if(path==='/auth/v1/user')return json(user);
     if(path==='/rest/v1/rpc/vtg_write'){
       assert.ok(saved);assert.equal(headers.get('Authorization'),'Bearer '+jwt);posts++;return json(1);
@@ -25,20 +42,22 @@ test('real SDK signs in, saves before authenticated RPC and keeps public reads a
     if(path==='/rest/v1/rpc/vtg_owner_state'){
       assert.ok(saved);assert.equal(headers.get('Authorization'),'Bearer '+jwt);ownerReads++;return json([]);
     }
-    if(path==='/rest/v1/rpc/vtg_snapshot'){
+    if(path==='/rest/v1/rpc/vtg_home_preview'){
       assert.notEqual(headers.get('Authorization'),'Bearer '+jwt);publicReads++;return json('2026-11-07T00:00:00Z');
     }
+    if(path==='/rest/v1/rpc/vtg_snapshot'){assert.equal(headers.get('Authorization'),'Bearer '+jwt);return json('2026-11-07T00:00:00Z');}
     throw new Error('Unexpected synthetic request');
   });
   const author=createAuthorSession({read:async()=>saved,write:async s=>{saved=s;}},gateway.auth);
   await author.run(null,true,()=>gateway.write('vtg_write',{p_request:'synthetic-request'}));
-  await gateway.read('vtg_snapshot',{},new AbortController().signal);
+  await gateway.read('vtg_home_preview',{},new AbortController().signal);
+  await author.run(owner,false,()=>gateway.authenticatedRead('vtg_snapshot',{},new AbortController().signal));
   await author.run(owner,false,()=>gateway.write('vtg_write',{p_request:'same-synthetic-request'}));
   await author.run(owner,false,()=>gateway.write('vtg_owner_state',{p_id:'synthetic-id',p_scene:'scene'}));
   assert.equal(saved.ownerId,owner);assert.equal(posts,2);assert.equal(publicReads,1);assert.equal(ownerReads,1);
 });
 test('real SDK refreshes expired session and persists rotated tokens before RPC',async()=>{
-  const expired={ownerId:owner,accessToken:token(Math.floor(Date.now()/1000)-3600),refreshToken:'synthetic-old'};
+  const expired={ownerId:owner,accessToken:token(Math.floor(Date.now()/1000)-3600),refreshToken:'synthetic-old',permanent:true};
   let saved=expired,refreshes=0;
   const gateway=createSdkGateway('https://synthetic.supabase.co','sb_publishable_synthetic',async(input,init)=>{
     const url=new URL(String(input));

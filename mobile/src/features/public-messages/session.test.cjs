@@ -5,7 +5,7 @@ const {createAuthorSession}=require('../../../../.codex-build/app-message-tests/
 const {createSessionVault}=require('../../../../.codex-build/app-message-tests/public-messages/sessionVault.js');
 const {editorAction}=require('../../../../.codex-build/app-message-tests/public-messages/editorAction.js');
 // Synthetic data only. No real credentials are read or logged.
-const sample={ownerId:'owner-a',accessToken:'synthetic-access',refreshToken:'synthetic-refresh'};
+const sample={ownerId:'owner-a',accessToken:'synthetic-access',refreshToken:'synthetic-refresh',permanent:true};
 function memory(){
   const data=new Map();
   return {data,get:async k=>data.get(k)??null,set:async(k,v)=>{data.set(k,v);},remove:async k=>{data.delete(k);}};
@@ -21,15 +21,15 @@ test('secure chunks commit atomically; interruption and missing data cannot beco
   const manifest=JSON.parse(s.data.get('test'));s.data.delete('test.'+manifest.generation+'.0');
   await assert.rejects(vault.read());
 });
-test('failed secure save blocks publish and retries same new identity; parallel actions restore instead of creating twice',async()=>{
-  let saved=null,create=0,restore=0,fail=true,work=0;
+test('failed secure save blocks publish and retries the explicit social identity without anonymous creation',async()=>{
+  let saved=null,restore=0,fail=true,work=0;
   const author=createAuthorSession({read:async()=>saved,write:async s=>{if(fail)throw new Error('store');saved=s;}},{
-    anonymous:async()=>{create++;return sample;},restore:async s=>{restore++;return s;},
+    restore:async s=>{restore++;return s;},
   });
-  await assert.rejects(author.run(null,true,async()=>work++));assert.equal(work,0);
+  await assert.rejects(author.accept(sample));assert.equal(work,0);
   fail=false;
   await Promise.all([author.run(null,true,async()=>work++),author.run(null,true,async()=>work++)]);
-  assert.equal(create,1);assert.equal(restore,1);assert.equal(work,2);
+  assert.equal(restore,1);assert.equal(work,2);
 });
 test('missing, unreadable, mismatched and expired identity never trigger automatic new author',async()=>{
   let creates=0,works=0;

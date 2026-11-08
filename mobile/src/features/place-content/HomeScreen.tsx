@@ -15,7 +15,7 @@ import { photoReadingSurface } from '../../ui/PhotoReading';
 import { color, layout, textStyles } from '../../ui/theme';
 import HomePreview from '../public-messages/HomePreviewCard';
 import type { Rect } from '../place-messages/geometry';
-import { deviceNotes } from '../local-notes/device';
+import { editorialNotes } from '../local-notes/device';
 import { deckDirection, emptyEditorialState, nextEditorial } from './editorial';
 
 let fallbackEditorial = emptyEditorialState;
@@ -118,7 +118,7 @@ export default function HomeScreen() {
       storyJob.current=storyJob.current.then(async()=>{
         const ids=content.listEditorialStories().map(story=>story.entry.id);
         let id:string|null;
-        try{const next=await deviceNotes.nextEditorial(ids);id=next.id;fallbackEditorial=next.state;}
+        try{const next=await editorialNotes.nextEditorial(ids);id=next.id;fallbackEditorial=next.state;}
         catch{const next=nextEditorial(ids,fallbackEditorial);id=next.id;fallbackEditorial=next.state;}
         if(alive.current)setStory(id);
       });

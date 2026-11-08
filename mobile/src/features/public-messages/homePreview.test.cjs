@@ -2,6 +2,10 @@ const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const {createHomePreview}=require('../../../../.codex-build/app-message-tests/public-messages/homePreview.js');
 const row={id:'message-id',scene_id:'scene-a',u:.2,v:.7,body:'  누군가의 이야기\n둘째 줄',created_at:'2026-11-07T00:00:00.123456Z'};
+test('home accepts at most 64 Unicode characters and never exposes an old server full body',async()=>{
+  const allowed=createHomePreview(['scene-a'],async()=>[{...row,body:'🙂'.repeat(64)}]);await allowed.load();assert.equal(allowed.snapshot().kind,'ready');
+  const oversized=createHomePreview(['scene-a'],async()=>[{...row,body:'🙂'.repeat(65)}]);await oversized.load();assert.equal(oversized.snapshot().kind,'error');
+});
 test('home loads one scoped public message with intact text and route IDs',async()=>{
   const c=createHomePreview(['scene-a'],async(scenes,signal)=>{
     assert.deepEqual(scenes,['scene-a']);assert.equal(signal.aborted,false);return [row];

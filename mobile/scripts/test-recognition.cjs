@@ -1,3 +1,4 @@
+/* global __dirname */
 const { spawnSync } = require('node:child_process');
 const path = require('node:path');
 const cwd = path.resolve(__dirname, '..');

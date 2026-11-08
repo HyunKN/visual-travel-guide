@@ -12,7 +12,7 @@ import { PhotoGlass } from '../../ui/PhotoGlass';
 import { PhotoReadingText,PhotoReadingAction } from '../../ui/PhotoReading';
 import { createMessageReader } from './reader';
 import type { Anchor, Messages } from './contract';
-import { deviceNotes } from '../local-notes/device';
+import { accountNotes } from '../local-notes/device';
 import type { Draft } from '../local-notes/store';
 import Editor from '../local-notes/Editor';
 import {productSceneMessages,getPublicService,publicServiceConfigured} from '../public-messages/nativeService';
@@ -32,9 +32,10 @@ function focus(target: FocusTarget) {
   if (tag) AccessibilityInfo.setAccessibilityFocus(tag);
 }
 export default function SceneScreen({ sceneId, source, messageId, draftId }: { sceneId: string; source?: Messages; messageId?: string; draftId?:string }) {
+  const [deviceNotes]=useState(()=>accountNotes());
   const scene = getScene(sceneId), insets = useSafeAreaInsets();
   const local = source===undefined || source === deviceNotes.messages;
-  const actual=source??productSceneMessages();
+  const [actual]=useState(()=>source??productSceneMessages());
   const [positioning,setPositioning] = useState(false), [anchor,setAnchor] = useState<Anchor|null>(null);
   const [editing,setEditing] = useState<Draft|null>(null), [moving,setMoving] = useState<Draft|null>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
@@ -55,7 +56,7 @@ export default function SceneScreen({ sceneId, source, messageId, draftId }: { s
       setComposingSize(size);setEditing(d);setAnchor({u:d.u,v:d.v});
     },()=>{if(active)setWriteError('초안을 불러오지 못했어요. 내 글에서 다시 열어 주세요.');});
     return ()=>{active=false;};
-  },[local,draftId,sceneId,size]);
+  },[local,draftId,sceneId,size,deviceNotes]);
   const controller = useMemo(() => createMessageReader(actual), [actual]);
   const state = useSyncExternalStore(controller.subscribe, controller.snapshot);
   const presentation = useMemo(() => createReaderPresentation(), []);
@@ -218,7 +219,7 @@ export default function SceneScreen({ sceneId, source, messageId, draftId }: { s
           <ScrollView style={s.bodyScroll} contentContainerStyle={s.bodyContent}>
             {reader?.kind === 'found' && <PhotoReadingText selectable style={s.body}>{reader.message.body}</PhotoReadingText>}
             {reader?.kind==='found' && reportFor===reader.id && <View>
-              <PhotoReadingText style={s.readingMeta}>신고 이유</PhotoReadingText><PhotoReadingText style={s.readingMeta}>신고를 위해 익명 세션을 사용해요.</PhotoReadingText>
+              <PhotoReadingText style={s.readingMeta}>신고 이유</PhotoReadingText>
               {([['spam','스팸'],['abuse','불쾌한 내용'],['personal_info','개인정보'],['other','기타']] as const).map(([reason,label])=>
                 <PhotoReadingAction key={reason} label={label} disabled={reportState?.busy} onPress={()=>{setReportFor(null);void report(reader.id,reason);}} />)}
               <PhotoReadingAction label="취소" onPress={()=>setReportFor(null)} />
