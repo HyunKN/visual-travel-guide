@@ -2,9 +2,9 @@
 
 [App 기능 지도](https://github.com/HyunKN/visual-travel-guide/issues/27) · [공유 이슈](https://github.com/HyunKN/visual-travel-guide/issues/34) · [설계](../docs/design/APP_SPRINT1_SPEC.md)
 
-서비스 프로젝트는 아직 준비되지 않았다. 앱은 설정이 없으면 전송하지 않는다. [migration](migrations/202611070001_place_messages.sql)은 공개를 명시한 글만 받는다. 개인 글·초안·사용자 사진은 이 스키마에 없다. 모바일과 별도로 아래 SQL을 로컬 PostgreSQL 엔진에서 검사할 수 있다. 서버 프로세스·클라우드 계정이 필요하지 않다.
+2026-11-08 개발 프로젝트에 migration 0001~0005를 적용하고 실제 비로그인 읽기 RPC를 확인했다. 앱의 공개용 URL·publishable key는 Git 제외 `mobile/.env.local`에 설정했다. 익명 로그인은 현재 꺼져 있어 작성/독립 A·B 전달 검증은 대기 중이다. 프로젝트 준비와 Android 인수는 구분하며 최신 상태는 위 공유 이슈를 따른다. 앱은 설정이 없으면 전송하지 않는다. [migration](migrations/202611070001_place_messages.sql)은 공개를 명시한 글만 받는다. 개인 글·초안·사용자 사진은 이 스키마에 없다. 모바일과 별도로 아래 SQL을 로컬 PostgreSQL 엔진에서 검사할 수 있다. 서버 프로세스·클라우드 계정이 필요하지 않다.
 
-기기 게시 경계는 [publication.ts](../mobile/src/features/public-messages/publication.ts), [RPC adapter](../mobile/src/features/public-messages/remote.ts), [SQLite 저장소](../mobile/src/features/local-notes/store.ts)에 구현했다. 게시를 누른 시점의 본문·위치·revision·작성자·서비스·요청 ID를 한 트랜잭션으로 보호한다. `createPublisher().deliver(noteId)`는 상태 확인 후 같은 요청을 재전송하며 중복 호출을 합친다. Supabase SDK·SecureStore 세션·작성 화면의 공개 및 철회 행동에 연결했다. 실제 프로젝트 인증·전송은 아직 실행하지 않았다.
+기기 게시 경계는 [publication.ts](../mobile/src/features/public-messages/publication.ts), [RPC adapter](../mobile/src/features/public-messages/remote.ts), [SQLite 저장소](../mobile/src/features/local-notes/store.ts)에 구현했다. 게시를 누른 시점의 본문·위치·revision·작성자·서비스·요청 ID를 한 트랜잭션으로 보호한다. `createPublisher().deliver(noteId)`는 상태 확인 후 같은 요청을 재전송하며 중복 호출을 합친다. Supabase SDK·SecureStore 세션·작성 화면의 공개 및 철회 행동에 연결했다. 실제 익명 인증 시도는 `anonymous_provider_disabled`로 거절됐으며 공개 전송은 미검증이다.
 
 미확인 요청이 있으면 새 게시·나만 보기 저장·초안/기기 삭제를 거부한다. 수정 초안은 별도로 보존한다. 서버에서 철회 또는 본인 공개 사본 없음을 확인하기 전에는 비공개 전환을 완료하지 않는다. 공개 글의 수정이 거부돼도 이전 공개 사본이 사라졌다고 표시하지 않는다. DB schema 1→2→3 migration은 기존 개인 글·동의 요청을 보존한다.
 
@@ -20,7 +20,7 @@ npm test
 
 **개발자가 이어갈 순서:**
 
-1. 대상이 비어 있는 **개발 프로젝트**인지 대조한 후 SQL Editor 또는 migration 절차로 migrations/의 0001(place_messages) → 0002(read_snapshot) → 0003(home_preview) → 0004(rate_limit_feedback) → 0005(owner_state) 순서로 각각 한 번 적용한다. 기존 개발 프로젝트라면 적용 이력을 확인해 미적용 파일만 실행한다. 이 저장소에서 원격 적용은 수행하지 않았다. Data API에 내부 `vtg` 스키마를 추가하지 않는다. 기본 테이블은 RLS·권한으로 직접 접근을 막고 호출용 RPC만 제공한다.
+1. 대상이 비어 있는 **개발 프로젝트**인지 대조한 후 SQL Editor 또는 migration 절차로 migrations/의 0001(place_messages) → 0002(read_snapshot) → 0003(home_preview) → 0004(rate_limit_feedback) → 0005(owner_state) 순서로 각각 한 번 적용한다. 이번 개발 프로젝트에는 이미 원격 적용했다. 기존 프로젝트라면 적용 이력을 확인해 미적용 파일만 실행한다. MCP `apply_migration`은 원격 실행 시점의 version을 생성하므로 원본 파일명과 숫자가 다를 수 있다. 이름·순서·SQL을 대조하고 같은 migration을 중복 실행하지 않는다. Data API에 내부 `vtg` 스키마를 추가하지 않는다. 기본 테이블은 RLS·권한으로 직접 접근을 막고 호출용 RPC만 제공한다.
 2. mobile의 git 제외 파일 `.env.local`에 `EXPO_PUBLIC_SUPABASE_URL`과 `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`를 본인이 설정한다. HTTPS의 기본 supabase.co 프로젝트 주소와 sb_publishable_ 키만 허용한다. 비밀 키나 세션은 넣지 않는다. SecureStore가 포함된 새 개발 APK를 직접 빌드·설치한 뒤 Metro를 직접 다시 시작해 설정을 반영한다. 작성 화면의 공개하기→소유권 한계 확인→익명 세션 저장→요청 저장/전송으로 이어진다. 세션이 유실된 기존 글에 새 익명 사용자를 자동 부여하지 않는다.
 3. 비로그인/실제 익명 사용자 A·B를 **독립 세션**으로 검사한다. A 게시 → B가 같은 장면에서 읽기 → B의 A 글 변경·철회 거부 → B 신고 → 서버 관리자 숨김 → 비로그인/B 읽기 불가. A의 철회 결과·불확실한 재시도·기기 재시작도 확인한다. 통과 증거를 이슈에 남긴 뒤 사용자 확인을 받는다.
 

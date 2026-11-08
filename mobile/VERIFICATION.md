@@ -1,5 +1,14 @@
 # Android 앱 개발 검증
 
+## 2026-11-08 Supabase 개발 프로젝트·공개 읽기 연결 (#34 부분)
+
+- 사용자가 플러그인/계정·개발 프로젝트를 준비했다. 연결된 `visual-travel-guide-dev`(PostgreSQL 17.11)의 public/vtg 테이블·migration이 비어 있고 정상 상태인 것을 확인한 뒤 기존 migration 5개를 순서대로 원격 적용했다. 앱용 URL·활성 publishable key만 Git 제외 `.env.local`에 설정했고 DB 비밀번호·서버 비밀 키는 사용하지 않았다. 코드·APK·앱/에뮬레이터·Metro 실행 변경은 없다.
+- 원격 이력: place_messages `20261108102715`, read_snapshot `20261108102724`, home_preview `20261108102732`, rate_limit_feedback `20261108102742`, owner_state `20261108102751`. 원본 SQL은 `supabase/migrations/202611070001`~`0005`이며 MCP의 원격 version은 실행 시각으로 생성됐다. 재적용하지 않는다.
+- 실제 HTTPS 확인: 비로그인 `vtg_snapshot` HTTP 200/시각, `vtg_markers`와 `vtg_home_preview` HTTP 200/빈 목록. 비로그인 write/owner_state는 HTTP 401·PostgreSQL 42501로 차단됐다. 실제 SDK의 익명 로그인은 HTTP 422 `anonymous_provider_disabled`; Auth settings의 `external.anonymous_users=false`를 확인했다. 사용자 Auth 설정을 켜기 전 작성·독립 A/B·철회·신고 검사는 미실행이다. 프로젝트에 공개 글·임의 사용자/세션을 만들지 않았다.
+- 원격 권한 확인: vtg 테이블 4개 RLS=true, anon/authenticated는 schema USAGE·테이블 SELECT 불가. public 읽기 4개는 비로그인 실행 가능, write/status/report/owner_state 4개는 인증 역할만 가능. 내부 write_base/report_base/rate_retry_at은 두 앱 역할 모두 실행 불가. 함수 search_path는 비어 있다.
+- advisor 결과도 확인했다. [RLS 정책 없음(INFO)](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy) 4개는 직접 테이블 접근을 모두 막는 기본 거부 설계다. [비로그인 SECURITY DEFINER 실행(WARN)](https://supabase.com/docs/guides/database/database-linter?lint=0028_anon_security_definer_function_executable) 4개와 [인증 역할 실행(WARN)](https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable) 8개는 승인된 RPC 경계와 ACL을 대조했다. 공개 읽기는 visible/not hidden만, 관리·쓰기에는 auth.uid/소유권 검사를 두며 원격 A/B 거부 검증은 남았다. 경고 0·실제 전달 통과라고 보고하지 않는다.
+- 브라우저 접근 승인이 시간 내 완료되지 않아 Auth 설정 UI는 변경하지 않았다. 다음은 프로젝트 Authentication의 Anonymous Sign-Ins 활성화→실제 A/B/비로그인 HTTPS 전달·권한→사용자가 Metro 설정 재로딩 후 Android 작성·공유·재실행 확인이다. #34·#35 인수 체크는 유지한다.
+
 ## 2026-11-08 MapLibre + OpenFreeMap 지도 공급자 변경 (#31)
 
 - 사용자 선택: 경복궁에서 직접 본 데모를 기준으로 MapLibre + OpenFreeMap을 채택했다. Google 전체의 지도 품질 비교나 모든 경복궁 건물의 실측 높이 검증은 아니다. 정교한 기와·처마·단청 3D 자산 제작은 보류한다. `0ad17ed`의 Google 지도 adapter와 API 키 조건을 교체했다.
