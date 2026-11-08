@@ -12,6 +12,6 @@ const result=spawnSync(process.execPath,[cli,'export','--platform','android','--
   cwd,stdio:'inherit',
   env:{...process.env,EXPO_OFFLINE:'1',EXPO_NO_DOTENV:'1',EXPO_NO_TELEMETRY:'1',
     TEMP:tempRoot,TMP:tempRoot,
-    EXPO_PUBLIC_SUPABASE_URL:'',EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY:'',VTG_ANDROID_MAPS_KEY:''},
+    EXPO_PUBLIC_SUPABASE_URL:'',EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY:''},
 });
 process.exit(result.status??1);

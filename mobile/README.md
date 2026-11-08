@@ -45,7 +45,7 @@ Windows에서 Ninja 오브젝트 경로 260자 초과를 재현해 `plugins/with
 
 ### 이번 PC에서 준비된 APK 사용
 
-2026-11-08 유리 렌더러가 포함된 x86_64 개발 APK의 오프라인 빌드·패키징 검사가 통과했다(해시는 [검증 기록](VERIFICATION.md)). 아래 순서에는 재빌드·다운로드가 필요 없다. Android Studio에서 에뮬레이터를 켠 뒤 **아무 PowerShell**에서 아래 두 줄을 실행한다. 첫 명령에 `emulator-5554 device`처럼 `device` 상태가 보여야 설치할 수 있다. `install -r`은 기존 앱 데이터를 유지하는 업데이트 설치다. 이전 APK를 설치했어도 네이티브 굴절을 확인하려면 이번 APK로 한 번 업데이트한다.
+2026-11-08 MapLibre 지도·유리 렌더러를 포함한 x86_64 개발 APK의 빌드·패키징 검사가 통과했다(해시는 [검증 기록](VERIFICATION.md)). 지도 라이브러리 설치·다운로드는 빌드 때 이미 수행했으므로 아래 순서에는 재빌드가 필요 없다. 실제 지도 화면에는 인터넷이 필요하다. Android Studio에서 에뮬레이터를 켠 뒤 **아무 PowerShell**에서 아래 두 줄을 실행한다. 첫 명령에 `emulator-5554 device`처럼 `device` 상태가 보여야 설치할 수 있다. `install -r`은 기존 앱 데이터를 유지하는 업데이트 설치다. 이전 APK를 설치했어도 MapLibre 지도를 확인하려면 이번 APK로 한 번 업데이트한다.
 
 ```powershell
 & "D:\Android\Sdk\platform-tools\adb.exe" devices
@@ -85,13 +85,13 @@ npx expo run:android --device --port 8083 --no-bundler
 2. ‘글 남기기’ → 사진을 눌러 작고 투명한 위치 표식 선택 → ‘글 쓰기’. 같은 사진 위에서 쪽지 입력창에 커서가 있는지 확인한다. 공개 범위 미선택, 한글 두 줄 입력 → ‘나만 보기’ → ‘저장’. 확대 후 표식을 열어 같은 위치/본문인지 확인한다.
 3. ‘내 글’에서 편집 도중 닫아 초안으로 남긴다. 앱을 종료했다 다시 열어 ‘이어 쓰기’를 확인한다. ‘초안 버리기’는 편집 전 저장한 글을 지우지 않아야 한다.
 4. ‘사진에서 보기’로 돌아가 같은 표식·본문인지 확인한다. 다른 새 글에서 ‘공개’를 선택하면 전송되지 않고 초안만 남아야 한다.
-5. ‘주변 장소’는 키 없이도 목록에서 직접 선택 가능해야 한다. 실제 지도 타일·GPS는 아래 설정 후 별도 확인한다.
+5. ‘주변 장소’에서 경복궁 지도·건물 높이 표현과 지도 출처를 확인한다. 지도 확대/회전/기울임 → 지원 장소 선택 → 설명 진입 → 복귀 → ‘경복궁 보기’를 확인한다. ‘현재 위치 확인’을 직접 눌러 위치·오차·측정 시각과 거부/만료 상태를 확인한다. 인터넷을 끊어 지도 실패/재시도 시에도 장소 목록에서 직접 설명을 열 수 있어야 한다. 기존 APK에서는 지도 모듈을 사용할 수 없으므로 새 개발 APK가 필요하다.
 
 키보드는 홈 검색과 쪽지 입력을 각각 확인한다. PC 키보드 실제 입력, 입력창 탭 후 화면 키보드 표시, 한글 조합·줄바꿈, Back으로 키보드만 닫기, 다시 입력·저장 순서다. 입력창/사진/저장 버튼이 가려지면 글자 크기와 키보드 종류를 함께 기록한다. 에뮬레이터 자체 검색창에서도 같은 문제가 생기는지 비교하되 명령어의 입력 주입을 PC 키보드 통과 근거로 쓰지 않는다. 키보드/AVD 설정은 사용자가 확인한다.
 
 유리는 밝은 하늘·복잡한 단청·어두운 부분, 확대 4배와 전체 사진에서 카드 중앙 정렬·외곽 굴절·여백 잘림·본문 가독성을 확인한다. ‘불투명’ 전환도 유지돼야 한다. 360dp·글자 200%·긴 글·동작 감소·TalkBack에서 읽기/작성/닫기/저장이 접근 가능해야 한다. 빌드 성공이나 HTML 시안 검사는 이 기기 확인을 대체하지 않는다.
 
-지도 연결(#31): 본인 Google Cloud 프로젝트에서 [Maps SDK for Android](https://developers.google.com/maps/documentation/android-sdk/get-api-key)를 활성화하고 Android 앱 패키지 `com.visualtravelguide.app`·사용하는 서명 인증서 SHA-1 및 해당 SDK로 키를 제한한다. Google Cloud 결제 연결이 필요한 경우 본인이 요금·할당량을 확인하고 결정한다. 키 값은 채팅/저장소에 넣지 않고 빌드 세션의 `VTG_ANDROID_MAPS_KEY`로 제공한 뒤 prebuild·새 Android 빌드에 반영한다. 이 변수를 쓸 때는 공개할 용도의 config 출력물을 게시하지 않는다. 개발용 좌표는 [OpenStreetMap](https://www.openstreetmap.org/copyright) 건물 도형의 경계 상자 중심이며 위치 인증이 아니다.
+지도 연결(#31): 2026-11-08 사용자 선택으로 MapLibre React Native + OpenFreeMap Liberty를 사용한다. Google Cloud 프로젝트·지도 API 키는 필요하지 않다. 기존 APK에는 MapLibre가 없어 새 development build를 설치해야 한다. [MapLibre Expo 설정](https://maplibre.org/maplibre-react-native/docs/setup/expo/)과 [OpenFreeMap 설정](https://openfreemap.org/quick_start/)을 따른다. 지도 스타일·타일은 화면을 볼 때 네트워크로 받고, 지역 전체 다운로드나 자체 지도 서버는 구성하지 않는다. 기본 높이 표현은 공급 데이터이며 실측 높이·정교한 궁궐 모형으로 보장하지 않는다. 지도 안의 출처 표기를 유지한다. 지원 장소 좌표는 [OpenStreetMap](https://www.openstreetmap.org/copyright) 건물 도형의 경계 상자 중심이며 위치 인증이 아니다.
 
 ```powershell
 # 저장소 루트에서 현재 PowerShell 세션에 적용한다.
@@ -161,7 +161,7 @@ SDK 57 사진 선택기를 추가한 빌드에서는 Expo가 네이티브 모듈
 
 좌표 시각 60초 이내·accuracy 100m 이내일 때만 지도 표식·정확도 원·직선 거리와 가까운 순서를 제공한다. 만료 타이머와 foreground 복귀 시 재검사로 오래된 좌표를 제거한다. 거리는 출처 있는 건물 중심까지의 근사 직선 거리이며 입구·도보 경로나 방문 인증이 아니다. 거부·위치 서비스 꺼짐·오차·timeout에서도 모든 지원 장소를 직접 선택할 수 있다. 다시 묻기 불가에서는 앱 권한 설정, 위치 서비스 꺼짐에서는 기기 위치 설정을 여는 버튼을 제공한다. 설정 복귀 후 자동 권한 요청은 하지 않는다.
 
-`createLocationController`의 요청·취소·만료 검사는 기존 `npm run test:messages`에 포함된다. adapter는 [Expo 57 Location](https://docs.expo.dev/versions/v57.0.0/sdk/location/), 설정 버튼은 [RN 0.86 Linking](https://reactnative.dev/docs/0.86/linking)과 [Android 위치 설정 Intent](https://developer.android.com/reference/android/provider/Settings#ACTION_LOCATION_SOURCE_SETTINGS)를 기준으로 작성했다. 실제 권한창·설정 복귀·GPS·Google Maps 타일은 사용자 Android 확인이 필요하다. 지도 공급자 설정이 없어도 위치/직접 선택 코드는 유지하며, 지도 키는 위 설정 절차와 새 native 빌드를 따른다.
+`createLocationController`의 요청·취소·만료 검사는 기존 `npm run test:messages`에 포함된다. adapter는 [Expo 57 Location](https://docs.expo.dev/versions/v57.0.0/sdk/location/), 설정 버튼은 [RN 0.86 Linking](https://reactnative.dev/docs/0.86/linking)과 [Android 위치 설정 Intent](https://developer.android.com/reference/android/provider/Settings#ACTION_LOCATION_SOURCE_SETTINGS)를 기준으로 작성했다. 실제 권한창·설정 복귀·GPS·OpenFreeMap 타일·입체 건물은 사용자 Android 확인이 필요하다. 지도나 네트워크를 사용할 수 없어도 위치 확인/직접 장소 선택을 유지한다.
 
 ## R3와 Android 실행 피드백 반영
 

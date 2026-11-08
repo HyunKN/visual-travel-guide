@@ -1,5 +1,14 @@
 # Android 앱 개발 검증
 
+## 2026-11-08 MapLibre + OpenFreeMap 지도 공급자 변경 (#31)
+
+- 사용자 선택: 경복궁에서 직접 본 데모를 기준으로 MapLibre + OpenFreeMap을 채택했다. Google 전체의 지도 품질 비교나 모든 경복궁 건물의 실측 높이 검증은 아니다. 정교한 기와·처마·단청 3D 자산 제작은 보류한다. `0ad17ed`의 Google 지도 adapter와 API 키 조건을 교체했다.
+- 구현: MapLibre React Native **11.5.1**, Expo 57/RN 0.86 유지. OpenFreeMap Liberty 스타일의 기존 building-3d 레이어를 사용하고 카메라를 기울인다. 좌표 순서/지원 장소 ID·현재 위치 오차 원/만료와 직접 선택 목록을 유지한다. 로딩 중 이탈·백그라운드에서 이전 시도를 취소하고, 이전 APK·연결 실패에서는 목록과 명시적 재시도를 제공한다. 권한은 기존 버튼에서만 요청한다. 세 장소 설명과 같은 `placeId`를 사용하며 사진·쪽지·모델·Supabase 계약은 변경하지 않았다.
+- 검사: `test:messages` **92/92**. 새 지도 회귀 4개에 위경도/가까운 지원 ID, 지리적 오차 원/무효·먼 위치 제거, 현장/원거리 카메라 정책, timeout·취소·늦은 완료를 포함한다. 타입 검사와 전체 lint 통과. HTTP 서버 없는 Android/Hermes export **1,787 modules / 34 assets** 통과. Astra가 설치된 MapLibre API와 정적 코드 정합을 별도 검토했다. 실제 터치·타일·GPU 렌더링 검사는 아니다.
+- 네이티브: D: SDK·Gradle 캐시에서 MapLibre 필수 의존성을 받아 x86_64 개발 APK를 컴파일했다. SDK 추가 설치는 비활성화했다. `BUILD SUCCESSFUL in 6m 39s`, 497 tasks(68 executed/429 up-to-date). Kotlin/CMake·패키징 통과. APK에 `lib/x86_64/libmaplibre.so`, MLRNMapViewModule, MapLibre MapView와 기존 PhotoGlassView를 확인했다. 이전 react-native-maps/GoogleMap 클래스는 제거됐다. 새 의존성은 고정 lockfile에 기록했고 이번 빌드는 완전 오프라인 검사가 아니다. 이후 캐시 재사용 빌드는 아래 README의 `--offline` 명령으로 수행할 수 있다.
+- APK: `D:\Android\Projects\visual-travel-guide\app-build-20261107-s1\outputs\apk\debug\app-debug.apk`, **112,534,284 bytes**, SHA-256 `3b2ba7f910de1f67db5968686afdf5089ba14e3665601652d638ad28db675998`. package `com.visualtravelguide.app` / 0.1.0(1), minSdk24/target36, ABI x86_64만. Metro가 필요한 에뮬레이터용 개발 APK이며 ARM 실기기·iOS 빌드 결과가 아니다. 기존 D: SDK·Gradle·app build/.cxx 연결과 이전 react-native-maps의 D: 출력은 보존했다. 최종 여유 C: 약 18.12GiB / D: 약 354.21GiB.
+- 미실행: 기기 설치·앱·에뮬레이터·Metro 시작/재시작. 새 APK에서 Liberty 건물 높이/경복궁 가시성, 회전·기울임·지도 밖 스크롤, 세 장소 선택·설명 복귀, 출처, 실제 GPS·권한·오차·만료, 오프라인 후 재시도를 사용자가 확인해야 한다. #31은 열린 상태로 확인 대기이며 지도 빌드 성공을 기능 인수나 현장 성능으로 세지 않는다. 기존 모듈 책임을 유지하는 adapter 교체여서 공통 ARCHITECTURE의 다른 스레드 변경은 이번 묶음에서 수정하지 않았다.
+
 ## 2026-11-08 사진 안 작성·홈 탐색·Android 유리 (#32/33/36)
 
 - 기준선: `568b83b`에선 검수 이야기 하나가 홈에 고정됐고, 쪽지 입력에 별도 native Modal을 썼다. 사용자 보고는 이전 화면의 흐름이 작동했고 PC 입력과 탭 후 화면 키보드가 작동하지 않았다는 것이다. [13개 요구의 설계·수용 기준](../docs/design/APP_SPRINT1_SPEC.md)과 이번 변경 후 기기 결과를 구분한다.

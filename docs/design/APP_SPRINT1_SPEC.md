@@ -104,7 +104,7 @@ API 미지원·기존 개발 빌드·Expo Go·software Canvas·shader/사진 실
 | 위치 선택 / #32·33 | ‘글 남기기’ 후에만 사진 터치 활성. 임시 anchor 1개, 다시 눌러 이동, ‘글 쓰기’ | 사진 밖 입력 무시. 선택 전 쓰기 비활성. 취소하면 기존 탐색 좌표·모드 복원 |
 | 작성 / #33·34 | 텍스트 하나·위치 변경·공개 범위·완료. 공개는 ‘공개하기’, 개인은 ‘저장’ | 기본 공개 범위 없음. 공백/상한/미선택 차단, 입력 유지. 키보드 위 완료 행. 뒤로 시 초안 저장 후 이탈 |
 | 내 글 / #33 | 기기 초안·기록 최신순, 상태와 본문 일부. 공개 여부 식별, 같은 위치로 열기 | 첫 빈 상태는 ‘남긴 글이 없어요’와 둘러보기. 로딩·실패를 빈 목록으로 바꾸지 않음 |
-| 주변 장소 / #31 | 홈의 명시적 위치 행동 → 현재 위치·지원 장소 3곳의 2D 지도 | 권한 거부·지도 실패 때 직접 선택 유지. 위치를 방문 인증/사진 촬영 위치로 단정하지 않음 |
+| 주변 장소 / #31 | 홈의 명시적 위치 행동 → 현재 위치·지원 장소 3곳과 건물 높이를 표현하는 지도 | 권한 거부·지도 실패 때 직접 선택 유지. 위치를 방문 인증/사진 촬영 위치로 단정하지 않음. MapLibre + OpenFreeMap 공급자 기준은 §8을 따름 |
 
 모든 화면 이동은 Expo Router. route에는 ID·선택 entry 정도만 넣고 사진 URI·본문·세션 token을 넣지 않는다. 같은 프로세스의 stack 복귀는 스크롤/장면 모드를 보존한다. 프로세스 재실행은 기기 저장 글·초안만 복원하며 임시 사진·미저장 탐색 상태는 복원을 보장하지 않는다. 공개 deep link의 좌표가 cover 밖이면 contain으로 전환한 뒤 해당 글을 연다.
 
@@ -195,11 +195,33 @@ Supabase 기존 선택을 유지한다. 읽기는 로그인 없이, 첫 공개 �
 - UI 대기 상한은 개발 보호값 30초, 즉시 취소 가능. timeout은 native 계산 종료가 아니며 종료 전 새 native 추론을 시작하지 않는다. latency 성능 목표와 별개다.
 - Sprint 1 인식은 photo-only. 위치 보정 실험·정책이 없는 동안 위치를 모델 판정에 섞지 않는다.
 
-위치는 사용자 행동 시 foreground 권한만 요청한다. expo-location SDK 57, requestForegroundPermissionsAsync/getCurrentPositionAsync를 adapter 뒤에 둔다. 15초 대기 상한, 늦은 결과 무효화. 관측 시각 60초 이내·accuracy 100m 이내부터 현재 위치 안내에 사용하고 나머지는 stale/imprecise 상태로 분리한다. 이 값은 방문 인증·인식 임곗값이 아니다. [Location API](https://docs.expo.dev/versions/v57.0.0/sdk/location/).
+### #31 지도 공급자 교체 (2026-11-08)
+
+사용자가 **MapLibre React Native + OpenFreeMap**을 선택했다. 경복궁 비교에서 MapLibre 쪽의 높이가 보이고 Google 쪽에서 보이지 않았다는 것은 해당 비교 화면의 사용자 관찰이다. 공급자 전체의 품질 우위나 궁궐 높이의 정확성·실제 앱 검증을 뜻하지 않는다. 이번에는 기존 주변 장소 기능의 지도 공급자만 바꾸며 정교한 지붕·처마·단청 3D, 새 장소, 길찾기, 모델 연동, 오프라인 지도 묶음은 추가하지 않는다.
+
+공식 최신 안정판은 확인일 기준 [11.5.1](https://github.com/maplibre/maplibre-react-native/releases/tag/v11.5.1)이다. v11은 New Architecture만 지원하며 RN 0.80 이상·Android API 23 이상을 요구한다. 해당 패키지의 Expo 54 이상·React 19.1 이상 peer 범위에 현재 Expo 57/RN 0.86/React 19.2가 들어가지만, 이는 빌드·실행 호환을 통과했다는 증거가 아니다. [공식 시작 안내](https://maplibre.org/maplibre-react-native/docs/setup/getting-started/), [Expo 설정](https://maplibre.org/maplibre-react-native/docs/setup/expo/)에 따라 버전을 고정하고 config plugin을 추가한 새 development APK가 필요하며 Expo Go에서는 사용할 수 없다.
+
+위치는 기존 controller/adapter를 유지하고 사용자 행동 시 foreground 권한만 요청한다. expo-location SDK 57, requestForegroundPermissionsAsync/getCurrentPositionAsync를 adapter 뒤에 둔다. 15초 대기 상한, 늦은 결과 무효화. 관측 시각 60초 이내·accuracy 100m 이내부터 현재 위치 안내에 사용하고 나머지는 stale/imprecise 상태로 분리한다. 이 값은 방문 인증·인식 임곗값이 아니다. MapLibre의 별도 위치 권한·지속 추적·백그라운드 수집을 켜지 않는다. [Location API](https://docs.expo.dev/versions/v57.0.0/sdk/location/).
 
 유효한 위치에는 측정한 현지 시각과 보고된 오차(m)를 표시한다. 화면에서 다시 검사한 시각을 새 측정 시각처럼 표시하지 않는다. 만료·거부·정확도 미확보에서는 이 정보를 내리고 직접 선택을 유지한다. 현재 위치의 정밀 숫자 좌표를 별도 보조 레이블로 추가하지 않는다.
 
-검수된 좌표+출처가 있는 장소만 지도·거리 계산에 사용한다. react-native-maps의 2D 지도에 현재 위치/정확도와 지원 장소 marker를 표시하고 같은 placeId 설명으로 이동한다. [SDK 57 지도 문서](https://docs.expo.dev/versions/v57.0.0/sdk/map-view/)에 따른 공급자 설정·제한된 Android 키·새 빌드가 필요하다. 지도 키/타일 실패를 가짜 지도로 감추지 않고 목록·직접 선택으로 복구한다. 지도 설정과 장소 좌표가 미확보이면 #31 인수는 남는다. 위치 기록을 영구 저장/서버 전송하지 않는다.
+지도는 [OpenFreeMap Liberty](https://tiles.openfreemap.org/styles/liberty)를 사용한다. 확인한 style JSON에는 zoom 14부터 openmaptiles의 building을 render_height/render_min_height로 표현하는 building-3d fill-extrusion가 이미 있으므로 추가 extrusion를 겹치지 않는다. 기본 건물 높이 표현이지 세부 궁궐 모델이 아니며, 각 건물의 높이 존재·정확도나 실물 구도를 보장하지 않는다. [공식 모바일 사용 안내](https://openfreemap.org/quick_start/)와 [TileJSON](https://tiles.openfreemap.org/planet)의 실제 속성을 대조했다.
+
+| 경계 | 구현 기준 | 수용 기준 |
+| --- | --- | --- |
+| v11 API | Map/mapStyle, Camera/initialViewState, GeoJSONSource/data, Layer/type·paint·layout. 좌표는 [longitude, latitude], bounds는 [west, south, east, north] | 구 v10 MapView·zoomLevel·centerCoordinate·rotateEnabled와 혼용하지 않음. 설치한 11.5.1 타입·소스를 기준으로 검사 |
+| 카메라 | 처음에는 경복궁 지원 세 장소 범위, pitch 약 45도·zoom 약 16을 출발값으로 삼음. 실제 지도 크기가 잡히고 준비되면 padding을 둔 세 장소 fit을 1회 수행. pan/zoom/pitch/rotate 허용, 자동 반복 fly 없음 | 처음에 세 장소 선택점에 접근 가능. 사용자가 옮긴 뒤 렌더/위치 만료만으로 다시 중앙에 고정하지 않음. 동작 감소에서는 카메라 전환 시간 0 |
+| 멀리 있는 현재 위치 | 궁 중심 약 2km 이내의 유효 fix만 궁과 함께 맞추는 후보. 그 밖은 궁 카메라를 유지하고 직선 거리 목록만 갱신. 최소 zoom 약 14·최대 약 19는 조정 가능한 출발값 | 다른 도시/국가의 fix로 전세계 fit이 되지 않음. 가까운 fix를 포함할 때도 세 지원점이 화면 밖으로 밀리면 궁 범위를 유지. 지도 전체가 지원 지역이라는 암시 없음 |
+| 지원 장소 | 기존 검수된 locations의 세 placeId·좌표·출처 재사용. GeoJSON/native annotation으로 지리 좌표에 고정 | pitch/회전/확대 후에도 같은 건물 지점. source onPress의 nativeEvent.features에서 지원 placeId만 허용하고 1회 상세 이동. 여러 hit는 결정적 한 곳을 선택. 손가락 영역과 작은 점을 분리하고 하단 목록은 항상 대체 경로 |
+| 현재 위치·오차 | 기존 good Fix만 point와 accuracy m의 지리 좌표 polygon으로 표현. 예: 64분할 닫힌 원, 반경 0이면 원 생략 | 화면 px를 m로 오인하거나 화면 고정 원을 그리지 않음. 회전·pitch에도 지리 영역 유지. 만료/거부/취소/background에서 위치점·오차원·측정정보를 함께 제거 |
+| 준비·실패 | Google 키 조건을 제거하고 native 모듈 존재를 먼저 확인한 뒤 지도를 지연 import. style 실패·import 실패·native 없음·첫 완전 렌더 15초 초과를 분리하고 재시도 제공 | 이전 APK에서 앱 전체가 중단되지 않고 목록/직접 선택 유지. 스타일 JSON 로드만으로 지도 표시 완료로 판단하지 않음. 재시도/이탈 뒤 이전 attempt의 타이머·이벤트는 폐기 |
+| 출처·표시 | native attribution을 유지하고 OpenFreeMap·© OpenMapTiles·OpenStreetMap 출처 링크 제공. 작은 지도는 RN 합성/클리핑과 ScrollView 제스처를 확인하며 필요한 경우 androidView=texture 사용 | 지도 또는 버튼이 출처를 덮지 않음. 출처 링크 실패 안내. 지도 조작과 화면 스크롤 모두 가능. 배경 지도 타일의 고유색을 앱 UI 남색 금지 규칙으로 재색칠하지 않음 |
+
+[Map](https://maplibre.org/maplibre-react-native/docs/components/map/), [Camera](https://maplibre.org/maplibre-react-native/docs/components/camera/), [v11 변경](https://maplibre.org/maplibre-react-native/docs/setup/migrations/v11/)을 따른다. Camera 문서의 예전 인자 수 예시와 달리 11.5.1 소스의 fitBounds는 bounds와 options 두 인자이며 padding·pitch·duration은 options 안에 둔다. native 존재 판정은 해당 버전의 MLRNMapViewModule을 먼저 확인하고, 없는 native View를 렌더한 뒤 JS 오류 처리만으로 복구할 수 있다고 가정하지 않는다.
+
+react-native-maps를 쓰는 마지막 앱 경로가 교체되면 해당 의존성과 Google config plugin, VTG_ANDROID_MAPS_KEY 참조, androidMapsConfigured gate를 제거한다. 사용자의 실제 키 값·OS 환경변수·다른 서비스 설정은 열거나 삭제하지 않는다. 패키지 설치·새 APK 빌드는 담당자가 저장공간과 현재 도구 상태를 확인한 뒤 수행하며 소스 C:/도구·캐시 D: 구성을 유지한다. 앱·Metro·에뮬레이터 실행이나 APK 설치, 대량 지도·모델·데이터셋 다운로드는 이번 설계 작업에 포함하지 않는다. 위치를 영구 저장하거나 서비스로 직접 전송하지 않지만, 지도 표시에는 선택한 지도 공급자의 네트워크 타일 요청이 필요하다.
+
+검증은 좌표 순서·ID whitelist·지리 오차원 반경/닫힘·멀리 있는 fix의 카메라 정책·만료 제거·초기화/재시도 세대·타입/린트/관련 회귀·새 native 빌드로 나눈다. 실제 Android에서 Liberty 입체 표시, 3개 장소 선택, 기울임/회전/스크롤, attribution, 오프라인/타임아웃/복구, 위치 권한 거부·만료를 실행하기 전에는 #31 인수를 완료로 표시하지 않는다. 에뮬레이터의 software GPU 관찰을 실기기 지도 성능으로 일반화하지 않는다.
 
 ## 9. 검증 계약과 개발 순서
 

@@ -1,15 +1,44 @@
-import {useEffect,useRef} from 'react';
-import MapView,{Circle,Marker} from 'react-native-maps';
+import {useEffect,useMemo,useRef,useState} from 'react';
+import {StyleSheet,View} from 'react-native';
+import {Camera,GeoJSONSource,Layer,Map,type CameraRef} from '@maplibre/maplibre-react-native';
+import {Action} from '../../ui/Action';
+import {Text} from '../../ui/Text';
+import {color,textStyles} from '../../ui/theme';
 import {content} from '../place-content/content';
-import {locations,type Fix} from './location';
-export default function PalaceMap({fix,open,onTimeout}:{fix:Fix|null;open:(id:string)=>void;onTimeout:()=>void}) {
-  const timer=useRef<ReturnType<typeof setTimeout>|undefined>(undefined);
-  useEffect(()=>{timer.current=setTimeout(onTimeout,15000);return ()=>clearTimeout(timer.current);},[onTimeout]);
-  const map=useRef<MapView>(null);
-  useEffect(()=>{if(fix)map.current?.fitToCoordinates([fix,...locations],{edgePadding:{top:36,bottom:36,left:36,right:36},animated:false});},[fix]);
-  return <MapView ref={map} style={{height:280}} initialRegion={{...locations[0],latitudeDelta:.009,longitudeDelta:.009}} rotateEnabled={false} pitchEnabled={false} toolbarEnabled={false}
-    onMapLoaded={()=>clearTimeout(timer.current)}>
-    {locations.map(p=>{const b=content.getBuilding(p.placeId);return b.status==='ok' && <Marker key={p.placeId} coordinate={p} title={b.data.name} onCalloutPress={()=>open(p.placeId)} />;})}
-    {fix && <><Marker coordinate={fix} title="현재 위치" pinColor="#B45440" /><Circle center={fix} radius={fix.accuracy??0} fillColor="#62626222" strokeColor="#62626288" /></>}
-  </MapView>;
+import type {Fix} from './location';
+import {fixFeatures,initialMapView,mapStyleUrl,nearbyMapBounds,palaceBounds,placeFeatures,pressedPlace} from './mapContract';
+
+export default function PalaceMap({fix,checkedAt,open,onReady,onFailure}:{fix:Fix|null;checkedAt:number;open:(id:string)=>void;onReady:()=>void;onFailure:()=>void}) {
+  const camera=useRef<CameraRef>(null),[ready,setReady]=useState(false),[selected,setSelected]=useState<string|null>(null);
+  const [width,setWidth]=useState(0),initialFit=useRef(false),lastFix=useRef<Fix|null>(null);
+  const geo=useMemo(()=>fixFeatures(fix,checkedAt),[fix,checkedAt]);
+  useEffect(()=>{
+    if(!ready||!width)return;
+    const bounds=nearbyMapBounds(fix,checkedAt);
+    if((bounds&&fix!==lastFix.current)||!initialFit.current){camera.current?.fitBounds(bounds??palaceBounds,{padding:{top:36,right:36,bottom:36,left:36},pitch:45,duration:0});initialFit.current=true;}
+    lastFix.current=fix;
+  },[fix,checkedAt,ready,width]);
+  const selectedPlace=selected?content.getBuilding(selected):null;
+  return <View style={s.section}>
+    <Map style={s.map} onLayout={e=>setWidth(e.nativeEvent.layout.width)} mapStyle={mapStyleUrl} androidView="texture" tintColor={color.ink} touchRotate touchPitch attribution compass scaleBar
+      onDidFailLoadingMap={onFailure}
+      onDidFinishRenderingMapFully={()=>{setReady(true);onReady();}}>
+      <Camera ref={camera} initialViewState={initialMapView} minZoom={14} maxZoom={19}/>
+      <GeoJSONSource id="accuracy" data={geo.accuracy}>
+        <Layer id="accuracy-fill" type="fill" paint={{'fill-color':'#626262','fill-opacity':.14}}/>
+        <Layer id="accuracy-edge" type="line" paint={{'line-color':'#626262','line-opacity':.6,'line-width':1}}/>
+      </GeoJSONSource>
+      <GeoJSONSource id="supported-places" data={placeFeatures} hitbox={{top:17,right:17,bottom:17,left:17}}
+        onPress={event=>{event.stopPropagation();setSelected(pressedPlace(event.nativeEvent.features,event.nativeEvent.lngLat));}}>
+        <Layer id="place-points" type="circle" paint={{'circle-radius':7,'circle-color':color.ink,'circle-stroke-color':'#FFFFFF','circle-stroke-width':2}}/>
+      </GeoJSONSource>
+      <GeoJSONSource id="measured-location" data={geo.point}>
+        <Layer id="location-point" type="circle" paint={{'circle-radius':6,'circle-color':color.accent,'circle-stroke-color':'#FFFFFF','circle-stroke-width':2}}/>
+      </GeoJSONSource>
+    </Map>
+    {!ready&&<Text accessibilityLiveRegion="polite" style={textStyles.source}>지도를 불러오는 중이에요.</Text>}
+    {selectedPlace?.status==='ok'&&<Action label={`${selectedPlace.data.name} 둘러보기`} variant="soft" onPress={()=>open(selectedPlace.data.id)}/>}
+    <Action label="경복궁 보기" onPress={()=>camera.current?.fitBounds(palaceBounds,{padding:{top:36,right:36,bottom:36,left:36},pitch:45,bearing:0,duration:0})}/>
+  </View>;
 }
+const s=StyleSheet.create({section:{gap:8},map:{height:280,width:'100%'}});
