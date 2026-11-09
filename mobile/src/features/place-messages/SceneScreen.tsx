@@ -24,6 +24,7 @@ import { createReaderPresentation } from './presentation';
 import { useReaderMotion } from './useReaderMotion';
 import { PublicationRejected } from '../public-messages/publication';
 import { rateLimitText } from '../public-messages/feedback';
+import {SketchTraceMarker} from './SketchTraceMarker';
 
 type FocusTarget = React.ElementRef<typeof View> | null;
 function focus(target: FocusTarget) {
@@ -201,15 +202,15 @@ export default function SceneScreen({ sceneId, source, messageId, draftId }: { s
             void controller.open(g.ids[0]);
           }}>
           <View style={[s.glyph, { transform: [{ translateX: g.glyph.x - g.x }, { translateY: g.glyph.y - g.y }] }]}>
-            {g.ids.length > 1 ? <Text style={s.count}>{g.ids.length}</Text> : <View style={s.bubble} />}
+            {g.ids.length > 1 ? <SketchTraceMarker variant="group" count={g.ids.length}/> : <SketchTraceMarker variant="message"/>}
           </View>
         </Pressable>;
       })}
-      {(reader||editing) && selectedPoint && loaded && !imageFailed && <View pointerEvents="none" style={[s.selected, { left: selectedPoint.x - 7, top: selectedPoint.y - 7 }]} />}
+      {(reader||editing) && selectedPoint && loaded && !imageFailed && <View pointerEvents="none" style={[s.selected, { left: selectedPoint.x - 7, top: selectedPoint.y - 7 }]}><SketchTraceMarker variant="selected"/></View>}
       {positioning && rect && loaded && !imageFailed && <>
         <Pressable accessibilityLabel="사진에서 위치 선택" accessibilityRole="button" style={StyleSheet.absoluteFill}
           onPress={({nativeEvent:e})=>{ const a=unproject({x:e.locationX,y:e.locationY},rect,size); if(a) setAnchor(a); }} />
-        {anchor && <View pointerEvents="none" style={[s.selected,{left:project(anchor,rect).x-7,top:project(anchor,rect).y-7}]} />}
+        {anchor && <View pointerEvents="none" style={[s.selected,{left:project(anchor,rect).x-7,top:project(anchor,rect).y-7}]}><SketchTraceMarker variant="selected"/></View>}
       </>}
       </View>
       {presented.phase !== 'hidden' && <View pointerEvents="box-none" style={[s.modal,{justifyContent:presented.side==='bottom'?'flex-end':'flex-start'}]}>
@@ -271,9 +272,8 @@ const s = StyleSheet.create({
   row: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
   body: textStyles.body, heading: { ...textStyles.heading, paddingLeft: 12 }, meta: textStyles.source,
   target: { position: 'absolute', width: 48, height: 48, justifyContent: 'center', alignItems: 'center' },
-  glyph: { minWidth: 14, height: 14, borderRadius: 7, backgroundColor: 'rgba(255,255,255,.3)', borderColor: '#FFFFFF', borderWidth: 1, alignItems: 'center', justifyContent: 'center',boxShadow:'0px 0px 3px rgba(0,0,0,.6)' },
-  bubble: { width: 4, height: 4, backgroundColor: '#FFFFFF', borderRadius: 2 }, count: { color: color.ink, backgroundColor:'rgba(255,255,255,.8)',fontSize: 10,lineHeight:14,paddingHorizontal:3,borderRadius:7 },
-  selected: { position: 'absolute', width: 14, height: 14, borderWidth: 1.5, borderRadius: 7, borderColor: '#FFFFFF', backgroundColor: 'rgba(255,255,255,.35)',boxShadow:'0px 0px 3px rgba(0,0,0,.65)' },
+  glyph: { minWidth: 14, height: 14, alignItems: 'center', justifyContent: 'center' },
+  selected: { position: 'absolute', width: 14, height: 14 },
   modal: { ...StyleSheet.absoluteFill, paddingHorizontal: 20,paddingVertical:12 }, card: { width: '100%', maxWidth: 560, alignSelf: 'center', maxHeight: '100%', backgroundColor: '#FFFFFF', borderRadius: 20, overflow: 'hidden', borderWidth: 1, borderColor: '#FFFFFFDD', padding: 8, elevation: 4 },
   bodyScroll: { flexGrow: 0, flexShrink: 1 }, bodyContent: { paddingHorizontal: 12, paddingVertical: 8 }, tint: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(255,255,255,.86)' },
   readingMeta:{...textStyles.source,color:'#353535'},

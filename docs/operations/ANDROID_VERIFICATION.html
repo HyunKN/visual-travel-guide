@@ -8,7 +8,15 @@
 <p>원본에 기록된 검사 결과입니다. 현재 기기 상태를 실시간으로 조회하지 않습니다.</p>
 <div class="verdict"><strong>빌드 결과와 기기 실행 결과를 구분해 기록합니다.</strong><p>아래에서 통과·실패·미실행 항목과 남은 확인을 함께 볼 수 있습니다.</p></div>
 <p class="reader-note">이 문서는 파일 자체로 열립니다. 임시 서버나 인터넷 연결 없이 검사 결과를 읽을 수 있습니다.</p></header>
-<main><h2>2026-11-09 메모 소셜 로그인·계정 격리 구현과 서버 권한 적용 (#34 부분)</h2>
+<main><h2>2026-11-09 사진 위 스케치 흔적 표식 (#36·#32)</h2>
+<ul>
+<li>사용자 지정 범위인 사진 위 작은 표식만 교체했다. <code>SketchTraceMarker</code>는 손그림 원+말풍선 14dp, 겹침 실제 개수(한 자리 14dp/두 자리 20×14dp), 선택/작성 위치 원+중앙 점을 그린다. 흰 외곽선·중립 먹색·투명 배경과 가벼운 그림자를 쓰며 고정 SVG에서 밀도별 PNG를 만들었다. 작성 CTA·공용 Action·로그인·geometry·원본 anchor·48dp 터치·그룹 간격·접근성 이름/복귀 ref는 바꾸지 않았다.</li>
+<li>Astra 설계/최종 정적 리뷰와 Sol 구현: 전체 TypeScript·담당 ESLint 통과, 기존 geometry/reader/messages·presentation <strong>27/27 통과</strong>. 두 자릿수 테두리 여백·숫자 정렬을 미세 조정한 뒤 타입·담당 lint를 재검사했다. 원본 SVG 4개와 RGBA PNG 12개(1×/2×/3×)의 크기·투명도·SHA-256을 확인했다. PNG 전체는 <strong>15,996 bytes</strong>이며 8× 샘플 외곽 alpha=0 검사로 캔버스 잘림을 확인했다. <span title="개발용 원본: assets/trace-markers/README.md">자산·재현 안내</span>.</li>
+<li>최종 Expo/Hermes export <strong>1,810 modules·46 assets·Android 번들 1개</strong> 통과. 말풍선·원·선택점·넓은 그룹의 PNG 밀도별 12개가 포함됐다. 새 네이티브 의존성이 없어 APK를 다시 빌드/설치하지 않았으며 앱·에뮬레이터·Metro도 실행하지 않았다. export는 HTTP listen 없는 mockServer 검사다.</li>
+<li><code>.codex-build/trace-marker-preview.png</code>는 흰색·중간 회색·어두운 단색에 원본 크기/5배 확대를 배치한 정적 원본 렌더다. 숫자는 기존 Spoqa 글리프 outline이며 실제 Android Text baseline·시스템 배율·궁궐 사진 합성이 아니다. 시안에서 말풍선/선택점 구분과 12/60의 테두리 여백을 확인했으며 실기기 품질 통과로 표시하지 않는다.</li>
+<li>사용자 확인: 로그인 설정 후 공통 사진에서 단일/겹친 흔적 열기→닫기/Back→같은 위치, 가장자리·전체 사진/1~4배 확대, 밝은 하늘·어두운 처마·복잡한 사진, 큰 글자/200%·TalkBack 포커스를 확인한다. #36·#32는 사람이 확인할 때까지 열린 확인 대기다.</li>
+</ul>
+<h2>2026-11-09 메모 소셜 로그인·계정 격리 구현과 서버 권한 적용 (#34 부분)</h2>
 <ul>
 <li>사용자 결정은 가이드 비로그인·메모 읽기/작성 진입부터 Google/카카오/네이버 로그인이다. 상세 원본은 <span title="개발용 원본: ../docs/design/APP_SPRINT1_SPEC.md#7-%EA%B3%B5%EA%B0%9C%EA%B6%8C%ED%95%9C%EA%B4%80%EB%A6%AC-34">Sprint 1 명세 §7</span>다. 아래 11/08의 익명 로그인 활성화 안내와 비로그인 전체 읽기 성공은 <strong>변경 전 기록</strong>이며 현재 진행 지시가 아니다. Anonymous Sign-Ins는 켜지 않는다.</li>
 <li><span title="개발용 원본: ../supabase/migrations/202611090006_permanent_social_auth.sql">0006 migration</span>을 기존 개발 프로젝트에 적용했다. 원격 version은 <code>20261108151349</code> / <code>permanent_social_auth</code>다. 기존 0001~0005를 재적용하지 않았고 저장된 글·소유권·요청을 삭제/변경하지 않았다. 원격 ACL에서 홈 발췌만 비로그인 실행 가능, 나머지 public RPC 7개는 authenticated만 실행 가능, 내부 함수 11개는 anon/authenticated 모두 실행 불가를 확인했다. 각 보호 RPC는 <code>auth.uid()</code>와 JSON boolean <code>is_anonymous=false</code>를 검사한다.</li>
@@ -447,5 +455,5 @@
 </ol>
 <h2>의존성 audit</h2>
 <p><code>npm audit --json</code>은 29건(critical 0, high 5, moderate 22, low 2)을 보고했다. high는 Expo CLI·Router와 전이 의존성 decode-uri-component/query-string/zod에 걸쳐 집계되어 있다. 중복된 의존 경로의 집계이지 29개의 독립 앱 취약점을 입증한 검사는 아니다. Router 경로의 npm 제안은 SDK 58 major 변경이어서 자동 적용하지 않았다. 원본은 <code>.codex-build/npm-audit.json</code>에 있다. 현재 검사만으로 출시 안전성을 판단하지 않으며 외부 배포 전 호환 가능한 수정 버전·실제 노출 경로를 확인한다.</p>
-</main><footer>원본: mobile/VERIFICATION.md · 이 페이지는 원본의 읽기용 변환본이며 새 검사 결과가 아닙니다.<br>원본 SHA-256: 4b2d9115a4eac705953904a02a8afaf06c8ba522e9ecf653297cf7a67f0cf810</footer>
+</main><footer>원본: mobile/VERIFICATION.md · 이 페이지는 원본의 읽기용 변환본이며 새 검사 결과가 아닙니다.<br>원본 SHA-256: f55b1f97a1cd494d461ff73a3b1b2ffe9324d8dbac1e1fd81dc7218a6eb843e7</footer>
 </body></html>
