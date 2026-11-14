@@ -97,6 +97,44 @@ test('clear discards ready coordinates and expiry timers without acquiring anoth
   assert.deepEqual(h.api.snapshot(),{kind:'idle'});assert.equal(h.timers.filter(t=>t.active).length,0);
   h.api.refreshAge();assert.equal(h.calls.length,3);
 });
+
+test('permission dialog suspension waits for foreground before starting GPS and then completes the same request',async()=>{
+  const work=deferred(),h=setup({requestPermission:()=>work.promise});
+  const pending=h.api.locate();h.api.suspend();
+  work.resolve({granted:true,canAskAgain:true});
+  await Promise.resolve();await Promise.resolve();
+  assert.equal(h.api.snapshot().kind,'locating');assert.ok(!h.calls.includes('position'));
+  h.api.refreshAge();await pending;
+  assert.equal(h.api.snapshot().kind,'ready');assert.ok(h.calls.includes('position'));
+  h.api.suspend();assert.deepEqual(h.api.snapshot(),{kind:'idle'});
+});
+
+test('a one-shot result received behind a system dialog is not applied until foreground; clear or timeout discards it',async()=>{
+  for(const end of ['resume','clear','timeout']){
+    const work=deferred(),h=setup({getCurrentPosition:()=>work.promise});
+    const pending=h.api.locate();
+    for(let i=0;i<8;i++)await Promise.resolve();
+    assert.equal(h.api.snapshot().kind,'locating');
+    h.api.suspend();work.resolve(h.sample);
+    for(let i=0;i<8;i++)await Promise.resolve();
+    assert.equal(h.api.snapshot().kind,'locating');assert.equal(h.api.snapshot().fix,undefined);
+    if(end==='clear')h.api.clear();else if(end==='timeout')h.fire(15_000);
+    h.api.refreshAge();await pending;
+    assert.equal(h.api.snapshot().kind,end==='resume'?'ready':end==='clear'?'idle':'timeout');
+    h.api.clear();
+  }
+});
+
+test('inactive controllers start no request and permission rejection is still reported after returning',async()=>{
+  const idle=setup();idle.api.suspend();await idle.api.locate();
+  assert.deepEqual(idle.calls,[]);assert.equal(idle.api.snapshot().kind,'idle');
+  idle.api.refreshAge();await idle.api.locate();assert.equal(idle.api.snapshot().kind,'ready');idle.api.clear();
+  const permission=deferred(),h=setup({requestPermission:()=>permission.promise});
+  const pending=h.api.locate();h.api.suspend();permission.resolve({granted:false,canAskAgain:false});
+  await Promise.resolve();await Promise.resolve();assert.equal(h.api.snapshot().kind,'locating');
+  h.api.refreshAge();await pending;
+  assert.deepEqual(h.api.snapshot(),{kind:'denied',canAskAgain:false});assert.ok(!h.calls.includes('position'));
+});
 test('permission/provider/position errors are recoverable only through a new explicit request',async()=>{
   for(const method of ['requestPermission','servicesEnabled','getCurrentPosition']){
     const h=setup();const original=h.port[method];h.port[method]=async()=>{throw Error('native failure');};

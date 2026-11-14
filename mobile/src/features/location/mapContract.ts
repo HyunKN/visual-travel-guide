@@ -31,12 +31,10 @@ export function pressedPlace(features:readonly {properties?:unknown}[],coordinat
   return candidates[0]?.placeId??null;
 }
 
-function withinPalaceArea(fix:Fix){return meters(fix,{longitude:palaceCenter[0],latitude:palaceCenter[1]})<=2000;}
-
 /** Geographic metres, not screen pixels: the polygon stays correct under zoom/pitch. */
 export function fixFeatures(fix:Fix|null,now:number) {
   const empty={type:'FeatureCollection' as const,features:[]};
-  if(!fix||classify(fix,now)!=='good'||!withinPalaceArea(fix))return {point:empty,accuracy:empty};
+  if(!fix||classify(fix,now)!=='good')return {point:empty,accuracy:empty};
   const point={type:'FeatureCollection' as const,features:[{type:'Feature' as const,properties:{},geometry:{type:'Point' as const,coordinates:lngLat(fix)}}]};
   if(!fix.accuracy)return {point,accuracy:empty};
   const rad=Math.PI/180,latitude=fix.latitude*rad,longitude=fix.longitude*rad,angle=fix.accuracy/6371000;
@@ -49,23 +47,24 @@ export function fixFeatures(fix:Fix|null,now:number) {
   return {point,accuracy:{type:'FeatureCollection' as const,features:[{type:'Feature' as const,properties:{},geometry:{type:'Polygon' as const,coordinates:[coordinates]}}]}};
 }
 
-/** A distant measurement updates distance text without zooming away from the palace. */
-export function nearbyMapBounds(fix:Fix|null,now:number):[number,number,number,number]|null {
-  if(!fix||classify(fix,now)!=='good'||!withinPalaceArea(fix))return null;
-  // Only a local courtyard fix may reframe the small pitched viewport. A wider
-  // 2km-area measurement can still appear on the map without moving palace pins.
-  const latitudeMargin=100/111320,longitudeMargin=latitudeMargin/Math.cos(palaceCenter[1]*Math.PI/180);
-  if(fix.longitude<palaceBounds[0]-longitudeMargin||fix.longitude>palaceBounds[2]+longitudeMargin
-    ||fix.latitude<palaceBounds[1]-latitudeMargin||fix.latitude>palaceBounds[3]+latitudeMargin)return null;
-  const points=[fix,...locations];
-  return [Math.min(...points.map(p=>p.longitude)),Math.min(...points.map(p=>p.latitude)),Math.max(...points.map(p=>p.longitude)),Math.max(...points.map(p=>p.latitude))];
+export type MapFocus={kind:'palace'}|{kind:'location'}|{kind:'place';placeId:string};
+export type MapFocusRequest={serial:number;target:MapFocus};
+/** Move only on an explicit action, including for a device outside the palace. */
+export function mapCameraTarget(target:MapFocus,fix:Fix|null,now:number){
+  if(target.kind==='palace')return {bounds:palaceBounds,pitch:45,bearing:0};
+  if(target.kind==='location')return fix&&classify(fix,now)==='good'?{center:lngLat(fix),zoom:17,pitch:45,bearing:0}:null;
+  const place=locations.find(p=>p.placeId===target.placeId);
+  return place?{center:lngLat(place),zoom:18,pitch:45,bearing:0}:null;
 }
+export const mapZoomLimits={min:2,max:19};
+export function nextMapZoom(current:number,delta:1|-1){return Math.max(mapZoomLimits.min,Math.min(mapZoomLimits.max,(Number.isFinite(current)?current:initialMapView.zoom)+delta));}
 
 /** One attempt owns one timer. Failure is terminal until an explicit new attempt. */
-export function createMapLoad(onFailure:()=>void,schedule=(fn:()=>void,ms:number)=>{const timer=setTimeout(fn,ms);return()=>clearTimeout(timer);}) {
+export type MapFailureReason = 'native-module' | 'import' | 'render' | 'timeout';
+export function createMapLoad(onFailure:(reason:MapFailureReason)=>void,schedule=(fn:()=>void,ms:number)=>{const timer=setTimeout(fn,ms);return()=>clearTimeout(timer);}) {
   let state:'loading'|'ready'|'failed'|'cancelled'='loading';
   let stop=()=>{};
-  const fail=()=>{if(state==='failed'||state==='cancelled')return;state='failed';stop();onFailure();};
-  stop=schedule(()=>{if(state==='loading')fail();},15000);
+  const fail=(reason:MapFailureReason='render')=>{if(state==='failed'||state==='cancelled')return;state='failed';stop();onFailure(reason);};
+  stop=schedule(()=>{if(state==='loading')fail('timeout');},15000);
   return {ready(){if(state!=='loading')return;state='ready';stop();},fail,cancel(){state='cancelled';stop();},snapshot:()=>state};
 }

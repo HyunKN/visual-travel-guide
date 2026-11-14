@@ -1,5 +1,5 @@
 import type {Draft} from '../local-notes/store';
-import {validAnchor,validateBody} from '../place-messages/contract';
+import {validAnchor,validateBody,validateStoredBody} from '../place-messages/contract';
 import {createPublisher,type PublicationJob,type PublicationRemote,type PublicationStorage} from './publication';
 
 export type OwnState=Readonly<{id:string;sceneId:string} & (
@@ -27,7 +27,7 @@ export function createOwnStateRemote(rpc:(name:string,args:Record<string,unknown
     if(!rows.length)return {kind:'missing',id,sceneId};
     const r=rows[0];
     if(!r||r.id!==id||r.scene_id!==sceneId||!Number.isSafeInteger(r.version)||r.version<1||!validAnchor(r)||
-      typeof r.body!=='string'||((r.visible||r.body!=='')&&validateBody(r.body))||typeof r.visible!=='boolean'||typeof r.hidden!=='boolean')
+      typeof r.body!=='string'||((r.visible||r.body!=='')&&validateStoredBody(r.body))||typeof r.visible!=='boolean'||typeof r.hidden!=='boolean')
       throw new Error('Invalid owner state');
     return {kind:'found',id,sceneId,version:r.version,u:r.u,v:r.v,body:r.body,visible:r.visible,hidden:r.hidden};
   };

@@ -54,3 +54,13 @@ test('nearby orders valid fixes by straight-line distance; unavailable or weak f
     assert.deepEqual(fallback.map(x=>x.placeId),locations.map(x=>x.placeId));
   }
 });
+
+test('nearby returns at most ten nearest registered landmarks without mutating the catalog',()=>{
+  const now=100_000,fix={latitude:37,longitude:127,accuracy:20,timestamp:now};
+  const source=Array.from({length:14},(_,i)=>({placeId:`place-${i}`,latitude:37+i*.001,longitude:127,way:`${i}/1`})).reverse();
+  const original=source.map(p=>p.placeId);
+  const result=nearbyPlaces(fix,now,source);
+  assert.equal(result.length,10);assert.equal(result[0].placeId,'place-0');assert.equal(result[9].placeId,'place-9');
+  assert.deepEqual(source.map(p=>p.placeId),original);
+  assert.equal(nearbyPlaces(null,now,source).length,10);
+});

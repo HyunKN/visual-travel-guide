@@ -2,7 +2,7 @@ import {AuthenticationRequired} from './session';
 import {authRuntime,memoConfig} from '../auth/nativeAuth';
 import {captureAccount,accountIsCurrent,accountRpc,type AccountScope} from '../auth/accountScope';
 import {createPublicationRemote} from './remote';
-import {createPublisher} from './publication';
+import {createPublisher,createPrivateSaver} from './publication';
 import {accountNotes} from '../local-notes/device';
 import type {Draft} from '../local-notes/store';
 import {createSceneMessages} from './sceneMessages';
@@ -26,8 +26,20 @@ function build(c:NonNullable<typeof memoConfig>) {
       createPublicationRemote(owner,c.url,rpc(scope)),createOwnStateRemote(rpc(scope)))));
   }
   return {
+    async ownPublicationState(sceneId:string,id:string){
+      const scope=captureAccount(),store=accountNotes(scope);
+      return run(scope,async owner=>{
+        const job=await store.getPublication(id);
+        if(!job||job.ownerId!==owner||job.serviceId!==c.url||job.payload.p_scene!==sceneId)throw new Error('Publication does not belong to this account');
+        return createOwnStateRemote(rpc(scope))(sceneId,id);
+      });
+    },
     inspectPublication:(id:string)=>recovery(value=>value.inspect(id)),
     recoverPublication:(draft:Draft,inspection:Inspection,operation:RecoveryOperation)=>recovery(value=>value.act(draft,inspection,operation)),
+    async savePrivate(draft:Draft){
+      const scope=captureAccount(),store=accountNotes(scope);
+      return run(scope,owner=>createPrivateSaver(store,createPublicationRemote(owner,c.url,rpc(scope)))(draft));
+    },
     async homePreview(scenes:readonly string[],signal:AbortSignal) {
       return gateway.read('vtg_home_preview',{p_scenes:[...scenes]},signal);
     },

@@ -67,7 +67,8 @@ test('rejected update retains withdrawal control; missing status or conflict can
   const draft={visibility:'private',body:'글'};
   const job={state:'rejected',payload:{p_withdraw:false},serverVersion:1};
   assert.equal(editorAction(draft,job,true,true).canWithdraw,true);
-  assert.equal(editorAction(draft,job,true,true).disabled,true);
+  assert.equal(editorAction(draft,job,true,true).disabled,false);
+  assert.equal(editorAction(draft,job,true,true).operation,'make-private');
   const conflict=editorAction({...draft,body:''},{...job,state:'conflict'},true,true);
   assert.equal(conflict.disabled,false);assert.equal(conflict.operation,'inspect');
   assert.equal(conflict.canDiscard,false);assert.equal(conflict.canWithdraw,false);

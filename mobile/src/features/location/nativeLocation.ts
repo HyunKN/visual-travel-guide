@@ -13,7 +13,8 @@ export const nativeLocation: LocationPort = {
   },
   async getCurrentPosition() {
     const api = await import('expo-location');
-    const sample = await api.getCurrentPositionAsync({ accuracy: api.Accuracy.Balanced });
+    // Explicit foreground measurement: favor accuracy without starting a location subscription.
+    const sample = await api.getCurrentPositionAsync({ accuracy: api.Accuracy.High });
     return { latitude: sample.coords.latitude, longitude: sample.coords.longitude,
       accuracy: sample.coords.accuracy, timestamp: sample.timestamp };
   },

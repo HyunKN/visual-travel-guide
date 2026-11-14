@@ -14,7 +14,7 @@ export default function BrowseTabs() {
       onPress={()=>{const event=navigation.emit({type:'tabPress',target:route.key,canPreventDefault:true});if(!event.defaultPrevented)navigation.navigate(route.name);}}
       onLongPress={()=>navigation.emit({type:'tabLongPress',target:route.key})} containerStyle={styles.tab} style={styles.target}>
       <View style={[styles.indicator,i===state.index&&styles.activeIndicator]} accessible={false}/>
-      <Text style={[textStyles.action,i!==state.index&&styles.inactive]}>{route.name==='index'?'둘러보기':'내 글'}</Text>
+      <Text style={[textStyles.action,i!==state.index&&styles.inactive]}>{route.name==='index'?'홈':'내 글'}</Text>
     </TapArea></Fragment>)}</View>}>
     <Tabs.Screen name="index" /><Tabs.Screen name="my-notes" />
   </Tabs>;

@@ -6,7 +6,7 @@ const {tmpdir}=require('node:os');
 const path=require('node:path');
 const {randomUUID}=require('node:crypto');
 const {createStore,migrate}=require('../../../../.codex-build/app-message-tests/local-notes/store.js');
-const {createPublisher,PublicationRejected}=require('../../../../.codex-build/app-message-tests/public-messages/publication.js');
+const {createPublisher,createPrivateSaver,PublicationRejected}=require('../../../../.codex-build/app-message-tests/public-messages/publication.js');
 const {createPublicationRemote,serverRejection}=require('../../../../.codex-build/app-message-tests/public-messages/remote.js');
 function connect(file=':memory:') {
   const db=new DatabaseSync(file);
@@ -22,6 +22,97 @@ async function prepare(c){
 function remote(overrides={}){
   return {ownerId:'author-a',serviceId:'project-a',status:async()=>null,write:async()=>1,...overrides};
 }
+test('cancel public edit restores the confirmed body/position without resending and ignores stale writes',async t=>{
+  const c=connect();t.after(()=>c.db.close());await c.tx(migrate);const {d}=await prepare(c);
+  await createPublisher(c.store,remote()).deliver(d.id);
+  const changed={...d,body:'버릴 수정',u:.9,visibility:'private',revision:2};await c.store.saveDraft(changed);
+  await c.store.cancelEdit(d.id);await assert.rejects(c.store.saveDraft(changed));
+  const original=await c.store.getDraft(d.id,d.sceneId);
+  assert.equal(original.body,d.body);assert.equal(original.u,d.u);assert.equal(original.visibility,'public');
+  assert.ok(original.revision>changed.revision);assert.equal((await c.store.list())[0].kind,'published');
+});
+test('private save withdraws once and only then commits the local private note',async t=>{
+  const c=connect();t.after(()=>c.db.close());await c.tx(migrate);const {d}=await prepare(c);
+  await createPublisher(c.store,remote()).deliver(d.id);let writes=0;
+  const changed={...d,visibility:'private',body:'개인 수정',revision:2};
+  assert.equal(await createPrivateSaver(c.store,remote({write:async(_,p)=>{writes++;assert.equal(p.p_withdraw,true);assert.equal(p.p_body,null);return 2;}}))(changed),null);
+  assert.equal(writes,1);assert.equal((await c.store.list())[0].kind,'note');
+  assert.equal((await c.store.privateRead(d.sceneId,d.id)).message.body,changed.body);
+});
+test('lost withdrawal reply keeps the draft, and private-save retry reconciles the same request',async t=>{
+  const c=connect();t.after(()=>c.db.close());await c.tx(migrate);const {d}=await prepare(c);
+  await createPublisher(c.store,remote()).deliver(d.id);const receipts=new Map();let writes=0;
+  const r=remote({status:async id=>receipts.get(id)??null,write:async(id)=>{writes++;receipts.set(id,2);throw new Error('lost');}});
+  const changed={...d,visibility:'private',body:'보호할 수정',revision:2},save=createPrivateSaver(c.store,r);
+  assert.equal((await save(changed)).state,'uncertain');assert.equal((await c.store.list())[0].kind,'draft');
+  await assert.rejects(c.store.cancelEdit(d.id));
+  assert.equal(await save(changed),null);assert.equal(writes,1);
+  assert.equal((await c.store.privateRead(d.sceneId,d.id)).message.body,changed.body);
+});
+test('private-save disk failure after withdrawal leaves a retryable draft without a second withdrawal',async t=>{
+  const c=connect();t.after(()=>c.db.close());await c.tx(migrate);const {d}=await prepare(c);
+  await createPublisher(c.store,remote()).deliver(d.id);let writes=0;
+  const changed={...d,visibility:'private',revision:2};
+  const save=createPrivateSaver(c.store,remote({write:async()=>{writes++;return 2;}}));
+  c.db.exec("CREATE TRIGGER fail BEFORE DELETE ON drafts BEGIN SELECT RAISE(ABORT,'disk'); END");
+  await assert.rejects(save(changed));assert.equal((await c.store.getPublication(d.id)).state,'withdrawn');
+  assert.equal((await c.store.getDraft(d.id,d.sceneId)).body,d.body);c.db.exec('DROP TRIGGER fail');
+  assert.equal(await save(changed),null);assert.equal(writes,1);
+});
+
+test('confirmed unchanged publication is listed as published after reopening without deleting its durable draft',async t=>{
+  const dir=mkdtempSync(path.join(tmpdir(),'vtg-published-list-')),file=path.join(dir,'notes.db');
+  let c=connect(file);t.after(()=>{c.db.close();rmSync(dir,{recursive:true});});await c.tx(migrate);
+  const {d}=await prepare(c);await createPublisher(c.store,remote()).deliver(d.id);
+  c.db.close();c=connect(file);await c.tx(migrate);
+  const [row]=await c.store.list();
+  assert.equal(row.kind,'published');assert.equal(row.publicationState,'published');assert.equal(row.body,d.body);
+  assert.equal((await c.store.getDraft(d.id,d.sceneId)).body,d.body);
+  assert.equal((await c.store.edit(d.id)).id,d.id);
+});
+
+test('My Notes renders a confirmed row with edit/photo actions and no unfinished-draft controls',async t=>{
+  const c=connect();t.after(()=>c.db.close());await c.tx(migrate);const {d}=await prepare(c);
+  await createPublisher(c.store,remote()).deliver(d.id);const [row]=await c.store.list();
+  const fs=require('node:fs'),vm=require('node:vm'),ts=require('typescript'),exports={};
+  const jsx=(type,props)=>({type,props});
+  const modules={
+    'react/jsx-runtime':{jsx,jsxs:jsx},
+    react:{useCallback:fn=>fn,useRef:value=>({current:value}),useState:initial=>[typeof initial==='function'?initial():initial,()=>{}]},
+    'expo-router':{router:{},useFocusEffect:()=>{}},
+    'react-native':{Alert:{},FlatList:'FlatList',View:'View',StyleSheet:{create:x=>x}},
+    'react-native-safe-area-context':{useSafeAreaInsets:()=>({top:0})},
+    '../../ui/Text':{Text:'Text'},'../../ui/Action':{Action:'Action'},'../../ui/Skeleton':{Skeleton:'Skeleton'},
+    '../../ui/theme':{color:{},layout:{},textStyles:{}},
+    '../../features/local-notes/device':{accountNotes:()=>({})},
+    '../../features/place-messages/scenes':{getScene:()=>({name:'근정전'})},
+    '../../features/auth/MemoGate':{MemoGate:'MemoGate',AccountActions:'AccountActions'},
+    '../../features/public-messages/OwnPublicationStatus':{OwnPublicationStatus:'OwnPublicationStatus'},
+  };
+  const code=ts.transpileModule(fs.readFileSync(path.join(process.cwd(),'src/app/(browse)/my-notes.tsx'),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX}}).outputText;
+  vm.runInNewContext(code,{exports,require:name=>{assert.ok(name in modules,`unexpected import ${name}`);return modules[name];}});
+  const content=exports.default().props.children;
+  const flatList=content.type().props.children;
+  const tree=flatList.props.renderItem({item:row});
+  const nodes=x=>Array.isArray(x)?x.flatMap(nodes):!x||typeof x!=='object'?[]:[x,...nodes(x.props?.children)];
+  const labels=nodes(tree).filter(x=>x.type==='Action').map(x=>x.props.label);
+  assert.deepEqual(labels,['편집','사진에서 보기']);
+  assert.ok(nodes(tree).some(x=>x.type==='OwnPublicationStatus'&&x.props.item===row));
+});
+
+test('only the exact confirmed snapshot is completed; later local edits and uncertain delivery stay drafts',async t=>{
+  const c=connect();t.after(()=>c.db.close());await c.tx(migrate);const {d}=await prepare(c);
+  await createPublisher(c.store,remote()).deliver(d.id);
+  let revision=d.revision;
+  for(const patch of [{body:'공개 후 수정'},{u:.4},{v:.2},{visibility:'private'}]){
+    await c.store.saveDraft({...d,...patch,revision:++revision});
+    const [row]=await c.store.list();assert.equal(row.kind,'draft');assert.equal(row.publicationState,'published');
+  }
+  const changed={...d,body:'공개 확인 전 추가 입력',revision:++revision};
+  await c.store.preparePublication(changed,'author-a','project-a');
+  await createPublisher(c.store,remote({write:async()=>{throw new Error('offline');}})).deliver(d.id);
+  const [row]=await c.store.list();assert.equal(row.kind,'draft');assert.equal(row.publicationState,'uncertain');
+});
 test('rate rejection returns attempt feedback while durable consent/draft stay intact and no resend occurs',async t=>{
   const c=connect();t.after(()=>c.db.close());await c.tx(migrate);const {d,job}=await prepare(c);
   let writes=0;const retryAt='2027-01-15T12:00:01.000Z';

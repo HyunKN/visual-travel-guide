@@ -33,7 +33,7 @@ export function MemoGate({children,cancelToHome=false}:{children:ReactNode;cance
   const login=(provider:SocialProvider)=>{if(memoConfig)void authRuntime().social.signIn(provider);};
   return <ScrollView style={s.fill} contentContainerStyle={s.page}>
     <Text accessibilityRole="header" style={textStyles.story}>메모를 보려면 로그인해 주세요</Text>
-    {memoConfig?<><Action label="Google로 로그인" disabled={busy} onPress={()=>login('google')}/><Action label="카카오로 로그인" disabled={busy} onPress={()=>login('kakao')}/><Action label="네이버로 로그인" disabled={busy} onPress={()=>login('custom:naver')}/></>:<Text style={textStyles.source}>로그인 연결을 준비 중이에요.</Text>}
+    {memoConfig?<><Action label="Google로 로그인" disabled={busy} onPress={()=>login('google')}/><Action label="네이버로 로그인" disabled={busy} onPress={()=>login('custom:naver')}/></>:<Text style={textStyles.source}>로그인 연결을 준비 중이에요.</Text>}
     {state.kind==='error'&&<Text accessibilityRole="alert" style={textStyles.source}>{state.message}</Text>}
     {state.kind==='error'&&state.logoutPending&&<Action label="로그아웃 다시 시도" onPress={()=>{void authRuntime().social.signOut();}}/>}
     {state.kind==='error'&&state.restorePending&&<Action label="로그인 상태 다시 확인" onPress={()=>{void authRuntime().social.restore();}}/>}

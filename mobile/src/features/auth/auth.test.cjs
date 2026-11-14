@@ -20,8 +20,8 @@ const deferred=()=>{let resolve;const promise=new Promise(r=>{resolve=r;});retur
 function setup(browser,options={}){
   const secret=options.secret??secrets(),vault=createSessionVault(secret,'social-test',randomUUID);
   const author=createAuthorSession(vault,{restore:options.restore??(async s=>s)});let exchanges=0;
-  const gateway={oauth:async(provider,redirect)=>{assert.ok(['google','kakao','custom:naver'].includes(provider));return 'https://synthetic.invalid/auth?redirect='+encodeURIComponent(redirect);},
-    exchange:async()=>{exchanges++;return sample(options.owner??a);},clear:async()=>{}};
+  const gateway={oauth:async(provider,redirect)=>{assert.ok(['google','custom:naver'].includes(provider));return 'https://synthetic.invalid/auth?redirect='+encodeURIComponent(redirect);},
+    exchange:async()=>{exchanges++;if(options.exchange) return options.exchange();return sample(options.owner??a);},clear:async()=>{}};
   const auth=createSocialAuth(service,gateway,author,browser,()=>options.nonce??'new-attempt',options.now??Date.now);
   return {auth,author,vault,secret,exchanges:()=>exchanges};
 }
@@ -43,7 +43,7 @@ test('callback rejects wrong origin/path, credentials, fragments, duplicate/nonm
 test('only a completed durable permanent login exposes account scope; concurrent login does not exchange twice',async()=>{
   const browser=deferred(),s=setup(()=>browser.promise);
   const login=s.auth.signIn('google');assert.equal(s.auth.snapshot().kind,'signing-in');assert.throws(captureAccount);
-  await s.auth.signIn('kakao');browser.resolve({type:'success',url:authCallback+'?attempt=new-attempt&code=one'});await login;
+  await s.auth.signIn('custom:naver');browser.resolve({type:'success',url:authCallback+'?attempt=new-attempt&code=one'});await login;
   assert.equal(s.exchanges(),1);assert.equal(s.auth.snapshot().ownerId,a);assert.equal(captureAccount().ownerId,a);
   assert.equal((await s.vault.read()).ownerId,a);
 });
@@ -51,12 +51,88 @@ test('only a completed durable permanent login exposes account scope; concurrent
 test('old callback is ignored without consuming the new verifier; cancellation and expired login exchange nothing',async()=>{
   const fresh=deferred();let calls=0;
   const s=setup(async()=>++calls===1?{type:'success',url:authCallback+'?attempt=old&code=old'}:fresh.promise);
-  const login=s.auth.signIn('kakao');while(calls<2)await new Promise(r=>setImmediate(r));
+  const login=s.auth.signIn('custom:naver');while(calls<2)await new Promise(r=>setImmediate(r));
   assert.equal(s.exchanges(),0);assert.equal(s.auth.snapshot().kind,'signing-in');
   fresh.resolve({type:'success',url:authCallback+'?attempt=new-attempt&code=fresh'});await login;assert.equal(s.exchanges(),1);
   const cancelled=setup(async()=>({type:'cancel'}));await cancelled.auth.signIn('google');assert.equal(cancelled.exchanges(),0);assert.equal(cancelled.auth.snapshot().kind,'guest');
   let now=0;const expired=setup(async(_url,redirect)=>{now=300001;return success(_url,redirect);},{now:()=>now});
   await expired.auth.signIn('custom:naver');assert.equal(expired.exchanges(),0);assert.equal(expired.auth.snapshot().kind,'error');
+});
+
+test('browser cancel and dismiss stay quiet after deadline and the next explicit login may succeed',async()=>{
+  for(const type of ['cancel','dismiss']){
+    let now=0,cancel=true;
+    const s=setup(async url=>{if(cancel){now=300001;return {type};}return success(url);},{now:()=>now});
+    await s.auth.signIn('google');assert.equal(s.auth.snapshot().kind,'guest');assert.equal(s.auth.snapshot().message,undefined);assert.equal(s.exchanges(),0);
+    cancel=false;await s.auth.signIn('custom:naver');assert.equal(s.auth.snapshot().kind,'authenticated');assert.equal(s.exchanges(),1);
+  }
+});
+
+test('only current-attempt access_denied without a server code is quiet cancellation, including mirrored Supabase envelopes',async()=>{
+  const prefix=authCallback+'?attempt=new-attempt';
+  for(const suffix of ['&error=access_denied','&error=access_denied&error_description=opaque',
+    '#error=access_denied&error_description=opaque&sb=',
+    '&error=access_denied&error_description=#error=access_denied&sb=',
+    '&error=access_denied&error_description=opaque#error=access_denied&error_description=opaque&sb=']){
+    const s=setup(async()=>({type:'success',url:prefix+suffix}));
+    await s.auth.signIn('custom:naver');assert.equal(s.auth.snapshot().kind,'guest',suffix);assert.equal(s.auth.snapshot().message,undefined);assert.equal(s.exchanges(),0);
+  }
+});
+
+test('malformed or server-error denial envelopes never become cancellation or exchange a code',async()=>{
+  const prefix=authCallback+'?attempt=new-attempt';
+  const bad=[
+    'https://auth/callback?attempt=new-attempt&error=access_denied',
+    'visual-travel-guide://auth/other?attempt=new-attempt&error=access_denied',
+    'visual-travel-guide://u:p@auth/callback?attempt=new-attempt&error=access_denied',
+    authCallback+'?attempt=&error=access_denied',authCallback+'#error=access_denied&attempt=new-attempt',
+    prefix+'&attempt=new-attempt&error=access_denied',prefix+'&error=access_denied&error=access_denied',
+    prefix+'&error=access_denied&code=synthetic',prefix+'&error=access_denied#access_token=synthetic',
+    prefix+'&error=access_denied#error=access_denied&error_description=other&sb=',
+    prefix+'&error=access_denied&error_description=a#error=access_denied&error_description=b&sb=',
+    prefix+'&error=access_denied#error_description=a&sb=',
+    prefix+'&error=access_denied#error=server_error&sb=',prefix+'&error=access_denied#sb=unexpected',
+    prefix+'&error=access_denied#error=access_denied&error=access_denied&sb=',
+    prefix+'&error=access_denied&error_code=',prefix+'&error=access_denied&error_code=signup_disabled',
+    prefix+'&error=access_denied&error_code=user_banned',prefix+'&error=access_denied&error_code=provider_email_needs_verification',
+    prefix+'&error=access_denied&error_code=user_cancelled',prefix+'&error=server_error&error_description=access_denied',
+    prefix+'&error_description=access_denied',prefix+'&code=synthetic&error=access_denied',
+  ];
+  for(const url of bad){const s=setup(async()=>({type:'success',url}));await s.auth.signIn('google');assert.equal(s.auth.snapshot().kind,'error',url);assert.equal(s.exchanges(),0,url);}
+});
+
+test('late current denial is quiet but valid stale denial/server errors keep the active login waiting',async()=>{
+  let now=0;
+  const late=setup(async()=>{now=300001;return {type:'success',url:authCallback+'?attempt=new-attempt&error=access_denied'};},{now:()=>now});
+  await late.auth.signIn('custom:naver');assert.equal(late.auth.snapshot().kind,'guest');assert.equal(late.auth.snapshot().message,undefined);assert.equal(late.exchanges(),0);
+  for(const envelope of ['error=access_denied','error=access_denied&error_description=#error=access_denied&sb=','error=access_denied&error_code=user_banned']){
+    const fresh=deferred();let calls=0;
+    const s=setup(async()=>++calls===1?{type:'success',url:authCallback+'?attempt=old&'+envelope}:fresh.promise);
+    const login=s.auth.signIn('google');while(calls<2)await new Promise(r=>setImmediate(r));
+    assert.equal(s.auth.snapshot().kind,'signing-in',envelope);assert.equal(s.exchanges(),0);
+    fresh.resolve({type:'success',url:authCallback+'?attempt=new-attempt&code=current'});await login;
+    assert.equal(s.auth.snapshot().kind,'authenticated');assert.equal(s.exchanges(),1);
+  }
+});
+
+test('stale callbacks stay bounded by deadline and malformed stale envelopes cannot bypass validation',async()=>{
+  let now=0;
+  const expired=setup(async()=>{now=300001;return {type:'success',url:authCallback+'?attempt=old&error=access_denied'};},{now:()=>now});
+  await expired.auth.signIn('google');assert.equal(expired.auth.snapshot().kind,'error');assert.equal(expired.exchanges(),0);
+  for(const suffix of ['&attempt=old&error=access_denied','&error=access_denied&code=synthetic','&error=access_denied#access_token=synthetic',
+    '&error=access_denied&error_code=#error=access_denied&sb=',
+    '&error=access_denied&error_description=nonempty#error=access_denied&sb=']){
+    const s=setup(async()=>({type:'success',url:authCallback+'?attempt=old'+suffix}));
+    await s.auth.signIn('google');assert.equal(s.auth.snapshot().kind,'error',suffix);assert.equal(s.exchanges(),0);
+  }
+});
+
+test('unknown browser results, missing URLs, network and exchange failures remain errors',async()=>{
+  for(const result of [{type:'success'},{type:'unknown'},{type:'locked'},{type:'opened'}]){
+    const s=setup(async()=>result);await s.auth.signIn('google');assert.equal(s.auth.snapshot().kind,'error');assert.equal(s.exchanges(),0);
+  }
+  const offline=setup(async()=>{throw new Error('network');});await offline.auth.signIn('google');assert.equal(offline.auth.snapshot().kind,'error');assert.equal(offline.exchanges(),0);
+  const exchange=setup(success,{exchange:async()=>{throw new Error('exchange');}});await exchange.auth.signIn('google');assert.equal(exchange.auth.snapshot().kind,'error');assert.equal(exchange.exchanges(),1);
 });
 
 test('logout locks synchronously, discards an in-flight result and tombstones restart session recovery',async()=>{
@@ -137,11 +213,14 @@ test('PKCE adapter adds only native random/digest and preserves an existing veri
   assert.throws(()=>target.crypto.subtle.digest('MD5',new Uint8Array()));
 });
 
-test('real SDK OAuth uses S256 with supported providers and never invokes anonymous signup',async()=>{
+test('SDK OAuth requests Google account selection and Naver reauthentication; S256, redirect and openid stay intact',async()=>{
   const gateway=createSdkGateway(service,'sb_publishable_synthetic',async()=>{throw Error('No network expected');});
-  for(const provider of ['google','kakao','custom:naver']){
+  for(const provider of ['google','custom:naver']){
     const url=new URL(await gateway.oauth(provider,authCallback+'?attempt=n'));
     assert.equal(url.searchParams.get('provider'),provider);assert.equal(url.searchParams.get('code_challenge_method'),'s256');assert.equal(url.searchParams.get('redirect_to'),authCallback+'?attempt=n');
+    assert.deepEqual(url.searchParams.getAll('prompt'),[provider==='google'?'select_account':'login']);
+    if(provider==='google')assert.notEqual(url.searchParams.get('prompt'),'login');
+    assert.notEqual(url.searchParams.get('prompt'),'consent');assert.equal(url.searchParams.has('max_age'),false);
     if(provider==='custom:naver')assert.equal(url.searchParams.get('scopes'),'openid');
   }
 });

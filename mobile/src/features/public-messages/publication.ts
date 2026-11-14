@@ -1,3 +1,6 @@
+import type {Draft,createStore} from '../local-notes/store';
+import {validateBody} from '../place-messages/contract';
+
 export type PublicationState='pending'|'uncertain'|'published'|'withdrawn'|'conflict'|'rejected';
 export type WritePayload={p_id:string;p_expected:number;p_scene:string;p_u:number;p_v:number;p_body:string|null;p_withdraw:boolean};
 export type PublicationJob={noteId:string;requestId:string;ownerId:string;serviceId:string;submittedRevision:number;payload:WritePayload;state:PublicationState;serverVersion:number|null;stateSource:'request'|'observation';updatedAt:string};
@@ -17,6 +20,23 @@ export interface PublicationRemote {
 /** Only a parsed server rejection can be definite. All other failures are uncertain. */
 export class PublicationRejected extends Error {
   constructor(readonly kind:'conflict'|'rejected',readonly rateLimit?:RateLimitInfo) { super(kind); }
+}
+/** One explicit private-save action; never claim private before withdrawal is confirmed. */
+export function createPrivateSaver(storage:Pick<ReturnType<typeof createStore>,'getPublication'|'preparePublication'|'saveDraft'|'savePrivate'|'settlePublication'>,remote:PublicationRemote){
+  return async(draft:Draft):Promise<DeliveryResult|null>=>{
+    if(draft.visibility!=='private'||validateBody(draft.body))throw new Error('Valid private note required');
+    const previous=await storage.getPublication(draft.id);
+    if(previous&&(previous.ownerId!==remote.ownerId||previous.serviceId!==remote.serviceId))throw new Error('Wrong publication session or service');
+    await storage.saveDraft(draft);
+    if(previous&&(['pending','uncertain'].includes(previous.state)||(previous.serverVersion!==null&&previous.state!=='withdrawn'))){
+      if(previous.state==='conflict'||(['pending','uncertain'].includes(previous.state)&&!previous.payload.p_withdraw))throw new Error('Resolve previous publication first');
+      const next=['pending','uncertain'].includes(previous.state)?previous:await storage.preparePublication(draft,remote.ownerId,remote.serviceId,true);
+      const result=await createPublisher(storage,remote).deliver(next.noteId);
+      if(result.state!=='withdrawn')return result;
+    }
+    await storage.savePrivate(draft);
+    return null;
+  };
 }
 /** No background sending: call only after explicit publication or retry action. */
 export function createPublisher(storage:PublicationStorage,remote:PublicationRemote) {

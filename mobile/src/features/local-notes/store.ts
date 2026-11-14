@@ -6,7 +6,7 @@ import { decodeEditorial, nextEditorial } from '../place-content/editorial';
 
 export type Visibility = 'private' | 'public' | null;
 export type Draft = { id: string; sceneId: string; u: number; v: number; body: string; visibility: Visibility; revision: number; updatedAt: string };
-export type LocalItem = Draft & { kind: 'draft' | 'note'; publicationState?:PublicationState|null };
+export type LocalItem = Draft & { kind: 'draft' | 'note' | 'published'; publicationState?:PublicationState|null };
 type Param = string | number | null;
 export interface Connection {
   execAsync(sql: string): Promise<void>;
@@ -56,6 +56,15 @@ export function createStore(transaction: Transaction, newId: () => string, now =
     const row=await tx.getFirstAsync<Omit<PublicationJob,'payload'> & {payload:string}>('SELECT * FROM publication_jobs WHERE noteId=?',id);
     return row ? {...row,payload:JSON.parse(row.payload)} : null;
   };
+  async function savedNote(tx:Connection,id:string):Promise<Draft|null> {
+    const publication=await job(tx,id);
+    if(publication?.state==='published'&&!publication.payload.p_withdraw){
+      const p=publication.payload;
+      return {id,sceneId:p.p_scene,u:p.p_u,v:p.p_v,body:p.p_body!,visibility:'public',revision:publication.submittedRevision,updatedAt:publication.updatedAt};
+    }
+    if(publication && publication.state!=='withdrawn' && !(publication.state==='rejected'&&publication.serverVersion===null))return null;
+    return tx.getFirstAsync<Draft>(`SELECT ${columns} FROM notes WHERE id=?`,id);
+  }
   async function write(tx: Connection, d: Draft) {
     if (!validAnchor(d) || !Number.isSafeInteger(d.revision) || d.revision < 0) throw new Error('Invalid draft');
     const current = await draft(tx, d.id);
@@ -150,11 +159,34 @@ export function createStore(transaction: Transaction, newId: () => string, now =
     }),
     saveDraft: (d: Draft) => transact(tx => write(tx,d)),
     savePrivate: (d: Draft) => transact(tx => savePrivate(tx,d)),
-    list: () => transact(tx => tx.getAllAsync<LocalItem>(`SELECT local.*,
-      (SELECT state FROM publication_jobs WHERE noteId=local.id) AS publicationState FROM (
+    getSavedNote: (id:string) => transact(tx=>savedNote(tx,id)),
+    cancelEdit: (id:string) => transact(async tx=>{
+      const original=await savedNote(tx,id),current=await draft(tx,id);
+      if(!original||!current)throw new Error('No confirmed note to restore');
+      if(original.visibility==='private'){
+        await protectPublication(tx,id);
+        await tx.runAsync('DELETE FROM drafts WHERE id=?',id);
+      }else{
+        // Keep revisions increasing so queued pre-cancel edits cannot return.
+        await write(tx,{...original,revision:current.revision+1});
+      }
+    }),
+    list: () => transact(async tx => {
+      const rows=await tx.getAllAsync<LocalItem & {submittedPayload:string|null}>(`SELECT local.*,
+      j.state AS publicationState,j.payload AS submittedPayload FROM (
       SELECT ${columns},'draft' AS kind FROM drafts UNION ALL
       SELECT ${columns},'note' AS kind FROM notes WHERE id NOT IN (SELECT id FROM drafts)
-      ) AS local ORDER BY updatedAt DESC,id DESC`)),
+      ) AS local LEFT JOIN publication_jobs j ON j.noteId=local.id ORDER BY local.updatedAt DESC,local.id DESC`);
+      return rows.map(({submittedPayload,...item}):LocalItem=>{
+        // A durable public draft is not necessarily an unfinished edit. Keep the
+        // data for retries/recovery; classify only the exact confirmed snapshot.
+        if(item.kind==='draft'&&item.publicationState==='published'&&item.visibility==='public'&&submittedPayload){
+          const p:WritePayload=JSON.parse(submittedPayload);
+          if(!p.p_withdraw&&p.p_id===item.id&&p.p_scene===item.sceneId&&p.p_body===item.body&&p.p_u===item.u&&p.p_v===item.v)return {...item,kind:'published'};
+        }
+        return item;
+      });
+    }),
     discardDraft: (id: string) => transact(async tx => {
       await protectPublication(tx,id);
       return tx.runAsync('DELETE FROM drafts WHERE id=?',id);

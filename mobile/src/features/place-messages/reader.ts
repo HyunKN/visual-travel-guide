@@ -1,4 +1,4 @@
-import { type MessagePage, type Messages, type ReadResult, validMarker, validateBody } from './contract';
+import { type MessagePage, type Messages, type ReadResult, validMarker, validateStoredBody } from './contract';
 export type ReaderState = Readonly<{
   sceneId: string;
   list: { kind: 'idle' | 'loading' | 'error' } | { kind: 'ready'; page: MessagePage };
@@ -57,7 +57,7 @@ export function createMessageReader(source: Messages) {
         if (generation !== readGeneration || sceneId !== state.sceneId) return;
         if (result.kind !== 'unavailable' && (result.kind !== 'found'
           || !validMarker(result.message, sceneId) || result.message.id !== id
-          || typeof result.message.body !== 'string' || validateBody(result.message.body))) throw new Error('Invalid message');
+          || typeof result.message.body !== 'string' || validateStoredBody(result.message.body))) throw new Error('Invalid message');
         // Checking is UI state owned here, never accepted from an adapter response.
         emit({ ...state, reader: result.kind === 'found'
           ? { kind: 'found', message: result.message, id } : { kind: 'unavailable', id } });

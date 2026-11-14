@@ -1,5 +1,9 @@
 # 구조와 데이터 흐름
 
+2026-11-14 App 홈 복귀: Root Stack의 공통 `HomeButton`이 `navigation/home.ts`의 root 대상 RESET action으로 `(browse)/index`만 남긴다. action의 `nubiIntent: home`을 읽기/편집 제거 방지에서 구분한다. `SceneScreen`은 홈을 읽기 닫기로 바꾸지 않고 전달하며 위치 변경 초안은 먼저 저장한다. `Editor`는 홈에서 `saveDraft` 완료 후 같은 action을 재전달한다. 실패하면 이동하지 않으며 일반 Back/수정 취소의 원문 복귀와 기존 공개 상태는 유지한다. [사용자 채택 동작](design/APP_SPRINT1_SPEC.md#상단-홈-바로가기-2026-11-14-사용자-채택), 진행·검증 원본 [#36](https://github.com/HyunKN/visual-travel-guide/issues/36).
+
+2026-11-04 App 책임 분리: [기능별 개발 경계](design/APP_FEATURE_BOUNDARIES.md)를 기준으로 장소/콘텐츠·사진 입력·인식 연결·위치·공통 장면·기기 기록·공유 권한·통합 검증을 나눈다. 진행과 개발 순서는 [GitHub App 지도 #27](https://github.com/HyunKN/visual-travel-guide/issues/27)에서 관리한다. 이 분리는 아래 양식 6의 과거 범위·실행 전 표현을 최신 구현 완료로 바꾸는 기록이 아니다.
+
 2026-11-04 기록 방향 변경: [자유 텍스트 기록과 사진 보관](DESIGN.md#자유-텍스트-기록과-사진-보관)에 따라 기록은 장소와 연결된 자유 텍스트로 다룬다. 사용자 사진은 기록용으로 영구 보관하지 않으며, 사진 보관을 제공하면 명시적 사용자 선택으로 기기 갤러리에 저장한다. 인식 입력의 임시 처리와 분리한다. [공통 장소 메시지 구현 설계](design/PLACE_MESSAGES.md)에 불변 sceneId·정규화 위치·로컬/공개 저장·서버 권한·모듈 계약을 정리했다. 참조 좌표 코드는 검증했으며 앱·서버 연결은 아직 없다. 공유 저장소의 기술 선택은 최신 Backlog의 Supabase를 기준으로 하고 아래 과거의 미정 표현과 구분한다.
 
 **2026-10-29 변경 검토:** [Sprint 1 조정안](experiments/sprint1-scope-replan.md)은 비공개 로컬 기록과 공개 텍스트의 사용자 간 공유를 추가 목표로 다룬다. 아래 초기 JSON·원격 동기화 미사용 구조만으로 실제 공유를 제공할 수 없다. 관리형 백엔드·권한·삭제 계약을 검토하며 서비스 선정과 구조 변경은 아직 미확정이다. 기기 내 인식과 기본 콘텐츠 JSON을 서버 추론으로 자동 변경하지 않는다.

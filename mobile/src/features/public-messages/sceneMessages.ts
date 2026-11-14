@@ -1,4 +1,4 @@
-import {validMarker,validateBody,type Marker,type Messages,type ReadResult} from '../place-messages/contract';
+import {validMarker,validateStoredBody,type Marker,type Messages,type ReadResult} from '../place-messages/contract';
 export type Boundary={snapshot:string;before:string|null;id:string|null};
 export type SceneRpc=(name:'vtg_snapshot'|'vtg_markers'|'vtg_read',args:Record<string,unknown>,signal:AbortSignal)=>Promise<unknown>;
 export interface LocalScene {
@@ -67,7 +67,7 @@ export function createSceneMessages(local:LocalScene,rpc:SceneRpc|null,now=()=>n
       if(!Array.isArray(rows)||rows.length>1)throw new Error('Invalid public read');
       if(!rows.length)return {kind:'unavailable'};
       const marker=mapRow(rows[0],sceneId),body=(rows[0] as Record<string,unknown>).body;
-      if(marker.id!==id || typeof body!=='string' || validateBody(body))throw new Error('Invalid public message');
+      if(marker.id!==id || typeof body!=='string' || validateStoredBody(body))throw new Error('Invalid public message');
       return {kind:'found',message:{...marker,body,origin:'public',owned:await local.owned(id)}};
     },
   };

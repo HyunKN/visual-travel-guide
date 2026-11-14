@@ -37,8 +37,9 @@ export function createSdkGateway(url:string,key:string,transport:typeof fetch=fe
   };
   return {
     auth,
-    async oauth(provider:'google'|'kakao'|'custom:naver',redirectTo:string){
-      const {data,error}=await client.auth.signInWithOAuth({provider,options:{redirectTo,skipBrowserRedirect:true,...(provider==='custom:naver'?{scopes:'openid'}:{})}});
+    async oauth(provider:'google'|'custom:naver',redirectTo:string){
+      const {data,error}=await client.auth.signInWithOAuth({provider,options:{redirectTo,skipBrowserRedirect:true,
+        queryParams:{prompt:provider==='google'?'select_account':'login'},...(provider==='custom:naver'?{scopes:'openid'}:{})}});
       if(error||!data.url)throw new Error('Social login unavailable');
       const authUrl=new URL(data.url);if(authUrl.searchParams.get('code_challenge_method')!=='s256')throw new Error('Secure login unavailable');return data.url;
     },

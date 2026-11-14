@@ -30,24 +30,24 @@
       "width": 14,
       "height": 14,
       "alpha": true,
-      "bytes": 616,
-      "sha256": "f7a7c2184ebef34199f15b1b914df5d7bf3d786eb4f39888db484432bb96af65"
+      "bytes": 613,
+      "sha256": "e47b9137ed62ec72f350318557f749d16463774f1c4f53dedbf90e2d0b81a82b"
     },
     {
       "file": "message@2x.png",
       "width": 28,
       "height": 28,
       "alpha": true,
-      "bytes": 1390,
-      "sha256": "0ba11cb9df0a48f0d4e338b4771510209a4f247a3bd238e181df61026ee7cf97"
+      "bytes": 1302,
+      "sha256": "03093301a23748aa4567bdf517dadc8f33dfc8b9c1436da58a76bca1932eaa11"
     },
     {
       "file": "message@3x.png",
       "width": 42,
       "height": 42,
       "alpha": true,
-      "bytes": 2223,
-      "sha256": "0bc0be191fa44e2c8eeab08521f2748c2eb321bf0944d649a596856e0ef6b78e"
+      "bytes": 2051,
+      "sha256": "13b645f44928c90b2fdedaeb66d12bc68da58147cb210f008580139f4b3cc6c0"
     },
     {
       "file": "ring.png",

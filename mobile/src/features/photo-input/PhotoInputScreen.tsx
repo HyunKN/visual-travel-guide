@@ -1,6 +1,6 @@
 import { router, Stack, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AppState, Image, Linking, ScrollView, StyleSheet } from 'react-native';
+import { Alert, AppState, Image, Linking, ScrollView, StyleSheet } from 'react-native';
 import { Text } from '../../ui/Text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { photoInput } from './nativePhotoInput';
@@ -48,6 +48,22 @@ export default function PhotoInputScreen() {
     if (result.kind === 'error') {
       setError(result.reason === 'permission' ? '카메라 권한을 허용해주세요.' : result.reason === 'unreadable' ? '이 사진을 읽을 수 없어요. 다른 사진을 골라주세요.' : '사진을 열지 못했어요. 다시 시도해주세요.');
       setSettings(result.reason === 'permission' && result.canAskAgain === false);
+      if (result.reason === 'permission') {
+        Alert.alert(
+          '카메라 권한이 필요해요',
+          '사진을 촬영하려면 카메라 권한을 허용해 주세요.',
+          result.canAskAgain === false
+            ? [
+                { text: '취소', style: 'cancel' },
+                { text: '설정 열기', onPress: () => {
+                  void Linking.openSettings().catch(() => {
+                    if (mounted.current) setError('설정을 열지 못했어요. 휴대폰 설정에서 카메라 권한을 확인해주세요.');
+                  });
+                } },
+              ]
+            : [{ text: '확인' }],
+        );
+      }
     }
   }, [cancel]);
   useEffect(() => {

@@ -12,9 +12,9 @@ import { Text } from '../../ui/Text';
 import { SearchIcon } from '../../ui/SearchIcon';
 import { PhotoGlass } from '../../ui/PhotoGlass';
 import { photoReadingSurface } from '../../ui/PhotoReading';
+import type { Rect } from '../place-messages/geometry';
 import { color, layout, textStyles } from '../../ui/theme';
 import HomePreview from '../public-messages/HomePreviewCard';
-import type { Rect } from '../place-messages/geometry';
 import { editorialNotes } from '../local-notes/device';
 import { deckDirection, emptyEditorialState, nextEditorial } from './editorial';
 
@@ -35,6 +35,7 @@ function StoryCard({id}:{id:string}) {
   return <TapArea accessibilityRole="button" accessibilityLabel={`추천 이야기, ${place.name}, ${entry.title}`} onPress={()=>openPlace(place.id,entry.id)}
     style={s.story} onLayout={e=>setSize(e.nativeEvent.layout)}>
     {!failed&&<Image source={source} resizeMode="cover" style={s.fillPhoto} onError={()=>setFailed(true)} accessible={false}/>}
+    <View pointerEvents="none" style={s.storyFade}/>
     <View style={s.storyGlass} onLayout={e=>setFrame(e.nativeEvent.layout)}>
       {!failed&&<PhotoGlass source={source} image={image} frame={frame} stageClip={{x:0,y:0,...size}} tint={.12}/>}
       <View style={s.storyReading}><Text style={s.placeName}>{place.name}</Text><Text style={s.storyTitle}>{entry.title}</Text></View>
@@ -100,7 +101,7 @@ function PlaceDeck({places}:{places:Place[]}) {
       onResponderTerminate={settle} onResponderTerminationRequest={()=>true}>
       {Array.from({length:Math.min(2,places.length-1)},(_,i)=>{const depth=Math.min(2,places.length-1)-i,p=places[(index+direction*depth+places.length)%places.length];return p.id===flight?.place.id?null:<BackCard key={p.id} depth={depth} place={p} offset={offset} progress={progress} advancing={flight?.direction===1}/>;})}
       <Animated.View style={[s.deckCard,s.front,animated]}>
-        <TapArea accessibilityRole="button" accessibilityLabel={`${place.name} 사진, 누르면 다음 장소`} onPress={()=>{if(!dragged.current)swap();}} style={s.deckTap}><DeckPhoto key={place.id} place={place}/></TapArea>
+        <TapArea accessibilityRole="button" accessibilityLabel={`${place.name} 둘러보기`} disabled={!!flight} onPress={()=>{if(!dragged.current&&!locked.current)openPlace(place.id);}} containerStyle={s.deckTap} style={s.deckTap}><DeckPhoto key={place.id} place={place}/></TapArea>
       </Animated.View>
       {flight&&<Animated.View pointerEvents="none" importantForAccessibility="no-hide-descendants" style={[s.deckCard,s.front,flying]}><DeckPhoto place={flight.place}/></Animated.View>}
     </View>
@@ -140,7 +141,7 @@ export default function HomeScreen() {
   useEffect(()=>{if(!searching)return;const back=BackHandler.addEventListener('hardwareBackPress',()=>{if(!navigation.isFocused())return false;closeSearch.current();return true;});return()=>back.remove();},[searching,navigation]);
   return <ScrollView style={s.page} keyboardShouldPersistTaps="handled" contentContainerStyle={[s.reading,{paddingTop:insets.top,paddingBottom:24}]}>
     <View style={s.mast} onLayout={e=>setHeaderWidth(e.nativeEvent.layout.width-40)}>
-      <View style={[s.brand,searchVisible&&s.hiddenBrand]} importantForAccessibility={searchVisible?'no-hide-descendants':'auto'}><Image source={require('../../../assets/brand/palace.png')} resizeMode="contain" style={s.logo} accessible={false}/><Text style={s.brandText} accessibilityRole="header">궁금한 궁</Text></View>
+      <View style={[s.brand,searchVisible&&s.hiddenBrand]} importantForAccessibility={searchVisible?'no-hide-descendants':'auto'}><Image source={require('../../../assets/brand/palace.png')} resizeMode="contain" style={s.logo} accessible={false}/><Text style={s.brandText} accessibilityRole="header">누비<Text style={s.brandEnglish}> Nubi</Text></Text></View>
       <Animated.View style={[s.searchShell,searchVisible&&s.expandedSearch,searchStyle]}>
         <TapArea buttonRef={searchButton} accessibilityRole="button" accessibilityLabel={searching?'검색 닫기':'장소 이름 검색'} accessibilityState={{expanded:searching}} style={s.searchButton} onPress={toggle}><SearchIcon/></TapArea>
         {searching&&<><TextInput ref={input} autoFocus showSoftInputOnFocus accessibilityLabel="장소 이름" placeholder="장소 검색" placeholderTextColor={color.secondary}
@@ -151,7 +152,7 @@ export default function HomeScreen() {
       {results.map(p=><Action key={p.id} label={p.name} style={s.start} onPress={()=>{input.current?.blur();openPlace(p.id);}}/>)}
       {!results.length&&<Text accessibilityLiveRegion="polite" style={textStyles.source}>일치하는 장소가 없어요.</Text>}
     </View>}
-    {story&&<View style={s.recommendation}><Text style={textStyles.heading} accessibilityRole="header">추천 이야기</Text><StoryCard key={story} id={story}/></View>}
+    {story&&<View style={s.recommendation}><Text style={[textStyles.heading,s.recommendationHeading]} accessibilityRole="header">추천 이야기</Text><StoryCard key={story} id={story}/></View>}
     <View style={s.section}><View style={s.sectionHead}><Text style={textStyles.heading} accessibilityRole="header">장소 둘러보기</Text><Action label="주변 장소" onPress={()=>router.push('/nearby')}/></View><PlaceDeck places={places}/></View>
     <HomePreview/>
     {__DEV__&&<View style={s.dev}><Action label="개발 메뉴" onPress={()=>setDev(x=>!x)}/>{dev&&<><Action label="쪽지 읽기 예시" onPress={()=>router.push('/place-message-preview')}/><Action label="개발 실행 확인" onPress={()=>router.push('/development-check')}/></>}</View>}
@@ -159,17 +160,21 @@ export default function HomeScreen() {
 }
 const s=StyleSheet.create({
   page:{backgroundColor:color.subtle},reading:{width:'100%',maxWidth:layout.readingWidth,alignSelf:'center'},
+  // Bundled Image defaults to source dimensions unless width/height override them.
   fillPhoto:{position:'absolute',left:0,top:0,width:'100%',height:'100%'},
   mast:{paddingHorizontal:20,paddingVertical:12,minHeight:76,backgroundColor:color.page,flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:12,borderBottomWidth:1,borderColor:color.line},
-  brand:{flex:1,flexDirection:'row',alignItems:'center',gap:10},logo:{width:44,height:36},brandText:{...textStyles.heading,fontSize:22},searchButton:{width:48,height:48,borderRadius:24,backgroundColor:color.subtle,alignItems:'center',justifyContent:'center'},
+  brand:{flex:1,flexDirection:'row',alignItems:'center',gap:10},logo:{width:44,height:36},brandText:{...textStyles.heading,fontSize:22,flexShrink:1},brandEnglish:{fontSize:17,fontWeight:'400',color:color.secondary},searchButton:{width:48,height:48,borderRadius:24,backgroundColor:color.subtle,alignItems:'center',justifyContent:'center'},
   hiddenBrand:{opacity:0,position:'absolute'},searchShell:{minHeight:48,borderRadius:24,backgroundColor:color.subtle,flexDirection:'row',alignItems:'center',overflow:'hidden'},
   expandedSearch:{marginLeft:'auto'},
   searchPanel:{backgroundColor:color.page,paddingHorizontal:20,paddingBottom:16,gap:4,borderBottomWidth:1,borderColor:color.line},input:{...textStyles.body,fontFamily:'SpoqaHanSans',flex:1,minHeight:48,minWidth:0},start:{alignItems:'flex-start'},
-  recommendation:{padding:20,gap:14,backgroundColor:color.page},story:{minHeight:260,backgroundColor:color.subtle,borderRadius:24,overflow:'hidden',justifyContent:'flex-end',padding:10},
-  storyGlass:{paddingHorizontal:18,paddingVertical:16,borderRadius:20,overflow:'hidden',gap:5,backgroundColor:color.page},placeName:{...textStyles.source,color:color.ink},storyTitle:{fontSize:24,lineHeight:34,fontWeight:'700',color:color.ink},
+  recommendation:{paddingTop:20,backgroundColor:color.page},recommendationHeading:{paddingHorizontal:20,paddingBottom:14},
+  story:{minHeight:320,backgroundColor:color.page,overflow:'hidden',justifyContent:'flex-end'},
+  storyFade:{...StyleSheet.absoluteFill,experimental_backgroundImage:'linear-gradient(to bottom, rgba(255,255,255,0) 28%, rgba(255,255,255,0.12) 46%, rgba(255,255,255,0.88) 76%, #FFFFFF 100%)'},
+  placeName:{...textStyles.source,color:color.ink},storyTitle:{fontSize:24,lineHeight:34,fontWeight:'700',color:color.ink},
+  storyGlass:{marginHorizontal:20,marginBottom:24,padding:10,borderRadius:20,overflow:'hidden',backgroundColor:color.page},
   storyReading:{backgroundColor:photoReadingSurface,borderRadius:10,padding:8,gap:5},
   section:{marginTop:12,padding:20,backgroundColor:color.page,borderTopWidth:1,borderBottomWidth:1,borderColor:color.line,gap:8},sectionHead:{flexDirection:'row',flexWrap:'wrap',alignItems:'center',justifyContent:'space-between',gap:8},
-  deck:{height:270,marginTop:8,marginBottom:8,marginRight:24},deckCard:{position:'absolute',height:232,borderRadius:22,backgroundColor:color.page,borderWidth:2,borderColor:color.page,overflow:'hidden',boxShadow:'0px 6px 18px rgba(0,0,0,0.12)'},front:{left:0,right:0,top:0},deckTap:{height:'100%'},
-  deckPhoto:{flex:1,justifyContent:'flex-end',alignItems:'flex-start',backgroundColor:color.subtle,padding:12},photoLabel:{paddingHorizontal:14,paddingVertical:8,borderRadius:16,backgroundColor:'rgba(255,255,255,.94)'},
+  deck:{height:270,marginTop:8,marginBottom:8,marginRight:24},deckCard:{position:'absolute',height:232,borderRadius:22,backgroundColor:color.page,borderWidth:2,borderColor:color.page,overflow:'hidden',boxShadow:'0px 6px 18px rgba(0,0,0,0.12)'},front:{left:0,right:0,top:0},deckTap:{flex:1},
+  deckPhoto:{flex:1,overflow:'hidden',justifyContent:'flex-end',alignItems:'flex-start',backgroundColor:color.subtle},photoLabel:{margin:12,paddingHorizontal:14,paddingVertical:8,borderRadius:16,backgroundColor:'rgba(255,255,255,.94)'},
   deckActions:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',marginBottom:6},dev:{marginTop:24,paddingHorizontal:20},
 });

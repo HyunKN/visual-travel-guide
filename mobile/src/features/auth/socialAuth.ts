@@ -3,11 +3,34 @@ import type {createAuthorSession} from '../public-messages/session';
 import {AuthenticationRequired} from '../public-messages/session';
 import {setAccountScope} from './accountScope';
 export const authCallback='visual-travel-guide://auth/callback';
-export type SocialProvider='google'|'kakao'|'custom:naver';
+export type SocialProvider='google'|'custom:naver';
 export type AuthState=Readonly<{kind:'guest'|'restoring'|'signing-in'|'signing-out'|'error';epoch:number;message?:string;logoutPending?:boolean;restorePending?:boolean}|{kind:'authenticated';ownerId:string;epoch:number}>;
+function callbackOrigin(url:URL){
+  const expected=new URL(authCallback);
+  if(url.protocol!==expected.protocol||url.host!==expected.host||url.pathname!==expected.pathname||url.username||url.password)throw new Error('Invalid auth callback');
+}
+/** Validate failure envelopes before deciding whether they belong to this attempt.
+ * Descriptions are compared for mirroring only, never interpreted or logged. */
+function callbackFailure(url:URL):'cancelled'|'failed'|null {
+  const fields=['error','error_code','error_description'];
+  const query=url.searchParams,fragment=new URLSearchParams(url.hash.slice(1));
+  if(!fields.some(key=>query.has(key)||fragment.has(key)))return null;
+  if([...query.keys()].some(key=>!['attempt',...fields].includes(key))
+    ||[...fragment.keys()].some(key=>![...fields,'sb'].includes(key)))throw new Error('Invalid denial parameters');
+  for(const params of [query,fragment])for(const key of new Set(params.keys()))if(params.getAll(key).length!==1)throw new Error('Duplicate denial parameter');
+  if(fragment.has('sb')&&fragment.get('sb')!=='')throw new Error('Invalid denial metadata');
+  const queryFields=fields.filter(key=>query.has(key)),fragmentFields=fields.filter(key=>fragment.has(key));
+  if(queryFields.length&&fragmentFields.length&&(
+    ['error','error_code'].some(key=>query.has(key)!==fragment.has(key)||query.get(key)!==fragment.get(key))
+    ||(query.get('error_description')??'')!==(fragment.get('error_description')??'')
+  ))throw new Error('Conflicting denial envelopes');
+  const error=queryFields.length?query:fragment;
+  if(!error.get('error'))throw new Error('Missing provider error');
+  return error.get('error')==='access_denied'&&!error.has('error_code')?'cancelled':'failed';
+}
 export function callbackCode(value:string,attempt?:string){
-  const url=new URL(value),expected=new URL(authCallback);
-  if(url.protocol!==expected.protocol||url.host!==expected.host||url.pathname!==expected.pathname||url.username||url.password||url.hash||url.searchParams.has('error'))throw new Error('Invalid auth callback');
+  const url=new URL(value);callbackOrigin(url);
+  if(url.hash||url.searchParams.has('error'))throw new Error('Invalid auth callback');
   if(attempt&&(url.searchParams.getAll('attempt').length!==1||url.searchParams.get('attempt')!==attempt))throw new Error('Unrelated auth callback');
   if([...url.searchParams.keys()].some(key=>!['code','attempt','sb_flow_id'].includes(key)))throw new Error('Invalid auth parameters');
   const code=url.searchParams.get('code');
@@ -42,10 +65,16 @@ export function createSocialAuth(service:string,gateway:ReturnType<typeof create
         let callback:ReturnType<typeof callbackCode>|undefined;
         while(!callback){
           const result=await browser(url,authCallback);if(task.generation!==generation)return;
+          if(result.type==='cancel'||result.type==='dismiss'){emit({kind:'guest',epoch:task.epoch});return;}
+          if(result.type!=='success'||!result.url)throw new Error('Invalid browser result');
+          const incoming=new URL(result.url);callbackOrigin(incoming);
+          if(incoming.searchParams.getAll('attempt').length!==1||!incoming.searchParams.get('attempt'))throw new Error('Missing auth attempt');
+          const failure=callbackFailure(incoming);
+          if(!failure)callbackCode(result.url);
+          if(incoming.searchParams.get('attempt')!==attempt){if(now()>deadline)throw new Error('Login attempt expired');continue;}
+          if(failure==='cancelled'){emit({kind:'guest',epoch:task.epoch});return;}
+          if(failure==='failed')throw new Error('Provider login failed');
           if(now()>deadline)throw new Error('Login attempt expired');
-          if(result.type!=='success'||!result.url){emit({kind:'guest',epoch:task.epoch});return;}
-          const incoming=new URL(result.url);
-          if(incoming.searchParams.get('attempt')!==attempt)continue;
           callback=callbackCode(result.url,attempt);
         }
         const session=await gateway.exchange(callback.code,callback.flowId);

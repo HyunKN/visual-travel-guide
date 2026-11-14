@@ -1,15 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { AccessibilityInfo, AppState, BackHandler, findNodeHandle, Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { Text } from '../../ui/Text';
-import { Stack, useFocusEffect } from 'expo-router';
+import { Stack, useFocusEffect, useNavigation } from 'expo-router';
 import { usePreventRemove } from 'expo-router/react-navigation';
+import { isHomeAction } from '../../navigation/home';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { photos } from '../place-content/photos';
 import { getScene } from './scenes';
 import { imageRect, layoutMarkers, originalView, zoomedRect, project, unproject, type Fit, type Size } from './geometry';
 import { usePhotoGestures } from './usePhotoGestures';
 import { PhotoGlass } from '../../ui/PhotoGlass';
-import { PhotoReadingText,PhotoReadingAction } from '../../ui/PhotoReading';
+import { PhotoReadingText,PhotoReadingAction,photoReadingSurface } from '../../ui/PhotoReading';
 import { createMessageReader } from './reader';
 import type { Anchor, Messages } from './contract';
 import { accountNotes } from '../local-notes/device';
@@ -33,6 +34,7 @@ function focus(target: FocusTarget) {
   if (tag) AccessibilityInfo.setAccessibilityFocus(tag);
 }
 export default function SceneScreen({ sceneId, source, messageId, draftId }: { sceneId: string; source?: Messages; messageId?: string; draftId?:string }) {
+  const navigation=useNavigation();
   const [deviceNotes]=useState(()=>accountNotes());
   const scene = getScene(sceneId), insets = useSafeAreaInsets();
   const local = source===undefined || source === deviceNotes.messages;
@@ -100,7 +102,20 @@ export default function SceneScreen({ sceneId, source, messageId, draftId }: { s
     const back=BackHandler.addEventListener('hardwareBackPress',()=>{closeReader.current();return true;});
     return()=>back.remove();
   },[presented.phase,controller,editing]);
-  usePreventRemove(presented.phase!=='hidden'&&!editing,()=>closeReader.current());
+  usePreventRemove(!editing&&(presented.phase!=='hidden'||!!moving),({data})=>{
+    if(isHomeAction(data.action)) {
+      if(writing.current)return;
+      // A location change may be selected while the editor itself is closed.
+      if(moving&&anchor){
+        writing.current=true;setSaving(true);
+        void deviceNotes.saveDraft({...moving,...anchor,revision:moving.revision+1}).then(
+          ()=>navigation.dispatch(data.action),
+          ()=>setWriteError('초안을 저장하지 못했어요. 위치를 유지한 채 다시 시도해 주세요.'),
+        ).finally(()=>{writing.current=false;if(active.current)setSaving(false);});
+      } else navigation.dispatch(data.action);
+    } else if(presented.phase!=='hidden')closeReader.current();
+    else navigation.dispatch(data.action);
+  });
   useFocusEffect(useCallback(()=>{
     active.current = true; sceneGeneration.current++;
     const sub=AppState.addEventListener('change',state=>{
@@ -131,6 +146,7 @@ export default function SceneScreen({ sceneId, source, messageId, draftId }: { s
   const baseRect=fitRect?zoomedRect(fitRect,photoSize,photoView):null;
   const page = state.list.kind === 'ready' ? state.list.page : null;
   const reader = state.reader ?? (presented.phase === 'hidden' ? null : presented.reader);
+  const overlayOpen = !!reader || !!editing || presented.phase !== 'hidden';
   const readingId=state.reader?.id;
   useEffect(()=>{
     if(!local || !readingId)return;
@@ -175,7 +191,7 @@ export default function SceneScreen({ sceneId, source, messageId, draftId }: { s
   const photo = photos[scene.photo.file];
   const groupIndex = reader ? groupIds.indexOf(reader.id) : -1;
   return <View style={s.screen} onLayout={e=>setScreenSize(e.nativeEvent.layout)}>
-    <Stack.Screen options={{ title: scene.name }} />
+    <Stack.Screen options={{ title: positioning || editing || moving ? `${scene.name} · 내 글을 남기는 중` : scene.name }} />
     <View pointerEvents={reader || editing ? 'none' : 'auto'} importantForAccessibility={reader || editing ? 'no-hide-descendants' : 'auto'}>
       <View style={s.toolbar}><Button buttonRef={titleRef} label="전체 사진" disabled={!!reader||!!editing} onPress={() => changeFit('contain')} />
         <Button label="축소" disabled={!!reader||!!editing||photoView.zoom<=1} onPress={()=>setPhotoView(v=>({...v,zoom:Math.max(1,v.zoom-.5)}))}/>
@@ -208,14 +224,15 @@ export default function SceneScreen({ sceneId, source, messageId, draftId }: { s
       })}
       {(reader||editing) && selectedPoint && loaded && !imageFailed && <View pointerEvents="none" style={[s.selected, { left: selectedPoint.x - 7, top: selectedPoint.y - 7 }]}><SketchTraceMarker variant="selected"/></View>}
       {positioning && rect && loaded && !imageFailed && <>
-        <Pressable accessibilityLabel="사진에서 위치 선택" accessibilityRole="button" style={StyleSheet.absoluteFill}
-          onPress={({nativeEvent:e})=>{ const a=unproject({x:e.locationX,y:e.locationY},rect,size); if(a) setAnchor(a); }} />
+        <Pressable accessibilityLabel="사진에서 위치 선택" accessibilityRole="button" disabled={saving} accessibilityState={{disabled:saving}} style={StyleSheet.absoluteFill}
+          onPress={({nativeEvent:e})=>{ if(writing.current)return; const a=unproject({x:e.locationX,y:e.locationY},rect,size); if(a) setAnchor(a); }} />
         {anchor && <View pointerEvents="none" style={[s.selected,{left:project(anchor,rect).x-7,top:project(anchor,rect).y-7}]}><SketchTraceMarker variant="selected"/></View>}
       </>}
       </View>
       {presented.phase !== 'hidden' && <View pointerEvents="box-none" style={[s.modal,{justifyContent:presented.side==='bottom'?'flex-end':'flex-start'}]}>
-        <Animated.View style={[s.card,motion.cardStyle]} pointerEvents={presented.phase === 'closing' ? 'none' : 'auto'} importantForAccessibility={presented.phase === 'closing' ? 'no-hide-descendants' : 'auto'} onLayout={({nativeEvent:{layout:frame}}) => {setCardSize({width:frame.width,height:frame.height});setCardOrigin({x:frame.x,y:frame.y});}} accessibilityViewIsModal onAccessibilityEscape={close}>
+        <Animated.View style={[s.card,{height:size.height / 2},motion.cardStyle]} pointerEvents={presented.phase === 'closing' ? 'none' : 'auto'} importantForAccessibility={presented.phase === 'closing' ? 'no-hide-descendants' : 'auto'} onLayout={({nativeEvent:{layout:frame}}) => {setCardSize({width:frame.width,height:frame.height});setCardOrigin({x:frame.x,y:frame.y});}} accessibilityViewIsModal onAccessibilityEscape={close}>
           {!opaque && loaded && !imageFailed && rect && <PhotoGlass source={photo} image={rect} frame={{...cardOrigin,...cardSize}} stageClip={{x:0,y:0,...size}} radius={20} tint={.12}/>}
+          <View style={s.readingSurface}>
           <View style={s.row}><PhotoReadingText accessibilityRole="header" style={s.heading}>쪽지</PhotoReadingText><PhotoReadingAction buttonRef={closeRef} label="닫기" onPress={close}/></View>
           <ScrollView style={s.bodyScroll} contentContainerStyle={s.bodyContent}>
             {reader?.kind === 'found' && <PhotoReadingText selectable style={s.body}>{reader.message.body}</PhotoReadingText>}
@@ -238,30 +255,40 @@ export default function SceneScreen({ sceneId, source, messageId, draftId }: { s
             {reader && reportState?.id===reader.id && !!reportState.message && <PhotoReadingText accessibilityLiveRegion="polite" style={s.readingMeta}>{reportState.message}</PhotoReadingText>}
             {reader && !!writeError && <PhotoReadingText accessibilityRole="alert" style={s.readingMeta}>{writeError}</PhotoReadingText>}
           </View>
+          </View>
         </Animated.View>
       </View>}
     </View>
-    <View pointerEvents={reader || editing ? 'none' : 'auto'} style={[s.footer, { paddingBottom: insets.bottom + 8 }]} importantForAccessibility={reader || editing ? 'no-hide-descendants' : 'auto'}>
+    <View style={[s.footer, { paddingBottom: insets.bottom + 8 }]}>
+      <View pointerEvents={overlayOpen ? 'none' : 'auto'} style={[s.footerControls,overlayOpen&&s.hiddenControls]} importantForAccessibility={overlayOpen ? 'no-hide-descendants' : 'auto'} accessibilityElementsHidden={overlayOpen}>
       {state.list.kind === 'loading' && <Text accessibilityLiveRegion="polite" style={s.meta}>쪽지를 불러오는 중이에요.</Text>}
-      {state.list.kind === 'error' && <><Text style={s.meta}>쪽지를 불러올 수 없어요.</Text><Button label="다시 시도" onPress={() => { void controller.load(sceneId, cursor); }} /></>}
-      {page?.publicStatus==='error' && <><Text style={s.meta}>공개 쪽지를 불러오지 못했어요. 기기의 글만 보여요.</Text><Button label="공개 쪽지 다시 불러오기" onPress={()=>{setCursors([null]);void controller.load(sceneId,null);}} /></>}
+      {state.list.kind === 'error' && <><Text style={s.meta}>쪽지를 불러올 수 없어요.</Text><Button label="다시 시도" disabled={overlayOpen} onPress={() => { void controller.load(sceneId, cursor); }} /></>}
+      {page?.publicStatus==='error' && <><Text style={s.meta}>공개 쪽지를 불러오지 못했어요. 기기의 글만 보여요.</Text><Button label="공개 쪽지 다시 불러오기" disabled={overlayOpen} onPress={()=>{setCursors([null]);void controller.load(sceneId,null);}} /></>}
       {page?.items.length === 0 && !positioning && page.publicStatus!=='error' && <Text style={s.meta}>{local && page.publicStatus!=='ready' ? '이 사진에 남긴 내 글이 없어요.' : '아직 쪽지가 없어요.'}</Text>}
       {local && <View style={s.row}>{positioning ? <>
-        <Button label="취소" disabled={saving} onPress={()=>{setPositioning(false);setComposingSize(size);setEditing(moving);setMoving(null);setAnchor(null);}} />
-        {!anchor && <Button label="사진 중앙 선택" onPress={()=>setAnchor({u:.5,v:.5})} />}
-        <Button label="글 쓰기" variant="primary" disabled={!anchor || saving || !loaded || imageFailed} onPress={()=>{void openEditor();}} />
-      </> : <Button label="글 남기기" variant="primary" disabled={!loaded || imageFailed} onPress={()=>{setPositioning(true);setAnchor(null);setWriteError('');}} />}</View>}
+        <Button label="취소" disabled={overlayOpen || saving} onPress={()=>{setPositioning(false);setComposingSize(size);setEditing(moving);setMoving(null);setAnchor(null);}} />
+        {!anchor && <Button label="사진 중앙 선택" disabled={overlayOpen||saving} onPress={()=>{if(!writing.current)setAnchor({u:.5,v:.5});}} />}
+        <Button label="글 쓰기" variant="primary" disabled={overlayOpen || !anchor || saving || !loaded || imageFailed} onPress={()=>{void openEditor();}} />
+      </> : <Button label="글 남기기" variant="primary" disabled={overlayOpen || !loaded || imageFailed} onPress={()=>{setPositioning(true);setAnchor(null);setWriteError('');}} />}</View>}
       {!!writeError && <Text accessibilityRole="alert" style={s.meta}>{writeError}</Text>}
       <View style={s.row}>
-        {cursors.length > 1 && <Button label="이전 흔적" onPress={() => setCursors(xs => xs.slice(0, -1))} />}
-        {page?.nextCursor && <Button label="다음 흔적" onPress={() => setCursors(xs => [...xs, page.nextCursor])} />}
+        {cursors.length > 1 && <Button label="이전 흔적" disabled={overlayOpen} onPress={() => setCursors(xs => xs.slice(0, -1))} />}
+        {page?.nextCursor && <Button label="다음 흔적" disabled={overlayOpen} onPress={() => setCursors(xs => [...xs, page.nextCursor])} />}
+      </View>
       </View>
       <Text style={s.meta}>{scene.photo.credit} · {scene.photo.license}</Text>
     </View>
     {editing && <Editor key={editing.id} initial={editing} side={side} compact={size.height<320} stage={stageFrame}
       viewport={size.height<320?{x:0,y:0,...screenSize}:stageFrame}
       photo={rect?{source:photo,rect:{...rect,x:rect.x+stageFrame.x,y:rect.y+stageFrame.y}}:undefined}
-      onClose={()=>{setEditing(null);setCursors([null]);void controller.load(sceneId,null);restoreFocus();}}
+      onClose={returnToReader=>{
+        const id=editing.id,generation=sceneGeneration.current;
+        setEditing(null);if(!returnToReader)setCursors([null]);
+        void controller.load(sceneId,returnToReader?cursor:null).then(()=>{
+          if(!active.current||generation!==sceneGeneration.current)return;
+          if(returnToReader)void controller.open(id);else restoreFocus();
+        });
+      }}
       onMove={d=>{setEditing(null);setMoving(d);setAnchor({u:d.u,v:d.v});setPositioning(true);requestAnimationFrame(()=>focus(titleRef.current));}} />}
   </View>;
 }
@@ -269,13 +296,15 @@ const s = StyleSheet.create({
   screen: { flex: 1, backgroundColor: color.page }, stage: { flex: 1, overflow: 'hidden', backgroundColor: color.subtle },
   photoClip:{overflow:'hidden'},
   toolbar: { paddingHorizontal: layout.gutter, flexDirection:'row',justifyContent:'flex-end',flexWrap:'wrap' }, footer: { paddingHorizontal: layout.gutter, paddingTop: 8, gap: 4 },
+  footerControls:{gap:4},hiddenControls:{opacity:0},
   row: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
   body: textStyles.body, heading: { ...textStyles.heading, paddingLeft: 12 }, meta: textStyles.source,
   target: { position: 'absolute', width: 48, height: 48, justifyContent: 'center', alignItems: 'center' },
   glyph: { minWidth: 14, height: 14, alignItems: 'center', justifyContent: 'center' },
   selected: { position: 'absolute', width: 14, height: 14 },
   modal: { ...StyleSheet.absoluteFill, paddingHorizontal: 20,paddingVertical:12 }, card: { width: '100%', maxWidth: 560, alignSelf: 'center', maxHeight: '100%', backgroundColor: '#FFFFFF', borderRadius: 20, overflow: 'hidden', borderWidth: 1, borderColor: '#FFFFFFDD', padding: 8, elevation: 4 },
-  bodyScroll: { flexGrow: 0, flexShrink: 1 }, bodyContent: { paddingHorizontal: 12, paddingVertical: 8 }, tint: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(255,255,255,.86)' },
+  readingSurface:{flex:1,minHeight:0,backgroundColor:photoReadingSurface,borderRadius:12,overflow:'hidden'},
+  bodyScroll: { flex:1,minHeight:0 }, bodyContent: { paddingHorizontal: 12, paddingVertical: 8 }, tint: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(255,255,255,.86)' },
   readingMeta:{...textStyles.source,color:'#353535'},
   fallback: { padding: layout.gutter, backgroundColor: color.page, gap: 12 },
 });

@@ -4,6 +4,10 @@
 
 ## 현재 상태
 
+- Windows에서 iPhone을 무료로 테스트하는 후속 경로는 [iOS 무료 기기 테스트](operations/IOS_FREE_DEVICE_TESTING.md)에 기록했다. 진행 원본은 [#37](https://github.com/HyunKN/visual-travel-guide/issues/37)이며, 사용자가 나중에 재개하기로 한 작업이다.
+
+- 2026-11-04 App 기능의 입구는 [GitHub 기능 지도 #27](https://github.com/HyunKN/visual-travel-guide/issues/27)이다. [개발 경계](design/APP_FEATURE_BOUNDARIES.md)는 책임·입출력을, 기능 이슈 #28~35는 연결·작성된/예정 함수·테스트·완료 조건과 개발 순서를 관리한다.
+
 - 2026-11-06 [App UI 구성 레퍼런스](design/APP_UI_REFERENCE.md), [여섯 화면 HTML](design/app-ui-reference/index.html), [캡처·수정 전후 보고서](design/app-ui-reference/review.html)에 구조·화면 검토와 15개 HTML 검사 결과를 보존했다. 실제 앱의 최종 UI·사용자 승인·기업 앱보다 우수하다는 검증 결과와 구분하며 [#36](https://github.com/HyunKN/visual-travel-guide/issues/36)에 연결한다.
 
 - 2026-11-04 [공통 장소 메시지 구현 설계](design/PLACE_MESSAGES.md)는 리뷰 목록 대신 장소 사진 위 흔적을 발견하는 사용자 방향을 다룬다. [치수·상태 도면](design/place-messages/layout.html), TypeScript 좌표·타입 참고 코드와 검증 결과를 포함한다. 코드의 수학적 확인과 Android UI·실제 공유 검증은 구분한다.
@@ -13,13 +17,13 @@
 - 문서 운영 규칙: 이 문서 묶음에서 정의했다.
 - 제품·UI는 프로토타입 기준과 후속 제품 계획을 구분한다. [구조 문서](ARCHITECTURE.md)는 현재 프로토타입 구현과 양식 6 기반 실제 제품 설계 초안을 함께 담는다. 2026-10-23 공식 사진 확보·PC 후보 모델 실행 근거를 연결했으며 제품의 기술 선정·구현·성능 검증 완료를 뜻하지 않는다.
 - 앱 코드와 실행 명령: [prototype](../prototype/README.md)의 독립 모바일 웹에 있다. 정적 자료와 메모리 상태로 동작한다.
-- Android 제품 개발은 별도 [mobile](../mobile/README.md)에서 시작한다. 설치·화면 이동을 확인하는 최소 앱이며 제품 기능과 실행 검증 상태는 해당 안내에서 구분한다.
+- Android 제품은 [mobile](../mobile/README.md)에서 개발한다. 장소 선택·설명·공통 사진 쪽지·계정별 기기 저장·Google/네이버 공개 공유·사진 입력·지도/GPS를 연결했다. 기능별 사용자 에뮬레이터 확인과 미확인 항목은 [App 지도 #27](https://github.com/HyunKN/visual-travel-guide/issues/27)에서 구분한다. 실제 모델 연결·실기기 통합·최종 UI 승인은 남아 있다.
 - Sprint·전체 계획·실제 개발 결과는 [Sprint·WBS 현황판](operations/SPRINT_PROGRESS.html)에서 함께 본다. 기존 Story·Task·추정·완료 기준을 재사용하며 인수 완료율과 착수율을 구분한다.
 - Android 검사 결과는 [읽기용 검증 보고서](operations/ANDROID_VERIFICATION.html)로 확인한다. 원본 `mobile/VERIFICATION.md`가 바뀌면 `python scripts/render_android_verification.py`로 HTML을 다시 생성한다. 변환에는 `markdown-it-py`가 필요하며 새 Android 검사를 실행하는 명령은 아니다.
 - 학습용 사진의 파일별 출처·저작자·이용조건·접근 방법과 수집 도구는 사용자 요청으로 Git 제외 내부 자료에 보관한다. 내부 진입점은 `local-assets/datasets/source-registry/INDEX.html`이다. 공개용 문서에는 수집 경계와 익명 집계만 남기며 확보·시각 검수·학습/평가 분할·학습 완료를 구분한다.
 - 2026-11-03 [데이터 수집 경계·설계 논의](experiments/data-collection-scope.md)에 사용자 방향, 요소 인식 후 건물 후보를 좁히는 구상, 메모 연결 단위, 수집 자료와 검증 계획을 정리했다. 현판·처마의 지원 목록과 부위별 메모 방식은 미확정이며 기존 백로그·Sprint 완료 상태를 변경하지 않는다.
-- 실제 제품 방향: 2026-10-24 설치형 Android 앱·기기 내 추론 우선, TypeScript + React Native + Expo 시작 구성을 선택했다. 작은 Android 모델 연결 실험을 먼저 수행한다. [구조 초안](ARCHITECTURE.md)에 결정과 미정 항목을 기록했다. 현재 웹 프로토타입과 별개로 최소 Android 개발 앱을 생성했으며 제품 기능·실기기 검증은 아직 없다.
-- 초기 제품 데이터: 앱에 포함한 검수 JSON과 별도 이미지·모델 파일을 채택했다. DB는 초기 구성에서 사용하지 않는다. [저장·조회 기준](ARCHITECTURE.md#31-데이터-관계와-무결성)과 [데이터·입출력 상세 설계](experiments/form6-data-contract-review.md)에 필드·갱신 정책·정상/오류 계약·2단계 설계 검수를 기록했다. 스키마·앱 구현과 실기기 검증은 남아 있다.
+- 실제 제품 방향: 설치형 Android 앱·기기 내 추론 우선, TypeScript + React Native + Expo를 사용한다. [구조](ARCHITECTURE.md)와 [App 기능 경계](design/APP_FEATURE_BOUNDARIES.md)에 책임을 나눈다. 기록·공유는 구현하고 사용자 에뮬레이터 확인을 받았으며 실제 Android 모델 런타임은 #30, 최종 통합·실기기·관찰은 #35에서 이어간다.
+- 제품 데이터: 검수 장소/설명 JSON·공통 사진은 앱에 포함한다. 기기 초안/개인 글은 계정별 SQLite, 인증 세션은 SecureStore, 공개 사본·신고·관리 상태는 Supabase에서 관리한다. [현재 명세](design/APP_SPRINT1_SPEC.md)와 [기기/공개 저장 경계](design/APP_FEATURE_BOUNDARIES.md)를 우선하고 과거 DB 미사용 초안과 구분한다.
 - 문서 검사·Wiki 자동 게시: GitHub Actions 설정을 추가했다. 실제 실행 결과와 장애 처리 방법은 [WIKI](WIKI.md)를 확인한다.
 - 프로토타입: [검토한 모바일 배치](prototype/UI_LAYOUT_REVIEW.html)에 따라 검색·전체 사진 탐색·후보 비교·설명·다음 관람·공통 이동을 연결했다. 시나리오는 관찰 과제이며 앱을 잠그지 않는다. [검증 기록](../prototype/VERIFICATION.md)의 브라우저·자동 검사와 [세 사용자 테스트 결과](prototype/OBSERVATION_RESULTS.md)의 실제 기록·미검증 사항을 구분한다.
 - 기존 웹 프로토타입의 기술 구성은 Vanilla JavaScript + Vite다. 흰 바탕·둥근 UI·기와 먹청색 중심을 적용했다. R01·R02·R03 기록을 분석했으며 발견된 모바일·사용성 문제의 수정 후 검증과 현장 효과는 남아 있다.

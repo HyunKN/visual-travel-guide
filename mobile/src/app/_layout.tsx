@@ -2,6 +2,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { color } from '../ui/theme';
 import {AuthBootstrap} from '../features/auth/MemoGate';
+import { HomeButton } from '../ui/HomeButton';
 
 export default function RootLayout() {
   return (
@@ -14,6 +15,7 @@ export default function RootLayout() {
           headerTitleStyle: { fontFamily: 'SpoqaHanSans', fontWeight: '700', fontSize: 17 },
           headerStyle: { backgroundColor: color.page },
           headerShadowVisible: false,
+          headerRight: () => <HomeButton />,
           contentStyle: { backgroundColor: color.page },
         }}
       >

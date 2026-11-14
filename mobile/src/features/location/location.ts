@@ -25,8 +25,8 @@ export const locations=[
 ];
 
 /** Distances are to sourced building centers, not entrances or walking routes. */
-export function nearbyPlaces(fix:Fix|null,now:number){
+export function nearbyPlaces(fix:Fix|null,now:number,source:readonly typeof locations[number][]=locations){
   const usable=fix!==null&&classify(fix,now)==='good';
-  const places=locations.map(place=>({...place,distanceMeters:usable?meters(fix,place):null}));
-  return usable?places.sort((a,b)=>a.distanceMeters!-b.distanceMeters!||a.placeId.localeCompare(b.placeId)):places;
+  const places=source.map(place=>({...place,distanceMeters:usable?meters(fix,place):null}));
+  return (usable?places.sort((a,b)=>a.distanceMeters!-b.distanceMeters!||a.placeId.localeCompare(b.placeId)):places).slice(0,10);
 }

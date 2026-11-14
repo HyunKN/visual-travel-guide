@@ -14,6 +14,16 @@ function connect(file) {
   return {db,tx,store:createStore(tx,randomUUID)};
 }
 const point={u:0,v:1};
+test('cancel private edit restores its saved note and rejects a queued pre-cancel write',async t=>{
+  const c=connect(':memory:');t.after(()=>c.db.close());await c.tx(migrate);
+  const d={...await c.store.createDraft('scene',point),body:'원문',visibility:'private',revision:1};
+  await c.store.savePrivate(d);const edit=await c.store.edit(d.id);
+  const changed={...edit,revision:2,body:'버릴 변경'};await c.store.saveDraft(changed);
+  assert.equal((await c.store.getSavedNote(d.id)).body,'원문');
+  await c.store.cancelEdit(d.id);await assert.rejects(c.store.saveDraft(changed));
+  assert.equal((await c.store.messages.read('scene',d.id)).message.body,'원문');
+  assert.equal((await c.store.list())[0].kind,'note');
+});
 test('editorial bag survives reopen, consumes once and does not touch drafts, notes or schema version',async t=>{
   const dir=mkdtempSync(path.join(tmpdir(),'vtg-editorial-')),file=path.join(dir,'notes.db');
   let c=connect(file);t.after(()=>{c.db.close();rmSync(dir,{recursive:true});});await c.tx(migrate);

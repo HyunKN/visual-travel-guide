@@ -9,7 +9,7 @@ const built = path.resolve(__dirname, '../../../../.codex-build/app-message-test
 const { imageRect, project, unproject, layoutMarkers,zoomedRect,pinchView } = require(path.join(built, 'geometry.js'));
 const { createMessageReader } = require(path.join(built, 'reader.js'));
 const { getScene } = require(path.join(built, 'scenes.js'));
-const { bodyBytes, validateBody } = require(path.join(built, 'contract.js'));
+const { bodyBytes, bodyLength, limitBodyInput, validateBody, validateStoredBody } = require(path.join(built, 'contract.js'));
 const scenes = require('./scenes.json');
 
 test('pinch and pan preserve anchors using the same transformed photo rectangle',()=>{
@@ -190,9 +190,20 @@ test('revalidation preserves the open presentation token and close/scene change 
     assert.equal(r.snapshot().reader,null);assert.equal(presentation.snapshot().phase,'hidden');unsubscribe();
   }
 });
-test('UTF-8 guard matches real encoding and supports free text beyond fifty chars', () => {
+test('100 Unicode characters bound new input/writes while legacy UTF-8 messages remain readable', () => {
   for (const s of ['한글\n본문', 'a'.repeat(16384), '🙂', '\ud800', '\udc00']) assert.equal(bodyBytes(s), Buffer.byteLength(s));
   assert.equal(validateBody('한'.repeat(60)), null);
-  assert.equal(validateBody('a'.repeat(16384)), null); assert.equal(validateBody('a'.repeat(16385)), 'too-large');
+  for(const char of ['a','한','🙂']){
+    assert.equal(bodyLength(char.repeat(100)),100);
+    assert.equal(validateBody(char.repeat(100)),null);
+    assert.equal(validateBody(char.repeat(101)),'too-large');
+    assert.equal(limitBodyInput(char.repeat(101),''),char.repeat(100));
+  }
+  assert.equal(bodyLength('가 \n🙂'),4);
+  assert.equal(validateStoredBody('한'.repeat(200)),null);
+  assert.equal(validateStoredBody('a'.repeat(16385)),'too-large');
+  const legacy='한'.repeat(200);
+  assert.equal(limitBodyInput(legacy+'글',legacy),legacy);
+  assert.equal(limitBodyInput(legacy.slice(1),legacy),legacy.slice(1));
   assert.equal(validateBody(' \n\t '), 'empty');
 });

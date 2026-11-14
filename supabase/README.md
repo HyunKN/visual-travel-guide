@@ -1,5 +1,13 @@
 # 공통 사진의 공개 글 (#34)
 
+## 100자 제한과 나만 보기 전환 (2026-11-14)
+
+[100자 제한 migration](migrations/20261114085157_message_body_100_characters.sql): 새 `vtg_write`의 공개 본문은 공백/줄바꿈 포함 Unicode code point 최대 100자다. 기존 긴 행을 수정·삭제하지 않고 읽기와 철회를 보존한다. 이미 확정된 기존 요청의 재실행은 원래 본문/해시 검사를 유지해 결과 복구가 가능하다. 개인 글 전환은 앱에서 공개 철회가 확인된 뒤 로컬 트랜잭션을 수행하며, 통신/로컬 실패는 초안을 남기고 명시적으로 재확인한다.
+
+CLI는 로컬/오프라인 캐시에 없어 새 다운로드 없이 MCP로 적용했다. 위 파일의 버전은 실제 원격 migration 기록을 확인한 값이며, 배포 전 동일 SQL을 PGlite에서 검사했다. `tests/body-limit.test.mjs`는 100/101자·Unicode·기존 긴 글·요청 재실행·철회·인증 경계를 검사한다.
+
+## 이전 연결 기록과 공통 운영
+
 [App 기능 지도](https://github.com/HyunKN/visual-travel-guide/issues/27) · [공유 이슈](https://github.com/HyunKN/visual-travel-guide/issues/34) · [설계](../docs/design/APP_SPRINT1_SPEC.md)
 
 2026-11-08 개발 프로젝트에 migration 0001~0005를 적용하고 실제 비로그인 읽기 RPC를 확인했다. 앱의 공개용 URL·publishable key는 Git 제외 `mobile/.env.local`에 설정했다. 익명 로그인은 현재 꺼져 있어 작성/독립 A·B 전달 검증은 대기 중이다. 프로젝트 준비와 Android 인수는 구분하며 최신 상태는 위 공유 이슈를 따른다. 앱은 설정이 없으면 전송하지 않는다. [migration](migrations/202611070001_place_messages.sql)은 공개를 명시한 글만 받는다. 개인 글·초안·사용자 사진은 이 스키마에 없다. 모바일과 별도로 아래 SQL을 로컬 PostgreSQL 엔진에서 검사할 수 있다. 서버 프로세스·클라우드 계정이 필요하지 않다.
@@ -18,7 +26,9 @@ npm test
 
 **2026-11-08 로그인 정책 변경 — 다음 구현 기준:** 가이드(홈·검색·사진 인식·설명·지도)는 비로그인으로 사용하고, 메모 전체 읽기/작성·내 글·직접 링크에는 로그인한다. 익명 로그인은 활성화하지 않는다. 홈 미리보기의 공개 발췌만 예외다. 서버 전체 목록/본문과 쓰기·관리 RPC는 인증된 비익명 사용자만 허용한다. 현재 상단의 비로그인 읽기 성공 기록은 정책 변경 전 증거이며, 이 단락은 적용·검증 완료 기록이 아니다. [상세 인증·기기 저장 계약](../docs/design/APP_SPRINT1_SPEC.md#7-공개권한관리-34)을 함께 따른다.
 
-**본인이 준비할 것:** 기존 개발 프로젝트에서 Google·카카오 앱과 네이버 로그인 앱의 소유/서비스 정보를 확인하고, 각 제공자의 Supabase callback·필요한 동의/테스트 계정·검수 조건을 설정한다. Google·카카오는 기본 provider, 네이버는 [Custom OIDC](https://supabase.com/docs/guides/auth/custom-oauth-providers)의 `custom:naver`, issuer `https://nid.naver.com`, `email_optional=true`를 사용한다. 네이버 [공식 OIDC](https://developers.naver.com/docs/login/devguide)는 `openid`로 식별하며 별도 중계 서버를 전제하지 않는다. 공급자 Client Secret은 Supabase의 안전한 설정 화면에서 본인이 입력한다. 채팅·앱·저장소에 넣지 않는다. 앱에는 프로젝트 URL·publishable key만 사용한다. 작성자 이름/닉네임/사진을 게시물에 노출하거나 프로필 공개 기능을 추가하지 않는다.
+**본인이 준비할 것:** 기존 개발 프로젝트에서 Google 앱과 네이버 로그인 앱의 소유/서비스 정보를 확인하고, 각 제공자의 Supabase callback·필요한 동의/테스트 계정·검수 조건을 설정한다. Google은 기본 provider, 네이버는 [Custom OIDC](https://supabase.com/docs/guides/auth/custom-oauth-providers)의 `custom:naver`, issuer `https://nid.naver.com`, `email_optional=true`를 사용한다. 네이버 [공식 OIDC](https://developers.naver.com/docs/login/devguide)는 `openid`로 식별하며 별도 중계 서버를 전제하지 않는다. 공급자 Client Secret은 Supabase의 안전한 설정 화면에서 본인이 입력한다. 채팅·앱·저장소에 넣지 않는다. 앱에는 프로젝트 URL·publishable key만 사용한다. 작성자 이름/닉네임/사진을 게시물에 노출하거나 프로필 공개 기능을 추가하지 않는다.
+
+**2026-11-09 가입 범위:** Google·네이버만 사용하고 카카오·이메일 가입은 보류한다. 소셜 첫 로그인 성공 시 계정을 생성하므로 별도 가입·이메일 인증·비밀번호 재설정 화면을 만들지 않는다. Supabase 제공자 설정에서도 사용하지 않는 Kakao·Email은 비활성화하고 Anonymous Sign-Ins는 계속 끈다. 이 문서는 설정 기준이며 Dashboard 변경이나 실제 로그인 성공을 증명하지 않는다. 네이버의 이메일 없는 사용자 허용은 이메일 가입이나 익명 로그인을 켜는 설정이 아니다.
 
 **개발자가 이어갈 순서:**
 
@@ -46,13 +56,17 @@ npm test
 
 로컬 테스트는 PostgreSQL 권한·함수·저장만 검증한다. 실제 Supabase Auth·PostgREST·속도·남용 방지·서로 다른 Android 기기에서의 전달은 미검증이다.
 
-기존 세션 구현은 SDK의 자동 영속화·백그라운드 refresh를 끄고 명시적 행동마다 세션 복원/갱신→기기 보관→RPC를 직렬화한다. 토큰은 SecureStore의 작은 조각과 commit pointer로 보호하며 SQLite·로그·route에 넣지 않는다. 안전 저장 실패 시 전송하지 않고 갱신된 세션을 메모리에 유지해 재저장을 시도한다. **소셜 로그인 전환 기준:** 익명 계정 생성은 제거하고 Google·카카오·네이버의 인증 결과를 검증한 뒤 보관한다. 앱 callback은 `visual-travel-guide://auth/callback`으로 고정하며 코드 교환/PKCE·취소·재시작 복귀를 검사한다. 같은 사용자 ID로 재로그인하면 소유권을 확인할 수 있으나, 기기 초안의 재설치/다른 기기 복원이나 원격 내 글 전체 동기화까지 제공하는 것은 아니다. 로그아웃 때 저장된 세션·진행 중 로그인·이전 계정 캐시를 무효화하되 계정별 DB는 삭제하지 않는다. 실제 A/B 전달 검사는 남아 있다.
+기존 세션 구현은 SDK의 자동 영속화·백그라운드 refresh를 끄고 명시적 행동마다 세션 복원/갱신→기기 보관→RPC를 직렬화한다. 토큰은 SecureStore의 작은 조각과 commit pointer로 보호하며 SQLite·로그·route에 넣지 않는다. 안전 저장 실패 시 전송하지 않고 갱신된 세션을 메모리에 유지해 재저장을 시도한다. **소셜 로그인 전환 기준:** 익명 계정 생성은 제거하고 Google·네이버의 인증 결과를 검증한 뒤 보관한다. 앱 callback은 `visual-travel-guide://auth/callback`으로 고정하며 코드 교환/PKCE·취소·재시작 복귀를 검사한다. 같은 사용자 ID로 재로그인하면 소유권을 확인할 수 있으나, 기기 초안의 재설치/다른 기기 복원이나 원격 내 글 전체 동기화까지 제공하는 것은 아니다. 로그아웃 때 저장된 세션·진행 중 로그인·이전 계정 캐시를 무효화하되 계정별 DB는 삭제하지 않는다. 실제 A/B 전달 검사는 남아 있다.
 
-OAuth callback 설정: 위의 고정 주소는 base이며 실제 `redirectTo`는 `visual-travel-guide://auth/callback?attempt=<새 UUID>`다. Supabase allow list의 Dashboard 값은 `visual-travel-guide://auth/callback\?attempt=*`로 설정한다(역슬래시 1개; JSON에서 표현할 때는 2개). [공식 redirect glob](https://supabase.com/docs/guides/auth/redirect-urls)의 `?`는 wildcard이므로 query 구분자만 이스케이프하고 앱 URL에는 역슬래시를 넣지 않는다. Google·카카오·네이버의 callback은 계속 Supabase HTTPS `/auth/v1/callback`이며 앱 query 패턴을 공급자 콘솔에 등록하지 않는다. 앱은 base와 단일 attempt 값·UUID·현재 시도·5분 만료를 검증한 뒤 code를 한 번만 교환한다. 이전 시도 콜백은 현재 브라우저/시도를 취소하지 않고 무시한다. 이 nonce는 SDK PKCE와 함께 사용한다.
+OAuth callback 설정: 위의 고정 주소는 base이며 실제 `redirectTo`는 `visual-travel-guide://auth/callback?attempt=<새 UUID>`다. Supabase allow list의 Dashboard 값은 `visual-travel-guide://auth/callback**`로 설정한다. [공식 redirect glob](https://supabase.com/docs/guides/auth/redirect-urls)의 `**`로 가변 query를 허용하며 앱에 전달하는 실제 URL에는 wildcard·역슬래시를 넣지 않는다. 서버 허용 목록이 callback 접두사를 허용하더라도 앱은 정확한 base와 단일 attempt 값·UUID·현재 시도·5분 만료를 별도로 검증한 뒤 code를 한 번만 교환한다. Google·네이버의 callback은 계속 Supabase HTTPS `/auth/v1/callback`이며 앱 query 패턴을 공급자 콘솔에 등록하지 않는다. 이전 시도 콜백은 현재 브라우저/시도를 취소하지 않고 무시한다. 이 nonce는 SDK PKCE와 함께 사용한다.
+
+2026-11-11 사용자 기기 검사: 기존 query 고정/이스케이프 패턴에서는 localhost:3000으로 이동했고, 위 callback 접두사 패턴을 추가한 뒤 Google 로그인 성공을 보고했다. 허용 목록 변경 전후 결과이며 역슬래시 해석 자체가 원인이라고 확정한 것은 아니다. Site URL 변경이나 3000 서버 실행은 해결 조치에 포함하지 않았다. 네이버·취소·재실행·독립 A/B 공유는 별도 확인한다.
 
 OAuth 재시작 경계: SDK `persistSession:false`에서 진행 시도·PKCE verifier는 메모리에만 둔다. 진행 중 앱 프로세스가 종료되면 cold-start 콜백을 교환하지 않고 시도를 취소한 뒤 로그인 선택으로 돌아간다. 로그인 완료 후 SecureStore에 보관한 세션은 재시작 시 복원/검증한다. 두 경우와 늦은 이전 콜백·새 시도의 충돌을 나누어 검사한다. 공급자 키/콘솔 설정과 실제 로그인 성공은 이 최소 설계의 채택만으로 검증된 것이 아니다.
 
-OAuth 취소 검사: 공급자 브라우저를 X로 닫거나 동의를 거부하면 앱의 로그인 선택 화면에서 다른 제공자로 다시 시도할 수 있어야 한다. 여기서 뒤로 또는 ‘가이드로 돌아가기’를 누르면 원래 가이드로 돌아간다(외부 직접 링크라 돌아갈 곳이 없으면 홈). 세 제공자 각각 실제 Android 브라우저에서 두 복귀 경로를 구분해 확인한다.
+재로그인 확인: 브라우저 SSO 쿠키는 삭제하지 않는다. Google은 `prompt=select_account`, 네이버는 2026-11-11 사용자 재인증 승인에 따라 `prompt=login`과 `openid`를 전달한다. 네이버는 아이디·비밀번호 입력이 필요할 수 있으며 실제 재인증 화면·다른 계정 입력/복귀는 Android에서 확인한다. 2026-11-11 거부된 `consent`(개인정보 제3자 제공 동의 반복 요청)는 사용하지 않는다. 최초 연결/권한 변경 등 제공자가 필요로 하는 동의까지 없앤다는 의미는 아니다. 현재 Expo SDK 57의 `preferEphemeralSession`은 iOS 전용이므로 Android 브라우저 데이터 분리에 쓸 수 없다. 재인증은 브라우저 데이터 삭제와 다르며 앱 세션 복원·갱신·로그아웃과 쪽지 공개 동의는 변경하지 않는다.
+
+OAuth 취소 검사: 공급자 브라우저를 X로 닫거나 명시적으로 접근을 거부하면 오류 없는 앱 로그인 선택 화면에서 다시 시도할 수 있어야 한다. native cancel/dismiss는 대기시간과 무관하게 취소로 끝낸다. 오류 콜백은 정확한 앱 주소와 현재 query attempt를 검증하고, 단일 `access_denied`이면서 `error_code` 필드가 없을 때만 취소로 처리한다. Supabase의 query/fragment 동일 오류 복사는 허용하며 오류 설명의 빈 문자열과 생략은 같은 값으로 취급한다. 구조상 유효한 이전 시도의 콜백은 새 시도를 끝내지 않고 무시한다. 현재 시도의 명시적 거부도 인증을 완료하지 않으므로 대기시간과 무관하게 취소로 처리한다. 반면 중복키·상충·분산된 오류·code/token 혼합은 거부한다. 계정 차단/가입 제한/제공자 오류/통신·교환 실패를 취소로 숨기지 않으며 원문 오류 설명·콜백 URL은 기록하지 않는다. 여기서 뒤로 또는 ‘가이드로 돌아가기’를 누르면 원래 가이드로 돌아간다(외부 직접 링크라 돌아갈 곳이 없으면 홈). 두 제공자 각각 실제 Android 브라우저에서 취소·거부·재시도와 가이드 복귀를 확인한다.
 
 공개 읽기 전환 기준: sceneMessages의 snapshot→marker/본문은 비익명 인증 client로 읽고 개인 본문은 원격으로 보내지 않는다. 서버 기준 페이지와 현재 계정의 기기 개인 글을 최대 60개씩 합치며 같은 ID는 하나만 표시한다. 네트워크 실패는 공개 목록 오류와 구분하고, 인증 상실 때는 보호 화면과 모든 계정 자료를 즉시 잠근다. 다른 사람의 공개 글에서 신고 이유를 고른 뒤 현재 로그인 세션으로 접수하며 서버 확인 전 성공을 표시하지 않는다. 전체 읽기·쓰기 권한 전환 migration 후 A/B 신고·숨김·삭제/철회와 비로그인/익명 JWT의 우회 거부를 확인한다.
 
