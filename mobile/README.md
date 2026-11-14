@@ -1,38 +1,68 @@
-# Android 앱
+# 누비 Nubi · Android 개발 앱
 
-관광객을 위한 장소 탐색 가이드 서비스의 Android 제품 개발 경로다. 기존 [웹 프로토타입](../prototype/README.md)과 독립적으로 설치한다. [개발 착수 계획](../docs/experiments/sprint1-development-readiness.md)의 T17 일부 → T02를 먼저 수행한다. 관련 작업은 [Issue #21](https://github.com/HyunKN/visual-travel-guide/issues/21)이다.
+누비의 React Native·Expo Development Build다. 기존 [웹 프로토타입](../prototype/README.md)과 독립적으로 설치한다. 진행 순서·기능별 확인·남은 개발의 원본은 [App 기능 지도 #27](https://github.com/HyunKN/visual-travel-guide/issues/27), 실제 모델 연결은 [#30](https://github.com/HyunKN/visual-travel-guide/issues/30)이다. 앱·에뮬레이터·Metro는 사용자가 직접 실행한다.
 
 ## 이번 구현의 범위
 
-R3 선택을 반영한 ‘누비’ 이야기 홈과 불투명한 ‘홈 / 내 글’ 탭을 적용 중이다. [상세 설계](../docs/design/APP_SPRINT1_SPEC.md)와 [공통 UI #36](https://github.com/HyunKN/visual-travel-guide/issues/36)에서 화면 기준·남은 검수를 확인한다. 2026-11-14 사용자 결정으로 TalkBack 검사는 현재 개발·인수 범위에서 제외한다. 앱·에뮬레이터·개발 서버는 사용자가 직접 실행한다.
+R3를 기준으로 ‘누비 Nubi’ 이야기 홈과 불투명한 ‘홈 / 내 글’ 탭을 구현했다. 홈의 공개 글은 ‘남긴 흔적’, 사진에서 새 글을 시작하는 버튼은 ‘나도 한 줄 남기기’다. 설명·출처·지도·사진에서는 상단 집 버튼으로 홈에 돌아간다. [상세 설계](../docs/design/APP_SPRINT1_SPEC.md)와 [공통 UI #36](https://github.com/HyunKN/visual-travel-guide/issues/36)에서 구현과 미확인 배치·최종 디자인을 구분한다. 2026-11-14 사용자 결정으로 TalkBack 수동 검사는 현재 인수 범위에서 제외한다.
 
 Expo SDK 57 + React Native + TypeScript의 로컬 Development Build다. [App 기능 지도 #27](https://github.com/HyunKN/visual-travel-guide/issues/27)에서 진행 순서와 상태를 관리한다. 근정전·교태전·광화문 선택 → 이야기 → 공통 사진 → 위치 선택 → 자유 글 → 기기 저장/복귀를 구현했다. 개인 촬영 사진은 보관하지 않는다. 위치는 사용자 요청 시에만 읽는다. 모델 미탑재 시 직접 선택할 수 있다.
 
-가이드는 로그인 없이 사용한다. 홈 공개 미리보기는 서버가 최대 64자로 제한한 발췌만 보여주며, 미리보기 탭·내 글·공통 사진의 메모 읽기/작성·직접 링크는 Google·네이버 소셜 로그인부터 진행한다. 첫 로그인 성공 시 계정을 만들며 별도 회원가입 화면은 없다. 카카오·이메일 가입은 보류한다. 보호 화면은 로그인 세션의 검증과 안전한 저장 뒤에만 열린다. 로그인은 공개 동의가 아니며 공개 범위 기본 선택도 없다. 실제 OAuth 제공자 설정·Android 로그인 인수는 대기 중이다. [인증 설계](../docs/design/APP_SPRINT1_SPEC.md#7-공개권한관리-34)와 [공유 설정 안내](../supabase/README.md)를 따른다.
+가이드는 로그인 없이 사용한다. 홈 공개 미리보기는 서버가 최대 64자로 제한한 발췌만 보여주며, 미리보기 탭·내 글·공통 사진의 메모 읽기/작성·직접 링크는 Google·네이버 소셜 로그인부터 진행한다. 첫 로그인 성공 시 계정을 만들며 별도 회원가입 화면은 없다. 카카오·이메일 가입은 보류한다. 보호 화면은 로그인 세션의 검증과 안전한 저장 뒤에만 열린다. 로그인은 공개 동의가 아니며 공개 범위 기본 선택도 없다. 기존 개발 프로젝트에서 Google·네이버 로그인·재인증·취소와 계정 분리는 사용자 에뮬레이터 확인을 받았다. 새 프로젝트의 제공자 설정과 실기기 통합은 별도다. [인증 설계](../docs/design/APP_SPRINT1_SPEC.md#7-공개권한관리-34)와 [공유 설정 안내](../supabase/README.md)를 따른다.
 
 기기 글·초안·게시 요청은 프로젝트와 사용자 ID별 SQLite 파일로 분리한다. 이전 공유 기기 DB는 열거나 변경·자동 귀속하지 않으며, 기존 글의 명시적 가져오기는 후속 범위다. 로그인 화면에서 뒤로/가이드로 돌아가기를 누르면 가이드로 복귀하고, 공급자 브라우저만 닫으면 로그인 선택으로 돌아가 다른 수단을 다시 고를 수 있다. 성공하면 원래 메모 화면을 연다. 진행 중 OAuth에서 앱 프로세스가 종료되면 해당 시도는 폐기하고 다시 로그인한다. 로그아웃은 화면을 즉시 잠그고 SecureStore의 로그아웃 표식을 먼저 확정한다. 홈 상단의 장소 이야기는 검수 콘텐츠 순환이며 개인화가 아니다.
 
-공개 글이 충돌하면 ‘서버 상태 확인’으로 본인 서버 글과 현재 초안을 따로 확인한다. 명시적으로 반영/철회할 때 다시 조회하고, 상태가 바뀌었으면 중단한다. 숨김 글은 재공개하지 않으며, 철회됐거나 본인 공개 사본이 없음을 확인하면 ‘나만 보기’를 선택해 저장할 수 있다. 이 복구에는 서버 migration 0005와 동일한 작성자 세션이 필요하다. 기기 SQLite schema 3은 기존 글·동의 snapshot을 보존하면서 요청 결과와 관측 근거를 구분한다. 실제 Android 복구 화면/서버 연결은 [검증 기록](VERIFICATION.md)의 미확인 항목이다.
+공개 글이 충돌하면 ‘서버 상태 확인’으로 본인 서버 글과 현재 초안을 따로 확인한다. 명시적으로 반영/철회할 때 다시 조회하고, 상태가 바뀌었으면 중단한다. 숨김 글은 재공개하지 않으며, 철회됐거나 본인 공개 사본이 없음을 확인하면 ‘나만 보기’를 선택해 저장할 수 있다. 이 복구에는 서버 migration 0005와 동일한 작성자 세션이 필요하다. 기기 SQLite schema 3은 기존 글·동의 snapshot을 보존하면서 요청 결과와 관측 근거를 구분한다. 실제 Android 연결 근거와 개별 복구 경로의 미확인 사항은 [검증 기록](VERIFICATION.md)·해당 Issue에서 구분한다.
 
 기존 AI·검색과 비교할 사용자 가치 가설은 [PRODUCT](../docs/PRODUCT.md#개발-핵심-원칙-사용자가-선택할-이유)를 따른다. 직접 선택·사진 입력은 같은 장소의 설명과 이후 흔적 경험을 잇기 위한 기반이다. 출처를 따라 읽는 이야기 초안과 관람 포인트를 제공하지만, 사용자가 기존 검색보다 흥미를 느끼고 실제 대상을 다시 보는지는 아직 검증하지 않았다. 사람 비교·실기기·모델 연결의 결과를 이 구현으로 대신하지 않는다.
 
 ## 설치와 실행
 
-기준: Node 24.11.1 / npm 11.6.2. 앱의 실제 의존성은 `package-lock.json`으로 고정한다. SDK 57 공식 템플릿 `expo-template-blank-typescript@57.0.33`에서 시작했으며 Expo 57.0.31 / RN 0.86.3 / React 19.2.3 / TypeScript 6.0.3을 사용한다. Android package는 `com.visualtravelguide.app`이다.
+기준: Node 24.11.1 / npm 11.6.2. 앱의 실제 의존성은 `package-lock.json`으로 고정한다. SDK 57 공식 템플릿 `expo-template-blank-typescript@57.0.33`에서 시작했으며 Expo 57.0.31 / RN 0.86.3 / React 19.2.3 / TypeScript 6.0.3을 사용한다. Android package와 로그인 scheme은 `com.visualtravelguide.app` / `visual-travel-guide`다. 화면 이름은 누비 Nubi지만 기존 개발 APK의 런처 이름은 아직 Visual Travel Guide다.
+
+### 이미 설치된 개발 앱을 실행할 때
+
+1. Android Studio Device Manager에서 에뮬레이터를 직접 켠다.
+2. 아무 PowerShell에서 아래 명령을 실행한다. `adb devices`에 `emulator-5554 device` 같은 행이 있어야 한다. SDK가 다른 곳에 있으면 실행 파일 경로를 바꾼다.
+
+```powershell
+& "D:\Android\Sdk\platform-tools\adb.exe" devices
+& "D:\Android\Sdk\platform-tools\adb.exe" reverse tcp:8083 tcp:8083
+```
+
+3. 저장소 루트의 다른 PowerShell에서 다음을 실행하고 터미널을 켜둔다. 이 프로젝트의 8083 서버가 이미 실행 중이면 새로 시작하지 않는다.
+
+```powershell
+cd mobile
+node --dns-result-order=ipv4first node_modules/expo/bin/cli start --dev-client --localhost --port 8083
+```
+
+4. 에뮬레이터에서 앱을 직접 열고 `http://127.0.0.1:8083` 개발 서버를 선택한다. 같은 서버에서 JS·문구 변경만 받으려면 Metro 터미널의 `r`로 새로고침한다. 네이티브 모듈 변경이 없으면 재설치하지 않는다.
+
+`no devices/emulators found`는 기기 연결부터 확인하고, `EADDRINUSE`는 같은 포트의 기존 서버를 먼저 확인한다. 다른 서버를 임의 종료하지 않는다. 검은 화면이 에뮬레이터 전체인지 앱에서만 나타나는지 구분하며, 새 APK·초기화를 기본 해결책으로 삼지 않는다.
+
+### 새 checkout에서 의존성을 준비할 때
 
 ```powershell
 cd mobile
 npm ci
-npm run typecheck
-npm run test:content
-npm run test:photo
-npm run test:messages
-npm run test:navigation
-npm run lint
-npm run check:dependencies
-npm run check:android-bundle
-npx expo-doctor@1.21.5
 ```
+
+기존 `node_modules`와 개발 APK를 사용하는 매 실행마다 설치·전체 검사를 반복하지 않는다. 새 환경의 APK 준비·네이티브 변경 시 빌드는 아래 절차를 따른다.
+
+### 변경한 기능에 맞춰 검사할 때
+
+| 명령 (`mobile/`에서 실행) | 대상 |
+| --- | --- |
+| `npm run typecheck` / `npm run lint` | 코드 변경의 타입·린트 |
+| `npm run test:content` | 장소/이야기·홈 사진/카드 |
+| `npm run test:photo` | 사진 입력·권한/복구 |
+| `npm run test:recognition` | 인식 요청·취소·응답 계약. 실제 모델 추론과 구분 |
+| `npm run test:messages` | 읽기·기기 저장·공유·로그인·위치 계약 |
+| `npm run test:navigation` | 홈 복귀·초안 보호·편집 Back·위치 저장 중 입력 |
+| `npm run check:android-bundle` | 설치/실행 없이 Android JS·Hermes·자산 내보내기 |
+
+이미 통과한 결과는 재사용하고 [핵심 기능 변경의 영향 범위만 재검사](../docs/DEVELOPMENT.md#핵심-기능-변경-시에만-재검사)한다. 문구·스타일·문서 변경 때문에 앱 테스트·빌드·기기 확인을 추가하지 않는다. SDK/패키지를 변경할 때는 `npm run check:dependencies`와 환경 진단을 별도로 선택한다.
 
 `check:android-bundle`은 Android 파일 내보내기만 검사한다. Expo 57의 mockServer export 경로를 사용하므로 HTTP 포트를 열거나 앱을 실행하지 않는다. Git 제외 `.codex-build/android-bundle-check`에 Hermes 묶음/에셋을 만들고, 임시 파일은 같은 폴더 체계 안에 둔다. 환경 파일과 외부 서비스 설정을 제외한 기본 구성 검사이며 실제 기기 검증을 대신하지 않는다.
 
@@ -64,7 +94,7 @@ node --dns-result-order=ipv4first node_modules/expo/bin/cli start --dev-client -
 
 다른 PowerShell에서 `adb reverse tcp:8083 tcp:8083`을 실행한 뒤 에뮬레이터의 앱 아이콘을 직접 눌러 localhost:8083 서버를 선택한다. 기기 연결이 없거나 포트가 다른 서버에 사용 중이면 그 원인을 먼저 확인한다. 최신 source의 공개 기능은 Supabase 설정이 있어야 동작한다. 실제 실행·데이터 복원·디자인 검수는 아래 순서로 수행한다.
 
-### 이번 변경을 직접 확인하기
+### 네이티브 모듈을 변경해 새 APK가 필요할 때
 
 SQLite·지도 모듈과 Android 폰트를 추가했다. 이전 APK에 JS만 갱신하면 이 변경을 확인할 수 없다. Android Studio Device Manager에서 `VTG_API_36`을 직접 켠 후 저장소 루트에서 아래 순서로 진행한다. 이미 설치한 이 PC에서는 npm ci를 반복할 필요가 없다. `--clean`을 추가하지 않아도 생성 폴더가 재생성될 수 있으므로 기존 native 수정·Junction을 먼저 확인한다. 앱 build/.cxx가 계속 D:를 가리키는지 prebuild 전후에 확인한다. 아래 run:android 명령은 앱을 설치·실행하므로 AI는 실행하지 않았다. build-only 검사는 아래 별도 명령으로 통과했다.
 
@@ -84,9 +114,11 @@ npx expo run:android --device --port 8083 --no-bundler
 
 이 PC의 기존 x86_64 빌드에는 짧은 경로가 필요했던 이력이 있다. Ninja 경로 길이 오류가 나면 드라이브를 새로 만들거나 파일을 옮기지 말고 [기존 빌드 근거](VERIFICATION.md)를 확인한다. 최신 native build-only 검사와 APK 정보는 VERIFICATION의 소셜 로그인 네이티브 모듈 포함 기록을 따른다.
 
+아래는 기능별 확인 기준이다. 이미 통과한 항목은 해당 Issue의 근거를 재사용하며, 이 목록을 이유로 매 실행마다 전체 재검사를 요청하지 않는다.
+
 1. 홈 좌상단 ‘누비’ 로고와 구분된 상단 이야기, 하단 중앙 ‘사진으로 찾기’를 확인한다. 추천 사진은 영역 폭을 채우고 아래쪽이 흰색 그라데이션으로 이어져야 한다. 돋보기에서 ‘교태’를 입력해 결과로 이동하고 복귀한다. 장소 카드 탭은 해당 설명으로 이동하며, 양방향 swipe/이전·다음은 카드만 교체한다. 사진이 카드 중앙을 채우고 한쪽 여백이 남지 않는지 확인한다. 세로 스크롤·짧은 드래그 취소와 구분한다. 추천 이야기를 열었다 뒤로 돌아오면 같은 이야기가 남고, 내 글→홈 재진입이나 앱 새 실행에서는 다른 이야기가 나와야 한다(후보가 여러 개인 경우). 이야기 → ‘사진 속 쪽지 보기’에서 두 손가락 확대·이동 또는 확대/축소 버튼을 쓰고 ‘전체 사진’으로 복원한다.
-2. 메모 진입에서 로그인 gate가 먼저 보이고 취소 시 가이드로 돌아오는지 확인한다. 제공자 설정 후 로그인 성공 → 원래 메모 화면 → ‘글 남기기’ → 위치 선택 → ‘글 쓰기’ 순서로 진행한다. 공개 범위 미선택, 한글 두 줄 입력 → ‘나만 보기’ → ‘저장’. 확대 후 같은 위치/본문인지 확인한다.
-3. ‘내 글’에서 편집 도중 닫아 초안으로 남긴다. 앱을 종료했다 다시 열어 ‘이어 쓰기’를 확인한다. ‘초안 버리기’는 편집 전 저장한 글을 지우지 않아야 한다.
+2. 메모 진입에서 로그인 gate가 먼저 보이고 취소 시 가이드로 돌아오는지 확인한다. 제공자 설정 후 로그인 성공 → 원래 메모 화면 → ‘나도 한 줄 남기기’ → 위치 선택 → ‘글 쓰기’ 순서로 진행한다. 공개 범위 미선택, 한글 두 줄 입력 → ‘나만 보기’ → ‘저장’. 확대 후 같은 위치/본문인지 확인한다.
+3. 새 글 작성 중 ‘닫기’ 또는 상단 집 버튼으로 나가면 초안을 보관하고 ‘내 글’에서 이어 쓴다. 저장된 글 편집의 ‘수정 취소’는 변경을 버리고 원문 읽기로 돌아간다. 편집 내용을 보관하고 홈으로 나가려면 상단 집 버튼을 사용한다. ‘초안 버리기’는 신규 작성에만 표시하며 저장된 글을 삭제하는 동작과 구분한다.
 4. ‘사진에서 보기’로 돌아가 같은 표식·본문인지 확인한다. 다른 새 글에서 ‘공개’ 선택만으로 전송되지 않고 초안으로 남아야 한다. ‘공개하기’에서 동의를 확인한 뒤에만 전송한다. 같은 기기에서 A 로그아웃 → B 로그인 → A 복귀 시 글·초안·게시 요청이 섞이지 않아야 한다.
 5. ‘주변 장소’에서 경복궁 지도·건물 높이 표현과 지도 출처를 확인한다. 지도 확대/회전/기울임 → 지원 장소 선택 → 설명 진입 → 복귀 → ‘경복궁 보기’를 확인한다. ‘현재 위치 확인’을 직접 눌러 위치·오차·측정 시각과 거부/만료 상태를 확인한다. 인터넷을 끊어 지도 실패/재시도 시에도 장소 목록에서 직접 설명을 열 수 있어야 한다. 기존 APK에서는 지도 모듈을 사용할 수 없으므로 새 개발 APK가 필요하다.
 
