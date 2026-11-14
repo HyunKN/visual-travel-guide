@@ -1,0 +1,4 @@
+Skullet MIT reference for native skeleton shapes and pulse.
+Pinned upstream: https://raw.githubusercontent.com/lochie/skullet/770cba428e6954977fd97938f0f06a7cade2fc2d/
+Read: packages/skullet/src/react/Skeleton.tsx and packages/skullet/src/lib/constants.ts.
+Native adaptation uses View and installed Reanimated; no DOM renderer or sample user text is bundled.

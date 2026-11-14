@@ -1,0 +1,6 @@
+Original Spoqa Han Sans, unmodified upstream Korean TTF subsets (not Neo).
+https://github.com/spoqa/spoqa-han-sans/tree/01ff0283e4f36e159ffbf744b36e16ef742da6d8/Subset/SpoqaHanSans
+LICENSE.txt: SIL Open Font License 1.1 from the same commit.
+SHA-256:
+811804cc0ce832deca80edd7da35bed7c695749a4851eef5554ff136368fc570 SpoqaHanSansRegular.ttf
+d0db86432b9103757de76ac26f87ac132a11b3dd523f5681473549838e530aba SpoqaHanSansBold.ttf

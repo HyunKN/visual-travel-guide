@@ -1,0 +1,101 @@
+{
+  "renderer": "PyMuPDF 1.27.2.3",
+  "assets": [
+    {
+      "file": "group-wide.png",
+      "width": 20,
+      "height": 14,
+      "alpha": true,
+      "bytes": 671,
+      "sha256": "01dd34f87be7e6050f03a240fe62f0e449976f9e7fe39b3384a4b9a198490953"
+    },
+    {
+      "file": "group-wide@2x.png",
+      "width": 40,
+      "height": 28,
+      "alpha": true,
+      "bytes": 1478,
+      "sha256": "50fc03e2c40e85667814bd36fbd1486196f18f558cb3357abb2047e4f940f8f0"
+    },
+    {
+      "file": "group-wide@3x.png",
+      "width": 60,
+      "height": 42,
+      "alpha": true,
+      "bytes": 2334,
+      "sha256": "701da346a640a22febc19cacdf259e30af9860f19bd677b93625ebdd3533dbd1"
+    },
+    {
+      "file": "message.png",
+      "width": 14,
+      "height": 14,
+      "alpha": true,
+      "bytes": 613,
+      "sha256": "e47b9137ed62ec72f350318557f749d16463774f1c4f53dedbf90e2d0b81a82b"
+    },
+    {
+      "file": "message@2x.png",
+      "width": 28,
+      "height": 28,
+      "alpha": true,
+      "bytes": 1302,
+      "sha256": "03093301a23748aa4567bdf517dadc8f33dfc8b9c1436da58a76bca1932eaa11"
+    },
+    {
+      "file": "message@3x.png",
+      "width": 42,
+      "height": 42,
+      "alpha": true,
+      "bytes": 2051,
+      "sha256": "13b645f44928c90b2fdedaeb66d12bc68da58147cb210f008580139f4b3cc6c0"
+    },
+    {
+      "file": "ring.png",
+      "width": 14,
+      "height": 14,
+      "alpha": true,
+      "bytes": 516,
+      "sha256": "37205bd0637ee07457e261be05279d40d2d8fc26d10c1387eb67c8cea569d045"
+    },
+    {
+      "file": "ring@2x.png",
+      "width": 28,
+      "height": 28,
+      "alpha": true,
+      "bytes": 1152,
+      "sha256": "e1e9bba18b64a10a4530eb330668835a0b87cf66a8083ad428a83319b82ef724"
+    },
+    {
+      "file": "ring@3x.png",
+      "width": 42,
+      "height": 42,
+      "alpha": true,
+      "bytes": 1846,
+      "sha256": "f50b82da1c16fabaff84c12a47770b349f76c397d0b2bb0925e2ebe6d5a96d30"
+    },
+    {
+      "file": "selected.png",
+      "width": 14,
+      "height": 14,
+      "alpha": true,
+      "bytes": 562,
+      "sha256": "6bfdf9f6bdd2e4b1f8454564b3054418286517bdaf0e6cc85939b39bc23631d1"
+    },
+    {
+      "file": "selected@2x.png",
+      "width": 28,
+      "height": 28,
+      "alpha": true,
+      "bytes": 1242,
+      "sha256": "96a810850a0ff24dbf491bbacfc60a0bffe0fa41b8cf5334239cda573db2a4cd"
+    },
+    {
+      "file": "selected@3x.png",
+      "width": 42,
+      "height": 42,
+      "alpha": true,
+      "bytes": 1966,
+      "sha256": "7d442e36d4566b8c62217d195c29bc1e30cb0fae5f0859ada4195ef398765b39"
+    }
+  ]
+}

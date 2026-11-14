@@ -1,0 +1,52 @@
+{
+  "name": "visual-travel-guide-mobile",
+  "version": "0.1.0",
+  "main": "expo-router/entry",
+  "dependencies": {
+    "@maplibre/maplibre-react-native": "11.5.1",
+    "@supabase/supabase-js": "2.119.0",
+    "expo": "57.0.31",
+    "expo-constants": "~57.0.22",
+    "expo-crypto": "~57.0.4",
+    "expo-dev-client": "~57.0.20",
+    "expo-font": "~57.0.4",
+    "expo-image-picker": "~57.0.20",
+    "expo-linking": "~57.0.13",
+    "expo-location": "~57.0.23",
+    "expo-router": "~57.0.29",
+    "expo-secure-store": "~57.0.4",
+    "expo-sqlite": "~57.0.4",
+    "expo-status-bar": "~57.0.1",
+    "expo-system-ui": "~57.0.4",
+    "expo-web-browser": "~57.0.3",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-reanimated": "4.5.1",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "~4.26.0",
+    "react-native-worklets": "0.10.1"
+  },
+  "devDependencies": {
+    "@types/react": "~19.2.2",
+    "eslint": "^9.39.5",
+    "eslint-config-expo": "~57.0.2",
+    "typescript": "6.0.3"
+  },
+  "scripts": {
+    "postinstall": "node scripts/fix-windows-autolinking.cjs && node scripts/fix-windows-gradle-path.cjs",
+    "start": "expo start --dev-client",
+    "start:emulator": "node --dns-result-order=ipv4first node_modules/expo/bin/cli start --dev-client --localhost --port 8081",
+    "android": "expo run:android",
+    "typecheck": "tsc --noEmit",
+    "test:content": "node scripts/test-content.cjs",
+    "test:photo": "node scripts/test-photo.cjs",
+    "test:recognition": "node scripts/test-recognition.cjs",
+    "test:messages": "node scripts/test-messages.cjs",
+    "test:navigation": "node scripts/test-navigation.cjs",
+    "lint": "expo lint",
+    "check:dependencies": "expo install --check",
+    "check:android-bundle": "node scripts/check-android-bundle.cjs"
+  },
+  "private": true
+}

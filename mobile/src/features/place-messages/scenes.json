@@ -1,0 +1,5 @@
+[
+  { "id": "geunjeongjeon-front-v1", "placeId": "geunjeongjeon", "assetId": "photo-geunjeongjeon", "imageWidth": 2000, "imageHeight": 1151, "imageSha256": "fccf05b39ca410d775ea11b00d2d53877556593d1e38c9babe792a1e94cc51bd" },
+  { "id": "gyotaejeon-front-v1", "placeId": "gyotaejeon", "assetId": "photo-gyotaejeon", "imageWidth": 2000, "imageHeight": 1333, "imageSha256": "03e95a24c650b7df74e8e2c44cadf494d6875c3f0313f03f3566a465d9b357aa" },
+  { "id": "gwanghwamun-front-v1", "placeId": "gwanghwamun", "assetId": "photo-gwanghwamun", "imageWidth": 2000, "imageHeight": 1117, "imageSha256": "df4307f18ebe6c3da9eae1f96f8628b8f100033e5829d782d96cbe38bbe45e68" }
+]

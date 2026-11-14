@@ -2,6 +2,10 @@
 /.codex-build/
 /.presentation-build/
 /output/
+/local-assets/
+# Collection provenance and source-specific tools remain internal until release approval.
+/experiments/sprint1-dataset/
+/docs/experiments/sprint1-web-image-sources.md
 **/__pycache__/
 
 # Private source report: preserve locally, exclude from public repository

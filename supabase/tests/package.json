@@ -1,0 +1,9 @@
+{
+  "name": "vtg-public-message-policy-tests",
+  "private": true,
+  "scripts": {
+    "pretest": "node ../../mobile/node_modules/typescript/bin/tsc --ignoreConfig ../../mobile/src/features/local-notes/store.ts ../../mobile/src/features/public-messages/remote.ts --strict --target ES2022 --module commonjs --skipLibCheck --outDir ../../.codex-build/app-message-tests",
+    "test": "node --test policies.test.mjs rate-limit.test.mjs recovery.test.mjs permanent-auth.test.mjs body-limit.test.mjs"
+  },
+  "devDependencies": { "@electric-sql/pglite": "0.5.15" }
+}

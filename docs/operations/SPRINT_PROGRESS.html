@@ -1,0 +1,1220 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Visual Travel Guide · Sprint와 WBS 현황</title>
+  <link rel="icon" href="data:,">
+  <style>
+    :root{color-scheme:light;--ink:#172a43;--muted:#536275;--line:#dfe5ec;--paper:#fff;--wash:#f5f7fa;--orange:#a34220;--orange-wash:#fff1e8;--blue:#284f8b;--blue-wash:#edf3fb;--green:#256244;--green-wash:#edf7f0}
+    *{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:70px}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.65 system-ui,"Malgun Gothic",sans-serif}a{color:var(--blue);text-underline-offset:3px}button,select{font:inherit}button,a,summary,select{touch-action:manipulation}button:focus-visible,a:focus-visible,summary:focus-visible,select:focus-visible{outline:3px solid var(--blue);outline-offset:4px}button{cursor:pointer}main,.header-inner,.nav-inner{max-width:1440px;margin:auto;padding:0 32px}header{padding:30px 0 22px;border-bottom:1px solid var(--line)}.eyebrow{font-size:12px;letter-spacing:.1em;color:var(--muted);font-weight:650}h1{font-size:28px;line-height:1.3;margin:7px 0 8px;letter-spacing:-.04em}h2{font-size:21px;line-height:1.4;margin:0 0 5px;letter-spacing:-.025em}h3{font-size:16px;margin:0 0 6px}p{margin:6px 0 12px}.header-row,.section-title,.group-line,.metric-line{display:flex;align-items:center;justify-content:space-between;gap:16px}.sub,.muted{color:var(--muted)}.sub{max-width:900px;font-size:14px}.meta{font-size:12px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap}.refresh{border:1px solid var(--line);border-radius:7px;background:white;color:var(--ink);padding:8px 15px;white-space:nowrap}.refresh:hover{background:var(--wash)}nav{position:sticky;top:0;z-index:5;background:rgba(255,255,255,.97);border-bottom:1px solid var(--line)}.nav-inner{display:flex;gap:24px;overflow:auto;white-space:nowrap}nav a{color:var(--ink);text-decoration:none;font-size:13px;padding:14px 0}nav a:hover{text-decoration:underline}section{padding:30px 0;border-bottom:1px solid var(--line)}.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;margin:18px 0}.kpi{padding:18px 20px;background:var(--wash);border-radius:8px}.kpi label{display:block;font-size:13px;color:var(--muted)}.value{font-size:32px;line-height:1.25;font-weight:650;font-variant-numeric:tabular-nums;margin:7px 0}.kpi small{font-size:12px;color:var(--muted)}.track{height:6px;background:#e4e9f0;border-radius:10px;margin:10px 0;overflow:hidden}.track span{height:100%;display:block;background:var(--blue)}.current{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:25px;padding:20px 22px;background:var(--blue-wash);border-radius:8px}.current p{margin:4px 0}.current ul{margin:4px 0;padding-left:20px}.current li{margin:6px 0}.pill{display:inline-flex;align-items:center;gap:5px;border-radius:5px;font-size:12px;font-weight:600;padding:2px 8px;white-space:nowrap;background:var(--wash);color:var(--muted)}.pill.blocked{background:var(--orange-wash);color:var(--orange)}.pill.in_progress{background:var(--blue-wash);color:var(--blue)}.pill.done{background:var(--green-wash);color:var(--green)}.pill.unverified{background:var(--orange-wash);color:var(--orange)}.notice{font-size:13px;color:var(--muted);margin-top:14px}.milestones{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;margin-top:18px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden}.milestone{background:white;padding:18px}.milestone time{font-size:18px;font-weight:650;font-variant-numeric:tabular-nums}.milestone p{font-size:13px;color:var(--muted);margin:5px 0}.milestone h3{margin-top:6px}.period{font-size:13px;color:var(--muted)}.table-scroll{overflow:auto;border-radius:6px}table{width:100%;border-collapse:collapse;text-align:left;font-size:13px}th{font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap;background:var(--wash)}th,td{padding:12px 13px;border-bottom:1px solid var(--line);vertical-align:top}tbody tr:last-child td{border-bottom:0}.wbs-table{min-width:850px}.wbs-table th:first-child{width:75px}.wbs-table th:nth-child(2){width:87px}.wbs-table th:nth-child(4){width:62px}.wbs-table th:nth-child(5){width:90px}.id{font-family:ui-monospace,Consolas,monospace;font-size:12px;white-space:nowrap}.group{margin-top:12px;border:1px solid var(--line);border-radius:7px;overflow:hidden}.group>summary{padding:16px 18px;background:var(--wash);cursor:pointer;list-style:none}.group>summary::-webkit-details-marker{display:none}.group>summary .name:before{content:'＋';margin-right:10px;color:var(--muted)}.group[open]>summary .name:before{content:'−'}.group-line .right{font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--muted)}.group-progress{height:4px;background:#e4e9f0;border-radius:8px;overflow:hidden;margin-top:8px}.group-progress span{display:block;height:100%;background:var(--blue)}.task-detail{margin-top:7px}.task-detail>summary{font-size:12px;color:var(--blue);cursor:pointer}.criteria{font-size:12px;background:var(--wash);padding:10px 12px;border-radius:5px;margin-top:8px}.checks{list-style:none;padding:0;margin:9px 0}.checks li{margin:6px 0}.check-sign{display:inline-block;width:18px;font-weight:650}.pass{color:var(--green)}.pending{color:var(--muted)}.toolbar{display:flex;gap:10px;align-items:center;font-size:13px;flex-wrap:wrap;margin-top:14px}.toolbar select{padding:7px 28px 7px 10px;border:1px solid var(--line);border-radius:6px;background:white;color:var(--ink)}.story-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:15px}.story{border:1px solid var(--line);border-radius:7px;overflow:hidden}.story>summary{cursor:pointer;padding:15px 17px;list-style:none}.story>summary::-webkit-details-marker{display:none}.story-name{font-weight:600;margin:5px 0}.story-meta{font-size:12px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap}.story-content{padding:0 17px 17px}.ac{border-top:1px solid var(--line);padding-top:10px;margin-top:12px;font-size:12px}.ac p{margin:4px 0}.definition-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:18px}.definition-grid article{padding:18px;background:var(--wash);border-radius:7px}.definition-grid ol,.definition-grid ul{margin:8px 0 0;padding-left:20px}.definition-grid li{margin:8px 0}.dependencies{margin:16px 0;display:grid;gap:10px}.dependency{display:grid;grid-template-columns:115px 110px 1fr;gap:12px;font-size:13px;padding:13px 15px;background:var(--wash);border-radius:6px}.source-list{padding-left:20px;font-size:13px}.source-list li{margin:8px 0}.source-list code{font-size:12px}.blank{padding:20px;color:var(--muted)}footer{max-width:1440px;margin:auto;padding:20px 32px 40px;color:var(--muted);font-size:12px}.nojs{padding:20px;background:var(--orange-wash)}@media(max-width:1000px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.milestones{grid-template-columns:repeat(3,minmax(0,1fr))}.current{grid-template-columns:1fr}.header-row{align-items:flex-start}}@media(max-width:650px){main,.header-inner,.nav-inner{padding-left:18px;padding-right:18px}h1{font-size:24px}.header-row{flex-direction:column;gap:8px}.kpis,.story-grid,.definition-grid{grid-template-columns:1fr}.kpis{gap:10px}.kpi{padding:15px 18px}.value{font-size:29px}.milestones{grid-template-columns:1fr 1fr}.group-line{align-items:flex-start;flex-direction:column;gap:5px}.dependency{grid-template-columns:1fr;gap:3px}.section-title{align-items:flex-start;flex-direction:column;gap:4px}.meta{gap:7px}.nav-inner{gap:20px}footer{padding-left:18px;padding-right:18px}}@media print{nav,.refresh,.toolbar{display:none}body{font-size:11px}main,.header-inner{padding:0}.kpis{grid-template-columns:repeat(4,1fr)}.milestones{grid-template-columns:repeat(4,1fr)}section{break-inside:avoid}.group{break-inside:auto}details:not([open])>*:not(summary){display:block}.table-scroll{overflow:visible}.wbs-table{min-width:0}.story-grid{grid-template-columns:1fr}.story{break-inside:avoid}}
+    #thread-review .wbs-table{table-layout:fixed;min-width:800px}#thread-review th:first-child{width:12%}#thread-review th:nth-child(2){width:17%}#thread-review th:nth-child(3){width:36%}#thread-review th:nth-child(4){width:35%}
+  </style>
+</head>
+<body>
+<header><div class="header-inner"><div class="eyebrow">VISUAL TRAVEL GUIDE / DELIVERY</div><div class="header-row"><div><h1>Sprint와 WBS 현황</h1><p class="sub">지원 장소 알아보기 → 내 시선 기록 → 같은 장소의 다른 사람 흔적 → 관람 이어가기</p></div><button class="refresh" type="button" id="refresh">새로고침</button></div><div class="meta" id="meta"></div></div></header>
+<nav aria-label="현황판 목차"><div class="nav-inner"><a href="#overview">현재 상황</a><a href="#android-verification">검증 근거</a><a href="#schedule">Sprint 일정</a><a href="#wbs">WBS · 20개 Task</a><a href="#backlog">전체 계획 · 17개 Story</a><a href="#rules">판정 기준·근거</a></div></nav>
+<noscript><p class="nojs">이 현황판의 집계와 작업 목록을 보려면 JavaScript가 필요합니다. 원본은 Product Backlog·Sprint Backlog와 Android 검증 기록에 있습니다.</p></noscript>
+<main>
+<section id="overview"><h2>현재 상황</h2><p class="muted">첫 적용: 근정전·교태전·광화문. 기존 웹 프로토타입 완료와 제품 Android 완료를 구분합니다.</p><div class="kpis" id="kpis"></div><div class="current" id="current"></div><p class="notice">완료율은 인수 기준을 통과한 결과만 집계합니다. APK 빌드 같은 중간 산출물은 WBS의 근거에서 따로 확인합니다. 착수율은 작업량이나 제품 완성도가 아닙니다.</p></section>
+<section id="thread-review"><h2>개발 스레드와 실제 구현 대조</h2><p class="muted">개발현황 채팅이 개발 스레드 1·2의 기록과 저장소를 대조해 관리합니다. 스레드의 설계 합의는 구현·검증 완료와 구분합니다.</p><div class="table-scroll"><table class="wbs-table"><thead><tr><th>확인 대상</th><th>담당·범위</th><th>확인한 결과</th><th>남은 작업</th></tr></thead><tbody id="thread-review-rows"></tbody></table></div><p class="notice">11/4 원격 Issue #21 직접 조회: open, 마지막 갱신 10/26. 최신 로컬 실행·설계 결과는 원격 본문에 미반영입니다. 기존 AC에는 사진 보관·50자 제한·기록 후 열람 조건이 남아 있어 최신 설계와 정합성 검토가 필요합니다. 이번 집계는 기존 계획의 20 Task·47h·50 SP·40 AC를 유지합니다.</p></section>
+<section id="android-verification"><h2>검증 근거 · 확인한 것과 남은 것</h2><p class="muted">아래는 기록된 중간 결과입니다. T02·T17 전체 완료를 뜻하지 않습니다.</p><p><strong>11/4 실행 확인:</strong> Metro·adb reverse 연결 복구 완료. 상세 버튼의 배경·글자 표시, 버튼 탭 → 상세 화면 → Android 뒤로가기 통과. 타입·lint 검사 통과. native 폴더를 재생성한 뒤 V: 가상 경로에서 x86_64 APK 빌드·재설치·실행을 확인했습니다. C: 긴 경로의 첫 빌드는 실패했고 재시도는 캐시를 사용했습니다. 이후 앱 build·.cxx 산출물을 D:로 연결하고 증분 빌드를 확인했습니다. native 폴더 재생성 후에는 연결을 다시 확인해야 합니다.</p><div class="definition-grid" id="verification-summary"></div><p><a href="ANDROID_VERIFICATION.html">Android 검증 보고서 전체 보기</a> · 서버 없이 열리는 읽기용 문서</p><details class="task-detail" id="restart-guide"><summary>다음에 앱 다시 켜는 순서</summary><ol><li>Android Studio → Device Manager → VTG API 36의 실행 버튼을 누르고 에뮬레이터 부팅을 기다립니다.</li><li>PowerShell에서 아래 명령을 순서대로 실행합니다.</li></ol><pre style="overflow:auto;background:var(--wash);padding:16px;border-radius:6px"><code>cd C:\Users\hi\Desktop\projects_2026\visual-travel-guide
+. .\scripts\use-android-tools.ps1
+adb reverse tcp:8081 tcp:8081
+cd mobile
+npm run start:emulator</code></pre><ol start="3"><li>Waiting on http://localhost:8081이 나오면 에뮬레이터에서 Visual Travel Guide 앱 → 최근 서버 http://127.0.0.1:8081을 선택합니다.</li><li>PowerShell 창은 앱을 사용하는 동안 열어둡니다. 종료할 때는 Ctrl+C로 Metro를 끕니다. 일반적인 JavaScript 수정은 자동 반영되며 native 의존성·설정 변경은 별도 재빌드가 필요할 수 있습니다.</li></ol><p class="notice">Failed to connect가 나오면 Metro 실행 상태와 adb reverse를 확인합니다. 이 절차는 설치된 개발 APK를 다시 실행하는 방법이며 제품 기능 검증이나 native 재빌드 절차가 아닙니다.</p></details></section>
+<section id="schedule"><div class="section-title"><h2>Sprint 일정과 판단 시점</h2><span class="period">Sprint 1: 10/26–11/16 · 개발 11/15까지</span></div><p class="muted">날짜는 계획 참고이며 해당 날까지 작업을 기다리는 기준이 아닙니다. 준비되는 작업부터 제대로 구현·검증하고, 일찍 써보며 계속 수정합니다. 11/4 첫 기본 흐름, 11/8 첫 전체 실행본은 당시 내부 목표입니다.</p><div class="milestones" id="milestones"></div><p class="notice">11/2–8 기존 가용 시간 가정은 25h, 전체 Task 초기 추정은 47h입니다. 추가 학습 공수도 충분히 반영되지 않아 11/8 전체 실행·AC 통과를 보장하지 않습니다. 실제 소요·잔여를 다시 추정해야 합니다.</p></section>
+<section id="wbs"><div class="section-title"><h2>WBS · Sprint 1의 기존 작업 분해</h2><span class="period" id="task-summary"></span></div><p class="muted">원래 Task ID·추정·완료 기준을 유지하고 보기 편하게 묶었습니다. 그룹 순서는 확정 시작일이나 새 Task 번호가 아닙니다.</p><div id="groups"></div><p class="notice">그룹 완료율 = 완료 기준을 충족한 Task의 원래 Est(h) 합계 ÷ 그룹의 원래 Est(h). 부분 진행에 임의의 50%를 주지 않습니다. 현재 실제 잔여 시간·소요 시간은 미집계이며 초기 47h를 그대로 ‘남은 시간’이라고 표시하지 않습니다.</p></section>
+<section id="backlog"><div class="section-title"><h2>전체 제품 계획</h2><span class="period">7 Epic · 17 Story · 70 SP</span></div><p class="muted">Sprint 1: 12개·50 SP / Sprint 2: 3개·13 SP / 후순위 미배치: 2개·7 SP. 후순위를 Sprint 3로 확정하지 않습니다.</p><div class="toolbar"><label for="sprint-filter">범위</label><select id="sprint-filter"><option value="all">전체 계획</option><option value="Sprint 1">Sprint 1</option><option value="Sprint 2">Sprint 2</option><option value="미배치(후순위)">후순위 미배치</option></select><span class="muted" id="story-summary" role="status"></span></div><div class="story-grid" id="stories"></div></section>
+<section id="rules"><h2>판정 기준과 관리 방식</h2><div class="definition-grid"><article><h3>퍼센트가 뜻하는 것</h3><ol><li><strong>Story 완료율:</strong> 모든 AC와 공통 DoD를 통과한 Story의 SP만 합산합니다. 모델 연결·APK 생성만으로 Story를 완료 처리하지 않습니다.</li><li><strong>착수율:</strong> 부분 진행·막힘·완료 Task 수 ÷ 전체 Task 수입니다. 난이도·공수·남은 기간을 뜻하지 않습니다.</li><li><strong>AC 통과율:</strong> 실제 검사를 통과한 조건만 셉니다. 코드·명령 검사와 제품 AC를 섞지 않습니다.</li><li><strong>남은 시간:</strong> 별도 재추정이 필요합니다. 실제 시간 기록 없이 Burndown·velocity·완료 예측을 만들지 않습니다.</li></ol></article><article><h3>계속 같은 화면에서 확인</h3><ol><li>이 채팅의 작업 보고 시 기존 Task의 상태·확인일·증거를 이 화면에 반영합니다.</li><li>파일을 갱신한 뒤 새로고침하면 바뀐 현황을 볼 수 있습니다. 열린 화면이 스스로 GitHub를 조회하거나 작업을 수행하지 않습니다.</li><li>계획·명세는 기존 문서, 진행·증거는 Issue/PR 또는 PR 전 검증 기록이 원본입니다. 이 화면은 사용자 요청으로 만든 조회용 스냅샷입니다.</li><li>원격 Issue와 차이가 있으면 숨기지 않습니다. 현재 #21은 이전 계획 기준이며 이번 로컬 개발 결과를 원격에 갱신하지 않았습니다.</li></ol></article></div><h3 style="margin-top:24px">남은 준비와 의존 사항</h3><div class="dependencies" id="dependencies"></div><h3>원본과 검증 근거</h3><ul class="source-list" id="sources"></ul><p class="notice">기존 프로토타입·설계·관찰의 성과는 근거로 유지합니다. 그 완료율을 새 Android 제품의 완료율에 더하지 않습니다. 새 WBS Task·외부 Issue·자동화·공개 배포는 만들지 않았습니다.</p></section>
+</main>
+<footer>조회용 로컬 스냅샷 · 진행률은 확인된 증거로 갱신 · 임의 진행률과 실제로 집계하지 않은 시간은 표시하지 않음</footer>
+<script id="progress-data" type="application/json">
+{
+  "updated": "2026-11-04",
+  "review": [
+    ["개발 스레드 1", "codex://threads/01a19796-a417-7b31-8537-5304f46b34c6", "T04 · 자료·모델 준비", "사진 원본 83장·표시 이미지 4장 확보. Training 라벨 194개 수령, 대응 원천 이미지는 0장. 현판·처마 후보 수집 포함", "원천 ZIP 대응 확인, 교태전 보강, 권리·중복 검수·분할. 모델 bundle·학습·Android 추론 미확인"],
+    ["개발 스레드 2", "codex://threads/01a1982e-5c74-7a70-b5bf-aceb7b4ecc6f", "T02 · 실행 환경 / T17 · 경험 설계", "11/2 에뮬레이터 실행 확인. 11/4 목록 대신 공통 장소 안의 흔적 발견 방향과 PLACE_MESSAGES 설계 초안·HTML 치수 도면·TypeScript 계약/좌표/겹침 참고 코드 추가. 앱에는 미연결", "참고 코드 검사와 Android 구현·검증을 구분. UI 수치는 제안값. 11/4 버튼 표시·V: 경로 재빌드·재설치 확인. 로컬 저장·서버·권한·접근성·사용자 검증 남음"],
+    ["저장소 대조", "../../mobile/README.md", "codex/android-bootstrap · 미커밋", "HEAD efb121e. mobile/src/app은 시작·임시 상세·layout만 존재. 제품 기능 연결 없음. 기존 검증 기록·UI tree·스크린샷 파일 존재 확인", "실기기·사진·모델·GPS·저장·공유·사용자 비교 미검증. 이번 갱신에서 Android 실행 검사는 새로 수행하지 않음"]
+  ],
+  "branch": "codex/android-bootstrap",
+  "focus": "T04",
+  "next": [
+    [
+      "T04·T22",
+      "Training 라벨의 원천 ZIP 대응 확인·교태전 보강 → 권리·중복·촬영 묶음 검토 → 기준선·학습 준비"
+    ],
+    [
+      "T02",
+      "11/4 native 재생성·V: 가상 경로 재빌드·재설치·화면 이동 확인. C: 긴 경로 빌드는 260자 제한으로 실패"
+    ],
+    [
+      "T06·T01",
+      "T17 최신 열람·기록 정책을 데이터 계약과 대조 → 검수 콘텐츠·직접 장소 선택·설명 연결"
+    ]
+  ],
+  "baselineRef": "e98b5421e347267b6448a891d9adc7c34aff8d59",
+  "sprint": {
+    "start": "2026-10-26",
+    "devEnd": "2026-11-15",
+    "review": "2026-11-16",
+    "capacity": 60,
+    "taskEstimate": 47,
+    "buffer": 13
+  },
+  "stories": [
+    {
+      "id": "US-01",
+      "name": "첫 진입에서 서비스 가치 체감과 탐색 시작",
+      "epic": "E1",
+      "priority": "Must",
+      "sp": 3,
+      "sprint": "Sprint 1",
+      "acs": [
+        {
+          "id": "AC-01",
+          "given": "처음 서비스를 방문한 상태",
+          "when": "첫 화면을 확인하면",
+          "then": "경복궁에서 해결할 수 있는 대표 궁금증과 탐색 후 얻는 결과를 연결해 볼 수 있습니다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-02",
+          "given": "현재 이용 가능한 탐색 경로와 예시가 구분되어 표시된 상태",
+          "when": "관심 있는 시작 경로를 선택하면",
+          "then": "현재 지원하는 탐색으로 진입하며 미구현 경로와 예시 결과를 실제 제공 기능으로 오해하지 않습니다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-03",
+          "given": "첫 건물 또는 명시된 예시 결과를 확인한 상태",
+          "when": "결과를 살펴보면",
+          "then": "대상의 명칭과 현재 제공되는 설명을 확인하고, 이용 가능한 다음 탐색 경로를 알 수 있습니다.",
+          "status": "not_run"
+        }
+      ],
+      "done": false
+    },
+    {
+      "id": "US-04",
+      "name": "현장에서 건물 사진 입력",
+      "epic": "E2",
+      "priority": "Must",
+      "sp": 3,
+      "sprint": "Sprint 1",
+      "acs": [
+        {
+          "id": "AC-01",
+          "given": "스마트폰에서 사진 촬영이 가능한 상태",
+          "when": "건물을 촬영하면",
+          "then": "촬영한 사진의 미리보기를 확인할 수 있습니다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-02",
+          "given": "기기에 건물 사진이 저장된 상태",
+          "when": "사진을 선택하면",
+          "then": "선택한 사진의 미리보기를 확인할 수 있습니다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-03",
+          "given": "촬영하거나 선택한 사진을 확인한 상태",
+          "when": "식별을 요청하면",
+          "then": "선택한 사진이 건물 후보 식별 단계로 전달됩니다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-04",
+          "given": "카메라를 사용할 수 없거나 사진 입력을 취소한 상태",
+          "when": "다른 입력 방법을 선택하거나 이전으로 돌아가면",
+          "then": "오류 상태에 갇히지 않고 사진 선택 또는 기존 탐색으로 이동합니다.",
+          "status": "not_run"
+        }
+      ],
+      "done": false
+    },
+    {
+      "id": "US-05",
+      "name": "이미지 중심 건물 식별과 선택적 위치 보정",
+      "epic": "E2",
+      "priority": "Must",
+      "sp": 8,
+      "sprint": "Sprint 1",
+      "acs": [
+        {
+          "id": "AC-01",
+          "given": "지원 대상 건물이 포함된 유효한 사진이 입력된 상태",
+          "when": "식별을 요청하면",
+          "then": "이미지 분석을 바탕으로 가능한 지원 건물의 ID와 순위·식별 상태를 반환합니다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-02",
+          "given": "사용자가 허용한 유효한 위치정보가 있는 상태",
+          "when": "사진 기반 식별을 수행하면",
+          "then": "입력사진과 현재 위치의 관련성이 확인된 경우에만 위치정보를 후보 순위의 보조 단서로 반영하며, 위치만으로 사진 기반 후보를 무조건 배제하지 않습니다. 관련성 미확인 저장사진은 사진 단독으로 식별합니다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-03",
+          "given": "위치 권한을 거부했거나 위치를 얻지 못했거나 부정확한 상태",
+          "when": "사진 식별을 요청하면",
+          "then": "무한 대기나 임의 위치 사용 없이 사진 단독으로 식별할 수 있습니다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-04",
+          "given": "등록 사진·기준 설정 자료·독립 평가 사진을 구분하고 확정·보류 규칙을 기록한 상태",
+          "when": "식별 결과를 확인하면",
+          "then": "기록한 규칙의 확정 조건을 충족하면 건물 기본 정보로 연결하고, 그 외에는 미확정 안내와 재촬영·다른 사진 선택을 제공합니다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-05",
+          "given": "학습에 사용하지 않은 여러 촬영 조건의 평가 사진이 준비된 상태",
+          "when": "식별 성능을 평가하면",
+          "then": "Top-1·Top-3 및 실패 사례를 기록하고 사진 단독·사진+위치 성능과 목표 달성 여부를 구분합니다.",
+          "status": "not_run"
+        }
+      ],
+      "done": false
+    },
+    {
+      "id": "US-08",
+      "name": "공식 명칭·위치·출처 있는 건물 기본 정보",
+      "epic": "E4",
+      "priority": "Must",
+      "sp": 3,
+      "sprint": "Sprint 1",
+      "acs": [
+        {
+          "id": "AC-01",
+          "given": "지원 건물을 검색·지도·사진 식별 등으로 선택한 상태",
+          "when": "기본 설명을 열면",
+          "then": "선택한 건물과 일치하는 공식 명칭·위치·기본 용도를 보여줍니다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-02",
+          "given": "검증된 출처가 연결된 건물 정보를 보고 있는 상태",
+          "when": "출처를 선택하면",
+          "then": "해당 정보의 근거 자료를 확인하고 설명으로 돌아올 수 있습니다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-03",
+          "given": "정보가 누락되거나 출처를 검증하지 못한 상태",
+          "when": "건물 설명을 확인하면",
+          "then": "확인되지 않은 내용을 사실처럼 제공하지 않고 확인된 정보만 보여줍니다.",
+          "status": "not_run"
+        }
+      ],
+      "done": false
+    },
+    {
+      "id": "US-07",
+      "name": "식별 실패 또는 결과 불일치 시 재탐색",
+      "epic": "E3",
+      "priority": "Must",
+      "sp": 3,
+      "sprint": "Sprint 1",
+      "acs": [
+        {
+          "id": "AC-01",
+          "given": "식별 가능한 지원 건물 후보가 없거나 식별에 실패한 상태",
+          "when": "결과를 확인하면",
+          "then": "미확정 상태를 안내하고 재촬영·다른 사진 선택·지원 장소 직접 선택 중 사용할 수 있는 대안을 제시합니다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-02",
+          "given": "AI가 건물 후보를 제시한 상태",
+          "when": "사용자가 결과 불일치 또는 재탐색을 선택하면",
+          "then": "해당 후보를 확정하지 않고 원하는 대체 탐색으로 이동합니다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-03",
+          "given": "사용자가 기존 후보 선택을 거부하거나 철회한 상태",
+          "when": "새로운 탐색을 진행하면",
+          "then": "이전 후보를 확정 건물처럼 유지하지 않고 새 탐색을 시작합니다.",
+          "status": "not_run"
+        }
+      ],
+      "done": false
+    },
+    {
+      "id": "US-09",
+      "name": "눈앞의 건물을 다시 보게 하는 맥락형 해설",
+      "epic": "E4",
+      "priority": "Must",
+      "sp": 3,
+      "sprint": "Sprint 1",
+      "acs": [
+        {
+          "id": "AC-01",
+          "given": "지원 건물의 검증된 해설이 있는 상태",
+          "when": "상세 설명을 열면",
+          "then": "해당 건물의 역사·쓰임·관람 포인트를 핵심 내용부터 단계적으로 확인합니다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-02",
+          "given": "현장 모습과 연결할 수 있는 관람 포인트가 준비된 상태",
+          "when": "관련 설명을 확인하면",
+          "then": "사진 또는 위치 단서를 통해 실제로 어느 특징을 살펴볼지 알 수 있습니다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-03",
+          "given": "연혁·역사적 사건·건축 특징에 관한 검증된 자료가 있는 상태",
+          "when": "관련 주제를 선택하면",
+          "then": "건립·중건·복원 등 시기 및 건물·부위를 구분한 구체적인 내용과 출처를 제공합니다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-04",
+          "given": "건물의 기본 설명을 읽은 상태",
+          "when": "더 알아보고 싶은 관련 주제나 관람 포인트를 선택하면",
+          "then": "현재 대상과 연결된 설명으로 이어지고 원래 내용에 돌아올 수 있습니다.",
+          "status": "not_run"
+        }
+      ],
+      "done": false
+    },
+    {
+      "id": "US-10",
+      "name": "설명 뒤 관람과 탐색 이어가기",
+      "epic": "E4",
+      "priority": "Must",
+      "sp": 3,
+      "sprint": "Sprint 1",
+      "acs": [
+        {
+          "id": "AC-01",
+          "given": "건물 설명을 확인한 상태",
+          "when": "다음 행동을 살펴보면",
+          "then": "같은 건물 더 살펴보기 또는 다른 건물 찾기 등 가능한 탐색 경로를 명확히 알 수 있습니다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-02",
+          "given": "검색·지도·사진 탐색에서 설명으로 들어온 상태",
+          "when": "이전 탐색으로 돌아가면",
+          "then": "이전 결과·사진·선택 맥락을 상황에 맞게 복원할 수 있습니다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-03",
+          "given": "설명에서 다른 지원 건물을 찾으려는 상태",
+          "when": "지도·검색·건물 목록 중 한 경로를 선택하면",
+          "then": "안내한 목적에 맞는 화면으로 이동하고 필요할 때 이전 설명으로 돌아올 수 있습니다.",
+          "status": "not_run"
+        }
+      ],
+      "done": false
+    },
+    {
+      "id": "US-17",
+      "name": "현재 위치로 주변 지원 장소를 확인하기",
+      "epic": "E1",
+      "priority": "Must",
+      "sp": 3,
+      "sprint": "Sprint 1",
+      "acs": [
+        {
+          "id": "AC-01",
+          "given": "위치 제공을 허용한 상태",
+          "when": "지도를 열면",
+          "then": "위치·정확도·취득 시각을 확인하여 유효한 내 위치와 주변 지원 장소를 2D 지도에 표시한다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-02",
+          "given": "위치를 거부했거나 얻지 못한 상태",
+          "when": "탐색을 시작하면",
+          "then": "임의 위치를 표시하지 않고 사진 입력·지원 장소 직접 선택을 유지한다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-03",
+          "given": "거리·위치 단서가 제공된 상태",
+          "when": "장소를 확인하면",
+          "then": "거리·위치 단서로 후보를 제안하고 사용자가 장소를 확인하며 현장 방문 인증으로 표시하지 않는다.",
+          "status": "not_run"
+        }
+      ],
+      "done": false
+    },
+    {
+      "id": "US-13",
+      "name": "사진과 감상을 비공개로 기록하기",
+      "epic": "E6",
+      "priority": "Must",
+      "sp": 5,
+      "sprint": "Sprint 1",
+      "acs": [
+        {
+          "id": "AC-01",
+          "given": "지원 장소와 사진·감상을 선택한 상태",
+          "when": "내 기록을 저장하면",
+          "then": "장소와 연결된 본인 기록을 비공개로 저장한다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-02",
+          "given": "내 기록이 기기에 저장된 상태",
+          "when": "앱을 다시 실행하면",
+          "then": "기록·사진 연결이 유지되고 다른 사용자에게 자동 공개되지 않는다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-03",
+          "given": "저장 오류 또는 재시도가 발생한 상태",
+          "when": "기록을 확인하면",
+          "then": "작성 입력을 보존하고 중복 기록·원본 사진 손실을 방지한다.",
+          "status": "not_run"
+        }
+      ],
+      "done": false
+    },
+    {
+      "id": "US-14",
+      "name": "내 기록 뒤 같은 장소의 흔적 만나기",
+      "epic": "E6",
+      "priority": "Must",
+      "sp": 3,
+      "sprint": "Sprint 1",
+      "acs": [
+        {
+          "id": "AC-01",
+          "given": "해당 장소에 내 기록이 없는 상태",
+          "when": "흔적을 열면",
+          "then": "다른 사람 글을 먼저 노출하지 않고 기록 경로를 안내하며 기본 설명·사진 탐색을 유지한다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-02",
+          "given": "같은 장소의 내 기록을 저장한 상태",
+          "when": "흔적을 열고 글을 누른 뒤 닫으면",
+          "then": "공개 동의와 별개로 사용자 사진 위에 같은 장소의 흔적을 표시한다. 누르면 50자 이내 글이 펼쳐지고 닫으면 원래 사진으로 돌아간다. 표시 위치는 특정 부위를 뜻하지 않는다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-03",
+          "given": "공개 흔적이 없거나 조회 오류가 발생한 상태",
+          "when": "흔적을 확인하면",
+          "then": "글 없음과 오류를 구분하고 내 기록을 보존한 채 재시도·복귀할 수 있다.",
+          "status": "not_run"
+        }
+      ],
+      "done": false
+    },
+    {
+      "id": "US-15",
+      "name": "선택한 텍스트를 다른 방문객과 공유하기",
+      "epic": "E7",
+      "priority": "Must",
+      "sp": 8,
+      "sprint": "Sprint 1",
+      "acs": [
+        {
+          "id": "AC-01",
+          "given": "비공개 기록에서 공개를 명시적으로 선택한 상태",
+          "when": "글을 저장하면",
+          "then": "동의한 장소·50자 이내 텍스트만 Supabase에 저장하고 개인 사진은 전송하지 않는다. 공백만 입력하거나 50자를 넘으면 저장하지 않고 안내한다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-02",
+          "given": "공개 저장 실패 또는 재시도가 발생한 상태",
+          "when": "저장 결과를 확인하면",
+          "then": "본인 기록을 잃지 않고 공개 성공 여부를 구분하며 중복 등록을 방지한다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-03",
+          "given": "서로 다른 사용자 환경에 같은 장소의 공개 글이 있는 상태",
+          "when": "글을 조회하면",
+          "then": "실제 공유 저장소의 글을 같은 장소에서 읽고 공식 설명·감상·제작 예시를 구분한다.",
+          "status": "not_run"
+        }
+      ],
+      "done": false
+    },
+    {
+      "id": "US-16",
+      "name": "공개 흔적의 삭제·신고와 접근을 관리하기",
+      "epic": "E7",
+      "priority": "Must",
+      "sp": 5,
+      "sprint": "Sprint 1",
+      "acs": [
+        {
+          "id": "AC-01",
+          "given": "작성자의 공개 글이 있는 상태",
+          "when": "본인 글 삭제를 요청하면",
+          "then": "작성자 권한을 확인하고 이후 일반 조회에서 제외하며 결과를 알린다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-02",
+          "given": "다른 사용자의 글과 비공개 기록이 있는 상태",
+          "when": "무단 수정·삭제를 요청하면",
+          "then": "서버에서 거부하고 정상 작성자 작업은 유지한다. 기기의 비공개 기록·사진은 공유 저장소에 전송되지 않는다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-03",
+          "given": "신고할 공개 글이 있는 상태",
+          "when": "신고하고 관리자가 숨기면",
+          "then": "접수 결과를 표시하며 관리자만 숨기고 숨긴 글은 이후 일반 조회에서 제외한다.",
+          "status": "not_run"
+        }
+      ],
+      "done": false
+    },
+    {
+      "id": "US-02",
+      "name": "알고 있는 건물 이름으로 검색",
+      "epic": "E1",
+      "priority": "Must",
+      "sp": 3,
+      "sprint": "Sprint 2",
+      "acs": [
+        {
+          "id": "AC-01",
+          "given": "지원 건물 정보가 등록된 상태",
+          "when": "정확한 건물 이름으로 검색하면",
+          "then": "해당 건물의 명칭·대표 사진과 설명으로 들어가는 경로가 나타납니다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-02",
+          "given": "지원 건물 명칭의 일부를 알고 있는 상태",
+          "when": "일부 명칭으로 검색하면",
+          "then": "일치하는 지원 건물을 보여주고 무관한 결과를 정답처럼 표시하지 않습니다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-03",
+          "given": "경복궁 같은 구역 명칭 또는 덕수궁 같은 지원 범위 밖 명칭을 검색한 상태",
+          "when": "검색 결과를 확인하면",
+          "then": "구역 탐색과 범위 밖 안내를 상황에 맞게 구분하고 사용할 수 있는 대체 탐색 방법을 제시합니다.",
+          "status": "not_run"
+        }
+      ],
+      "done": false
+    },
+    {
+      "id": "US-03",
+      "name": "지도·구역 사진에서 건물 탐색",
+      "epic": "E1",
+      "priority": "Must",
+      "sp": 5,
+      "sprint": "Sprint 2",
+      "acs": [
+        {
+          "id": "AC-01",
+          "given": "지원 구역·건물 위치·대표 사진이 등록된 상태",
+          "when": "지도 또는 구역 사진 목록을 열면",
+          "then": "건물의 명칭·사진·위치 관계를 살펴볼 수 있습니다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-02",
+          "given": "지도나 구역 사진 목록에서 건물을 고른 상태",
+          "when": "상세 정보를 선택하면",
+          "then": "선택한 건물과 일치하는 명칭·대표 사진·설명으로 이동합니다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-03",
+          "given": "현재 위치가 없거나 부정확한 상태",
+          "when": "지도 또는 사진 목록을 이용하면",
+          "then": "구역을 직접 골라 탐색할 수 있으며 검증되지 않은 위치를 현재 위치처럼 표시하지 않습니다.",
+          "status": "not_run"
+        }
+      ],
+      "done": false
+    },
+    {
+      "id": "US-06",
+      "name": "불확실한 후보의 선택적 비교와 구별 근거 확인",
+      "epic": "E3",
+      "priority": "Must",
+      "sp": 5,
+      "sprint": "Sprint 2",
+      "acs": [
+        {
+          "id": "AC-01",
+          "given": "AI 식별 결과가 사전에 검증한 신뢰도 기준을 충족하지 못한 상태",
+          "when": "식별 결과를 확인하면",
+          "then": "확정되지 않은 상태와 비교가 필요한 이유를 알 수 있고 복수 후보를 살펴볼 수 있습니다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-02",
+          "given": "후보별 참고 사진과 검증된 구별 정보가 있는 상태",
+          "when": "후보를 비교하면",
+          "then": "입력 사진과 후보 사진을 구분하고 현판·외관·위치 등 확인 가능한 차이를 살펴볼 수 있습니다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-03",
+          "given": "여러 후보를 비교하는 상태",
+          "when": "다른 후보를 선택하면",
+          "then": "해당 후보의 명칭·사진·구별 정보가 일치하도록 바뀝니다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-04",
+          "given": "제공된 근거만으로 판단하기 어려운 상태",
+          "when": "후보를 확정하지 않으면",
+          "then": "정답 선택을 강요하지 않고 미확정 상태를 유지합니다.",
+          "status": "not_run"
+        }
+      ],
+      "done": false
+    },
+    {
+      "id": "US-11",
+      "name": "준비된 관련 질문으로 상세 이해 확장",
+      "epic": "E4",
+      "priority": "Should",
+      "sp": 2,
+      "sprint": "미배치(후순위)",
+      "acs": [
+        {
+          "id": "AC-01",
+          "given": "지원 건물에 검증된 관련 질문이 등록된 상태",
+          "when": "관련 질문 목록을 열면",
+          "then": "현재 건물에 맞는 선택형 질문임을 명확히 알 수 있습니다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-02",
+          "given": "관련 질문과 출처가 있는 답변이 준비된 상태",
+          "when": "질문을 선택하면",
+          "then": "현재 건물과 일치하는 검증된 답변 및 출처가 나타납니다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-03",
+          "given": "답변을 읽은 상태",
+          "when": "다른 질문이나 기본 설명을 선택하면",
+          "then": "같은 건물의 맥락을 유지하며 추가 탐색으로 이동할 수 있습니다.",
+          "status": "not_run"
+        }
+      ],
+      "done": false
+    },
+    {
+      "id": "US-12",
+      "name": "사전 지정된 세부 요소 선택과 의미 이해",
+      "epic": "E5",
+      "priority": "Should",
+      "sp": 5,
+      "sprint": "미배치(후순위)",
+      "acs": [
+        {
+          "id": "AC-01",
+          "given": "지원 건물의 사진에 세부 요소와 선택 영역이 사전 등록된 상태",
+          "when": "지원 요소를 선택하면",
+          "then": "선택된 부분이 눈에 띄게 표시되고 해당 요소의 명칭·의미·출처를 확인할 수 있습니다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-02",
+          "given": "선택한 요소에 검증된 해설이 있는 상태",
+          "when": "세부 내용을 열면",
+          "then": "설명이 현재 건물·사진·선택 부위와 일치하고 실제 볼 특징을 알 수 있습니다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-03",
+          "given": "사진에서 지원하지 않는 부분을 선택하거나 자료가 없는 상태",
+          "when": "결과를 확인하면",
+          "then": "임의로 요소를 식별하거나 의미를 만들어내지 않고 지원 범위를 안내합니다.",
+          "status": "not_run"
+        },
+        {
+          "id": "AC-04",
+          "given": "확대 사진에서 요소를 선택한 상태",
+          "when": "설명을 보거나 다시 사진으로 돌아가면",
+          "then": "선택 결과·다음 행동이 현재 화면에서 인지되며 확대·스크롤·복귀가 방해받지 않습니다.",
+          "status": "not_run"
+        }
+      ],
+      "done": false
+    }
+  ],
+  "tasks": [
+    {
+      "id": "T01",
+      "name": "시작 경로와 첫 결과 안내를 구성·확인한다",
+      "story": "US-01",
+      "hours": 2,
+      "criteria": "사진 입력·지원 장소 직접 선택으로 시작하여 대상·설명·다음 행동을 확인하고 예시를 구분한다",
+      "status": "not_started",
+      "remainingHours": null,
+      "note": "제품 앱에서 구현·검증 전",
+      "evidence": [],
+      "checks": []
+    },
+    {
+      "id": "T02",
+      "name": "PC Android Emulator의 앱 설치·실행 환경을 구성한다",
+      "story": "US-04",
+      "hours": 2,
+      "criteria": "가상 기기·Android 버전·SDK·lockfile을 기록하고 PC 에뮬레이터에서 앱을 재빌드·설치·실행한다. 실기기 검증은 T18에서 수행한다",
+      "status": "done",
+      "remainingHours": null,
+      "note": "11/4 native 재생성·V: 가상 경로의 x86_64 APK 재빌드·재설치·버튼 표시·상세 이동·뒤로가기 확인. C: 긴 경로는 260자 제한으로 실패; Gradle 캐시 재사용",
+      "evidence": [
+        "apk"
+      ],
+      "checks": [
+        [
+          "pass",
+          "앱·SDK·JDK·AVD·lockfile 준비 및 버전 기록"
+        ],
+        [
+          "pass",
+          "재설치·타입·lint·Expo Doctor 21개 검사 통과"
+        ],
+        [
+          "pass",
+          "x86_64 개발 APK 빌드 및 식별자·해시 확인"
+        ],
+        [
+          "pass",
+          "실제 Emulator 부팅·adb device와 앱 실행 확인. 가속 진단 실패 원인은 별도 미확인 사항이며 실행 실패를 뜻하지 않음"
+        ],
+        [
+          "pass",
+          "기존 APK 설치·시작·상세 이동·시스템 뒤로가기·최근 Metro 서버 선택 후 재실행 (11/2 기록)"
+        ],
+        [
+          "pass",
+          "11/4 기존 native 폴더 보관 후 재생성. C: 긴 경로 실패, V: 가상 경로·D: SDK/Gradle·기존 캐시로 x86_64 빌드 및 재설치·실행 확인"
+        ],
+        [
+          "pass",
+          "11/4 버튼 미표시 재현 후 Link 래퍼를 직접 router.push하는 Pressable로 수정. 캡처의 배경·글자 표시와 탭→상세→뒤로가기 확인"
+        ]
+      ]
+    },
+    {
+      "id": "T03",
+      "name": "촬영·갤러리 입력과 예외 처리를 연결한다",
+      "story": "US-04",
+      "hours": 2,
+      "criteria": "미리보기·현재 사진 전달·원본 보존과 취소·권한 거부·읽기 오류의 복구를 확인한다",
+      "status": "not_started",
+      "remainingHours": null,
+      "note": "제품 앱에서 구현·검증 전",
+      "evidence": [],
+      "checks": []
+    },
+    {
+      "id": "T04",
+      "name": "S3 연결 자료와 식별 판단 규칙을 준비한다",
+      "story": "US-05",
+      "hours": 2,
+      "criteria": "모델·런타임·전처리·출력을 확인한다. 등록·기준 설정·독립 평가 사진을 구분하고 교태전 자료를 포함한다. 확정·보류 규칙과 적용 조건을 기록한 뒤 평가한다",
+      "status": "in_progress",
+      "remainingHours": null,
+      "note": "원본83장 + 표시 이미지 4장, Training 라벨194개 확보. 해당 라벨 대응 이미지0장·원천 ZIP 번호 미확인. 권리·원본 수령·분할·모델 평가는 남음",
+      "evidence": [
+        "dataset",
+        "dataset2",
+        "internalCollection"
+      ],
+      "checks": [
+        [
+          "pass",
+          "웹 사진 출처 원본 58장과 파일별 출처·권리 메타데이터 확보, SHA-1·SHA-256·표시/저장 크기 대조"
+        ],
+        [
+          "pass",
+          "시각 검수 후 새 외관 후보 22장·기존 probe 재게시 3장·추가 검수 13장·외관 후보 제외 20장 구분"
+        ],
+        [
+          "pass",
+          "11/2 국내 공공 사진·학습 데이터 플랫폼 구성 조사 당시 추가 수령 0장. 11/3 웹 사진 출처 외관 보강은 별도 기록"
+        ],
+        [
+          "pass",
+          "11/3 원본 25장 추가, SHA-1·SHA-256·크기·해상도·출처 대조. 외관 후보 14·기존 probe 재게시 1·추가 검수 3·제외 7장"
+        ],
+        [
+          "pending",
+          "교태전 추가 자료, 저작자·EXIF 조건 불일치 등 권리 확인과 기존 학습 자료 중복 대조"
+        ],
+        [
+          "pending",
+          "원본 S3 bundle·학습 checkpoint·코드·장비 확인, 자료 분리와 확정/보류 규칙 고정·평가"
+        ],
+        [
+          "pass",
+          "서비스용 이미지 4개와 현판·처마 후보 2개 연결, 내부 수령 대장·수동 절차 정리. 고해상도 원본 수령과 학습 승인은 별도"
+        ],
+        [
+          "pass",
+          "Training 라벨 JSON 194개와 파일명 목록 보관 확인. 사용자 확인으로 Training 출처 기록. 이미지 수령·원천 ZIP 대응·건물별 정답 검수와 구분"
+        ]
+      ]
+    },
+    {
+      "id": "T05",
+      "name": "사진 식별과 위치 보조를 구현한다",
+      "story": "US-05",
+      "hours": 2,
+      "criteria": "후보 ID·순위·상태를 반환하고 T04의 규칙에 따라 기본 정보 또는 재탐색으로 연결한다. 관련 촬영만 위치를 보조하며 나머지는 사진 단독으로 처리한다",
+      "status": "not_started",
+      "remainingHours": null,
+      "note": "제품 앱에서 구현·검증 전",
+      "evidence": [],
+      "checks": []
+    },
+    {
+      "id": "T22",
+      "name": "식별 규칙과 독립 평가 결과를 검증한다",
+      "story": "US-05",
+      "hours": 2,
+      "criteria": "확정·보류·위치 미사용 사례와 실기기 출력을 확인한다. 독립 사진의 Top-1·Top-3·실패를 사진 단독/위치 보조로 기록하고 Product Backlog의 평가 목표와 대조한다",
+      "status": "not_started",
+      "remainingHours": null,
+      "note": "제품 앱에서 구현·검증 전",
+      "evidence": [],
+      "checks": []
+    },
+    {
+      "id": "T06",
+      "name": "공식 자료를 검수하고 기본 설명에 연결한다",
+      "story": "US-08",
+      "hours": 3,
+      "criteria": "지원 장소의 ID·명칭·용도·위치·출처를 확인하고 원문 열기·복귀·누락을 처리한다",
+      "status": "not_started",
+      "remainingHours": null,
+      "note": "제품 앱에서 구현·검증 전",
+      "evidence": [],
+      "checks": []
+    },
+    {
+      "id": "T09",
+      "name": "재입력과 실패 복구를 구현·확인한다",
+      "story": "US-07",
+      "hours": 2,
+      "criteria": "취소·재선택 뒤 늦은 결과를 폐기하고 실패·시간 초과·불일치 시 재촬영·다른 사진·지원 장소 직접 선택으로 복구한다",
+      "status": "not_started",
+      "remainingHours": null,
+      "note": "제품 앱에서 구현·검증 전",
+      "evidence": [],
+      "checks": []
+    },
+    {
+      "id": "T10",
+      "name": "관찰 포인트와 단계별 해설을 구성한다",
+      "story": "US-09",
+      "hours": 3,
+      "criteria": "출처를 검수하여 역사·쓰임·시기·실제 특징을 연결하고 짧은 핵심에서 상세 설명·이전 내용으로 이동한다",
+      "status": "not_started",
+      "remainingHours": null,
+      "note": "제품 앱에서 구현·검증 전",
+      "evidence": [],
+      "checks": []
+    },
+    {
+      "id": "T11",
+      "name": "다음 탐색과 이전 화면 복귀를 연결한다",
+      "story": "US-10",
+      "hours": 2,
+      "criteria": "사진·선택·스크롤 등 기존 탐색 맥락을 복원하고 같은 건물·다른 지원 장소로 이동한다. 새 탐색에 이전 확정값을 재사용하지 않는다",
+      "status": "not_started",
+      "remainingHours": null,
+      "note": "제품 앱에서 구현·검증 전",
+      "evidence": [],
+      "checks": []
+    },
+    {
+      "id": "T12",
+      "name": "현재 위치와 주변 지원 장소 지도를 연결한다",
+      "story": "US-17",
+      "hours": 2,
+      "criteria": "2D 지도에 유효한 내 위치·주변 지원 장소를 표시한다. 거부·미취득·부정확 시 임의 위치를 표시하지 않고 사진·장소 직접 선택을 유지한다. 현장 방문 인증으로 쓰지 않는다",
+      "status": "not_started",
+      "remainingHours": null,
+      "note": "제품 앱에서 구현·검증 전",
+      "evidence": [],
+      "checks": []
+    },
+    {
+      "id": "T13",
+      "name": "비공개 기록의 저장·복원·오류를 구현한다",
+      "story": "US-13",
+      "hours": 4,
+      "criteria": "장소 ID·사진 사본·감상을 기기에 저장하고 재실행 후 복원한다. 실패 시 입력·원본을 보존하고 중복·자동 공개를 방지한다",
+      "status": "not_started",
+      "remainingHours": null,
+      "note": "11/4 공통 사진·자유 텍스트·위치 연결 설계 및 참고 타입 작성. 사진 사본 보관은 최신 설계로 대체. 제품 앱 저장 구현·검증 전이며 시간 재산정 전",
+      "evidence": ["placeMessages"],
+      "checks": []
+    },
+    {
+      "id": "T14",
+      "name": "사진 위 흔적 표시와 펼침·복귀를 연결한다",
+      "story": "US-14",
+      "hours": 2,
+      "criteria": "내 기록 뒤 사용자 사진 위에 같은 장소의 흔적을 표시한다. 누르면 50자 이내 글이 펼쳐지고 닫으면 사진으로 복귀한다. 글 없음·오류·다른 장소를 구분하며 공개 동의와 분리한다",
+      "status": "in_progress",
+      "remainingHours": null,
+      "note": "11/4 Android 근정전 읽기 시안에서 예시 흔적 3개, 큰 사진 위 반투명 쪽지, 추천 24→25→24, 닫기·뒤로가기 복귀를 에뮬레이터로 확인. 정렬·실제 집계·공유는 미연결이며 기존 AC·추정의 재검토가 남음",
+      "evidence": ["placeMessages", "placeMessagePreview"],
+      "checks": []
+    },
+    {
+      "id": "T15",
+      "name": "Supabase 인증·공개 저장 구조·권한을 구성한다",
+      "story": "US-15",
+      "hours": 2,
+      "criteria": "익명 인증·장소별 공개 글 저장 구조·작성자 및 공개 상태별 RLS를 구성한다. 개인 사진은 전송하지 않고 무단 접근이 거부되는지 확인한다",
+      "status": "not_started",
+      "remainingHours": null,
+      "note": "사용자 소유 Supabase 프로젝트 준비 확인 후 연결",
+      "evidence": [],
+      "checks": []
+    },
+    {
+      "id": "T21",
+      "name": "텍스트 공개와 두 사용자 간 조회를 구현·검증한다",
+      "story": "US-15",
+      "hours": 2,
+      "criteria": "공개 동의한 50자 이내 글만 저장하고 공백·초과·실패·중복을 처리한다. 비공개 기록을 보존하고 A/B 환경에서 같은 장소의 글을 실제 조회한다",
+      "status": "not_started",
+      "remainingHours": null,
+      "note": "제품 앱에서 구현·검증 전",
+      "evidence": [],
+      "checks": []
+    },
+    {
+      "id": "T16",
+      "name": "공개 글의 삭제·신고·숨김을 구현하고 권한을 검증한다",
+      "story": "US-16",
+      "hours": 3,
+      "criteria": "작성자 삭제·신고 접수·관리자 숨김을 구현한다. 무단 수정·삭제 거부와 삭제·숨김 글의 일반 조회 제외를 확인한다. 관리자 자격은 앱에 넣지 않는다",
+      "status": "not_started",
+      "remainingHours": null,
+      "note": "제품 앱에서 구현·검증 전",
+      "evidence": [],
+      "checks": []
+    },
+    {
+      "id": "T17",
+      "name": "화면·데이터의 상세 흐름과 예외를 설계한다",
+      "story": null,
+      "hours": 4,
+      "criteria": "구현 전 신규 Story·우선순위·대체 경로를 Product Backlog·개별 US·구조에 반영한다. 장소 ID로 사진·메모를 연결하고 저장·열람·권한·오류·표시 흐름을 설계한다. 특정 부위 고정은 제외한다",
+      "status": "in_progress",
+      "remainingHours": null,
+      "note": "공통 장소 안의 흔적 발견·자유 텍스트·사진 비보관 방향. PLACE_MESSAGES에 상태·치수·정규화 좌표·저장/서버 계약 초안과 참고 TS 코드 작성. Android 앱 미연결·수치 미확정",
+      "evidence": [
+        "contract",
+        "design",
+        "placeMessages"
+      ],
+      "checks": [
+        [
+          "pass",
+          "mobile README에 초기 데이터 경계와 지켜야 할 조건 작성"
+        ],
+        [
+          "pending",
+          "신규 Story와 개별 US·구조 문서의 전체 동기화 확인"
+        ],
+        [
+          "pending",
+          "저장·열람·권한·오류·표시 흐름의 상세 설계 검토"
+        ],
+        [
+          "pass",
+          "DESIGN에 공개 이야기 자유 열람·자유 텍스트·기본 비공개/별도 공개·사용자 사진 비보관 결정 기록"
+        ],
+        [
+          "pending",
+          "공통 사진 위치·UI 치수·입력 상한 등 제안값 검토와 기존 AC 정합성 검토. 최신 방향 우선 안내는 Product Backlog·구조·용어에 반영됨. AC 실행·Android 연결은 남음"
+        ]
+      ]
+    },
+    {
+      "id": "T18",
+      "name": "전체 흐름의 통합 오류를 수정·확인한다",
+      "story": null,
+      "hours": 2,
+      "criteria": "A/B 사용자 환경과 Android 실기기 1대 이상에서 정상·재실행·취소·오프라인·접근 거부를 확인하고 실패한 AC를 수정 후 다시 검사한다",
+      "status": "not_started",
+      "remainingHours": null,
+      "note": "제품 앱에서 구현·검증 전",
+      "evidence": [],
+      "checks": []
+    },
+    {
+      "id": "T19",
+      "name": "발견 경험과 기록 부담을 관찰한다",
+      "story": null,
+      "hours": 2,
+      "criteria": "최소 2명이 같은 장소를 기존 검색·상용 AI와 비교한다. 새로 알게 된 점, 다음 장소에서 쓸 방식과 이유, 기록 중 막힌 행동을 기록하고 현장·모의를 구분한다",
+      "status": "not_started",
+      "remainingHours": null,
+      "note": "실행본 확보 후 최소 2명 비교 관찰 · 효과 입증과 구분",
+      "evidence": [],
+      "checks": []
+    },
+    {
+      "id": "T20",
+      "name": "검증 기록과 제출·시연 자료를 정리한다",
+      "story": null,
+      "hours": 2,
+      "criteria": "지원 장소·버전·출처·AC 결과·제약·설치 방법을 정리하고 APK와 Review 시연을 준비한다",
+      "status": "not_started",
+      "remainingHours": null,
+      "note": "제품 앱에서 구현·검증 전",
+      "evidence": [],
+      "checks": []
+    }
+  ],
+  "groups": [
+    {
+      "id": "foundation",
+      "name": "개발 기반과 데이터 경계",
+      "tasks": [
+        "T17",
+        "T02"
+      ]
+    },
+    {
+      "id": "experience",
+      "name": "시작·설명·관람 흐름",
+      "tasks": [
+        "T01",
+        "T06",
+        "T10",
+        "T11"
+      ]
+    },
+    {
+      "id": "recognition",
+      "name": "사진 입력·모델·실패 복구",
+      "tasks": [
+        "T03",
+        "T04",
+        "T05",
+        "T09",
+        "T22"
+      ]
+    },
+    {
+      "id": "location",
+      "name": "현재 위치와 주변 지원 장소",
+      "tasks": [
+        "T12"
+      ]
+    },
+    {
+      "id": "records",
+      "name": "비공개 기록·공유·흔적·권한",
+      "tasks": [
+        "T13",
+        "T15",
+        "T21",
+        "T16",
+        "T14"
+      ]
+    },
+    {
+      "id": "verification",
+      "name": "통합·사용자 비교·시연",
+      "tasks": [
+        "T18",
+        "T19",
+        "T20"
+      ]
+    }
+  ],
+  "milestones": [
+    [
+      "11/2",
+      "최소 앱과 모델 준비 확인",
+      "native 재생성·V: 경로 APK 재빌드·Emulator 재설치·이동 확인. 모델 연결 남음",
+      "partial"
+    ],
+    [
+      "11/3–4",
+      "첫 기본 흐름",
+      "11/4 점검: 실행 확인용 2화면만 구현. 장소 선택→설명→기록·기준선·첫 추가 학습 완료 근거 없음. 목표 달성 위험",
+      "planned"
+    ],
+    [
+      "11/5–6",
+      "인식·위치·공유 통합",
+      "ONNX·Android 출력 비교 · 11/8 통합 가능성 판단",
+      "planned"
+    ],
+    [
+      "11/7–8",
+      "첫 전체 실행본",
+      "실기기 전체 흐름·관찰·수정 · 완료 보장 없는 도전 목표",
+      "planned"
+    ],
+    [
+      "11/12",
+      "범위 고정 판단",
+      "실제 구현·위험·잔여를 보고 사용자와 우선순위 결정",
+      "planned"
+    ],
+    [
+      "11/13–15",
+      "비교 관찰·회귀·시연 준비",
+      "최소 2명 · 독립 평가 · 실제 지원 범위와 제약 기록",
+      "planned"
+    ],
+    [
+      "11/16",
+      "Sprint Review·시연",
+      "AC·DoD를 통과한 Story만 완료 SP에 반영",
+      "planned"
+    ]
+  ],
+  "evidence": {
+    "placeMessagePreview": {
+      "label": "Android 근정전 읽기 시안 검증",
+      "href": "../../mobile/VERIFICATION.md"
+    },
+    "apk": {
+      "label": "Android 최소 앱 검증 기록",
+      "href": "#android-verification"
+    },
+    "design": {
+      "label": "최신 열람·기록·말투 결정 원본",
+      "href": "../DESIGN.md"
+    },
+    "placeMessages": {
+      "label": "공통 장소 메시지 구현 설계 초안 · 참고 코드·치수 도면",
+      "href": "../design/PLACE_MESSAGES.md"
+    },
+    "contract": {
+      "label": "초기 데이터 계약 초안",
+      "href": "#contract-evidence"
+    },
+    "dataset": {
+      "label": "수집 사진과 1차 검수 결과 보기",
+      "href": "../../local-assets/datasets/gyeongbokgung-web-v1/REPORT.html"
+    },
+    "dataset2": {
+      "label": "2차 추가 사진 25장과 검수 결과",
+      "href": "../../local-assets/datasets/gyeongbokgung-web-v2/REPORT.html"
+    },
+    "internalCollection": {
+      "label": "내부 데이터 수집 대장 · 외부 게시 금지",
+      "href": "../../local-assets/datasets/source-registry/INDEX.html"
+    }
+  },
+  "dependencies": [
+    [
+      "T02",
+      "실행 재현·시각 확인",
+      "11/4 native 재생성·V: 경로 재빌드·재설치·이동 확인. C: 긴 경로 빌드는 260자 제한으로 실패; 가속 진단 원인과 실기기 검증은 미확인."
+    ],
+    [
+      "T04 · T22",
+      "자료·장비 준비",
+      "동일 export 모델 묶음, 학습 가능한 checkpoint·코드·설정·장비, 교태전 포함 사진과 촬영 묶음별 데이터 분리."
+    ],
+    [
+      "T15 · T21",
+      "외부 연결 준비",
+      "사용자 소유 Supabase 프로젝트·익명 사용자 구분·서버 RLS와 두 사용자 검증 필요."
+    ],
+    [
+      "T18 · T19",
+      "검증 준비",
+      "실제 Android 1대 이상과 비교 참여자 2명 이상 필요."
+    ]
+  ]
+}
+</script>
+<script>
+(() => {
+  'use strict';
+  const report = JSON.parse(document.getElementById('progress-data').textContent);
+  const taskMap = new Map(report.tasks.map(t => [t.id,t]));
+  const names = {not_started:'미착수',in_progress:'부분 진행',blocked:'막힘',done:'검증 완료',unverified:'검증 대기'};
+  const esc = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const pct = (n,d) => d ? Math.round(n/d*1000)/10 : 0;
+  const sum = (rows,key) => rows.reduce((n,r)=>n+r[key],0);
+  const badge = state => `<span class="pill ${esc(state)}">${esc(names[state])}</span>`;
+  const link = (label,href) => `<a href="${esc(href)}">${esc(label)}</a>`;
+  document.getElementById('thread-review-rows').innerHTML = report.review.map(([name,href,scope,result,next])=>`<tr><td>${link(name,href)}</td><td>${esc(scope)}</td><td>${esc(result)}</td><td>${esc(next)}</td></tr>`).join('');
+  const sprint = report.stories.filter(s=>s.sprint==='Sprint 1');
+  const spTotal = sum(sprint,'sp');
+  // A Story needs all ACs plus its explicit DoD acceptance. Task progress alone earns no SP.
+  const accepted = sprint.filter(s=>s.done && s.acs.every(a=>a.status==='pass'));
+  const doneTasks = report.tasks.filter(t=>t.status==='done');
+  const started = report.tasks.filter(t=>t.status!=='not_started');
+  const acs = sprint.flatMap(s=>s.acs);
+  const passed = acs.filter(a=>a.status==='pass');
+  document.getElementById('verification-summary').innerHTML = ['T02','T17'].map(id=>{
+    const task = taskMap.get(id);
+    return `<article id="${id==='T17'?'contract-evidence':'android-evidence'}"><h3>${esc(id)} · ${id==='T02'?'앱 설치·실행':'데이터 계약 초안'}</h3><p>${badge(task.status)}</p><p>${esc(task.note)}</p><ul class="checks">${task.checks.map(([status,text])=>`<li><span class="check-sign ${status}">${status==='pass'?'✓':'○'}</span><strong>${status==='pass'?'확인됨':'남은 확인'}</strong> · ${esc(text)}</li>`).join('')}</ul></article>`;
+  }).join('');
+  document.getElementById('meta').innerHTML = `<span>상태 기준 ${esc(report.updated)} KST</span><span>원격 계획 ${esc(report.baselineRef.slice(0,7))} + 현재 로컬 검증</span><span>자동 동기화 없음</span>`;
+  const metric = (label,value,detail,progress) => `<article class="kpi"><label>${esc(label)}</label><div class="value">${esc(value)}</div>${progress===null?'':`<div class="track" aria-hidden="true"><span style="width:${progress}%"></span></div>`}<small>${esc(detail)}</small></article>`;
+  document.getElementById('kpis').innerHTML = [
+    metric('Sprint 1 · 인수 완료',pct(sum(accepted,'sp'),spTotal)+'%',`${sum(accepted,'sp')} / ${spTotal} SP · ${accepted.length} / ${sprint.length} Story`,pct(sum(accepted,'sp'),spTotal)),
+    metric('Task · 작업 착수',pct(started.length,report.tasks.length)+'%',`${started.length} / ${report.tasks.length}개 착수 · 완료 ${doneTasks.length}개`,pct(started.length,report.tasks.length)),
+    metric('Sprint 1 · AC 검증',pct(passed.length,acs.length)+'%',`${passed.length} / ${acs.length}개 통과 · ${acs.filter(a=>a.status==='not_run').length}개 미실행`,pct(passed.length,acs.length)),
+    metric('Task 초기 추정 · 실제 잔여 아님',report.sprint.taskEstimate+'h',`원래 가용 ${report.sprint.capacity}h · 예비 ${report.sprint.buffer}h · 실제 잔여 미집계`,null)
+  ].join('');
+  const current = report.tasks.find(t=>t.id===report.focus&&t.status!=='done') || report.tasks.find(t=>t.status==='blocked') || report.tasks.find(t=>t.status==='in_progress') || report.tasks.find(t=>t.status==='not_started');
+  document.getElementById('current').innerHTML = `<div><h3>${current?'지금 · '+esc(current.id)+' · '+esc(current.name):'현재 진행 작업 없음'}</h3>${current?`<p>${badge(current.status)}</p><p>${esc(current.note)}</p>${current.evidence.map(id=>{const e=report.evidence[id];return `<p>${link(e.label,e.href)}</p>`;}).join('')}`:''}</div><div><h3>다음 · 준비되는 순서로</h3><ul>${report.next.map(([id,text])=>`<li><strong>${esc(id)}</strong> ${esc(text)}</li>`).join('')}</ul></div>`;
+  document.getElementById('milestones').innerHTML = report.milestones.map(([date,name,note,state])=>`<article class="milestone"><time>${esc(date)}</time><h3>${esc(name)}</h3><p>${esc(note)}</p><span class="pill ${state==='partial'?'in_progress':'not_started'}">${state==='partial'?'부분 진행':'목표 · 미검증'}</span></article>`).join('');
+  document.getElementById('task-summary').textContent = `${report.tasks.length}개 · 초기 ${sum(report.tasks,'hours')}h · 완료 ${doneTasks.length}개 · 착수 ${started.length}개`;
+  document.getElementById('groups').innerHTML = report.groups.map((g,index)=>{
+    const tasks = g.tasks.map(id=>taskMap.get(id));
+    const hours = sum(tasks,'hours');
+    const completed = tasks.filter(t=>t.status==='done');
+    const doneHours = sum(completed,'hours');
+    const rate = pct(doneHours,hours);
+    const rows = tasks.map(t=>`<tr data-task="${esc(t.id)}"><td class="id">${esc(t.id)}</td><td class="id">${esc(t.story||'공통')}</td><td><strong>${esc(t.name)}</strong><details class="task-detail"><summary>완료 기준·근거 보기</summary><div class="criteria"><strong>원래 완료 기준</strong><br>${esc(t.criteria)}</div>${t.checks.length?`<ul class="checks">${t.checks.map(([status,text])=>`<li><span class="check-sign ${status}">${status==='pass'?'✓':'○'}</span>${esc(text)}</li>`).join('')}</ul>`:''}${t.evidence.map(id=>{const e=report.evidence[id];return `<p>${link(e.label,e.href)}</p>`;}).join('')}<p class="muted">실제 잔여: ${t.remainingHours===null?'미집계':esc(t.remainingHours)+'h'}</p></details></td><td>${t.hours}h</td><td>${badge(t.status)}</td><td>${esc(t.note)}</td></tr>`).join('');
+    return `<details class="group" ${index===0?'open':''}><summary><div class="group-line"><strong class="name">${index+1}. ${esc(g.name)}</strong><span class="right">${completed.length} / ${tasks.length}개 완료 · ${hours}h · 완료 ${rate}%</span></div><div class="group-progress" aria-hidden="true"><span style="width:${rate}%"></span></div></summary><div class="table-scroll"><table class="wbs-table"><thead><tr><th>Task</th><th>Story</th><th>할 일 · 완료 기준</th><th>초기 추정</th><th>상태</th><th>확인한 현재 상황</th></tr></thead><tbody>${rows}</tbody></table></div></details>`;
+  }).join('');
+  const filter = document.getElementById('sprint-filter');
+  function renderStories(){
+    const stories = report.stories.filter(s=>filter.value==='all'||s.sprint===filter.value);
+    document.getElementById('story-summary').textContent = `${stories.length}개 · ${sum(stories,'sp')} SP · ${sum(stories.filter(s=>s.done&&s.acs.every(a=>a.status==='pass')),'sp')} SP 인수 완료`;
+    document.getElementById('stories').innerHTML = stories.length ? stories.map(s=>{
+      const tasks = report.tasks.filter(t=>t.story===s.id);
+      const accepted = s.done&&s.acs.every(a=>a.status==='pass');
+      const started = tasks.some(t=>t.status!=='not_started');
+      const text = accepted?'인수 완료':started?'작업 착수 · Story 미완료':s.sprint==='Sprint 1'?'미착수 · 미검증':'계획 · 제품 검증 전';
+      return `<details class="story" data-story="${esc(s.id)}"><summary><div class="story-meta"><span class="id">${esc(s.id)}</span><span>${esc(s.sprint)}</span><span>${s.sp} SP · ${esc(s.epic)} · ${esc(s.priority)}</span></div><div class="story-name">${esc(s.name)}</div><div class="story-meta"><span>${text}</span><span>AC ${s.acs.filter(a=>a.status==='pass').length} / ${s.acs.length} 통과</span></div></summary><div class="story-content"><p class="muted">${tasks.length?'관련 작업: '+tasks.map(t=>t.id).join(' · '):'Sprint 1 Task 분해 대상 아님 · 향후 Review에서 범위·용량 재검토'}</p>${s.acs.map(a=>`<div class="ac"><strong>${esc(a.id)} · ${a.status==='pass'?'통과':a.status==='fail'?'실패':'미실행'}</strong><p><span class="muted">상황</span> ${esc(a.given)}</p><p><span class="muted">행동</span> ${esc(a.when)}</p><p><span class="muted">기대 결과</span> ${esc(a.then)}</p></div>`).join('')}</div></details>`;
+    }).join('') : '<p class="blank">이 범위에 배치된 Story가 없습니다.</p>';
+  }
+  filter.addEventListener('change',renderStories);renderStories();
+  document.getElementById('dependencies').innerHTML=report.dependencies.map(([id,kind,text])=>`<div class="dependency"><strong class="id">${esc(id)}</strong><strong>${esc(kind)}</strong><span>${esc(text)}</span></div>`).join('');
+  const github=`https://github.com/HyunKN/visual-travel-guide/blob/${report.baselineRef}/docs/`;
+  document.getElementById('sources').innerHTML=[
+    [link('Sprint 1 Planning · 원격 계획 원본',github+'sprints/SPRINT1_PLANNING.md'),'목표·50 SP·Capacity 60h'],
+    [link('Sprint 1 Backlog · 원격 계획 원본',github+'sprints/SPRINT1_BACKLOG.md'),'20 Task·47h·40 AC·원래 완료 기준'],
+    [link('전체 Product Backlog · 현재 로컬 원본','../PRODUCT_BACKLOG_DRAFT.md'),'17 Story·70 SP·7 Epic·57 AC'],
+    [link('개발 착수·11/8 내부 목표','../experiments/sprint1-development-readiness.md'),'추가 학습·실기기·공유·관찰·일정 위험'],
+    [link('Android 검증 기록 · 읽기용 보고서','ANDROID_VERIFICATION.html'),'코드·자동 검사·APK 빌드·미실행과 막힘의 증거'],
+    [link('기존 기술 검증 Issue #21','https://github.com/HyunKN/visual-travel-guide/issues/21'),'원격 본문은 10/26 기준 · 이번 개발 결과 원격 미반영'],
+  ].map(([a,text])=>`<li>${a} — ${esc(text)}</li>`).join('');
+  document.getElementById('refresh').addEventListener('click',()=>location.reload());
+})();
+</script>
+</body>
+</html>

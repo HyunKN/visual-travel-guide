@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>장소에서 발견하는 이야기 — App UI 레퍼런스</title>
+  <link rel="stylesheet" href="../place-messages/vendor/k-style-components.css">
+  <link rel="stylesheet" href="reference.css">
+</head>
+<body>
+<header class="review-header">
+  <p class="review-kicker">VISUAL TRAVEL GUIDE / DESIGN REFERENCE / 2026.11.06</p>
+  <h1>장소를 보고, 이야기를 발견하고.</h1>
+  <p>검토용 화면 구성안입니다. Android 앱의 실제 화면·사용자 승인·사용성 검증 결과가 아닙니다. 쪽지와 추천수는 디자인 예시이며 실제 방문자의 글이 아닙니다. 아래 화면 안 링크는 이 문서의 다음 화면으로 이동합니다.</p>
+  <div class="review-tools">
+    <label>화면 너비 <select id="width"><option value="390">390</option><option value="360">360</option><option value="430">430</option></select></label>
+    <label><input id="large" type="checkbox"> 글자 200%</label>
+    <label><input id="opaque" type="checkbox"> 투명도 줄이기</label>
+    <a href="../APP_UI_REFERENCE.md">설계·두 차례 검토 기록</a>
+    <a href="review.html">캡처와 수정 전후 보기</a>
+  </div>
+  <nav aria-label="레퍼런스 화면"><a href="#home">01 홈</a><a href="#detail">02 이야기</a><a href="#scene">03 쪽지</a><a href="#compose">04 작성</a><a href="#photo">05 사진 입력</a><a href="#notes">06 내 글</a><a href="#review">검토 결과</a></nav>
+</header>
+<main class="board">
+  <section id="home" class="study" aria-labelledby="home-label">
+    <div class="study-heading"><span>01</span><h2 id="home-label">첫 화면 · 발견과 바로 찾기</h2></div>
+    <div class="phone plain">
+      <header class="appbar"><strong class="brand">Visual Travel Guide</strong><a class="camera-action" href="#photo">사진으로 찾기</a></header>
+      <div class="screen-scroll">
+        <figure class="home-photo"><img src="../../../mobile/assets/places/geunjeongjeon.jpg" alt="근정전과 앞마당"><a class="photo-entry" href="#scene">쪽지 보기</a></figure>
+        <a class="story-link" href="#detail" aria-label="근정전, 마당의 돌은 자리를 알려줘요 읽기">
+          <span class="place-name">근정전</span><h3>마당의 돌은<br>자리를 알려줘요</h3><svg class="story-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg><p>가운데 길 양쪽에 선 돌 표식은 관리들이 품계에 따라 설 자리를 나타내요.</p>
+        </a>
+        <section class="place-selection" aria-label="장소 직접 선택"><h4>장소</h4><div class="place-options"><a href="#detail">근정전</a><button type="button" data-place="gyotaejeon">교태전</button><button type="button" data-place="gwanghwamun">광화문</button></div><div id="place-preview" hidden></div></section>
+        <a class="visitor-preview" href="#scene"><img src="../../../mobile/assets/places/geunjeongjeon.jpg" alt=""><div><span class="place-name">근정전 · 방문자 쪽지</span><p>한참 지붕만 보다가,<br>돌 사이에 난 풀을 봤다.</p></div></a>
+      </div>
+      <nav class="bottom-nav" aria-label="홈 탐색"><a href="#home" aria-current="page">둘러보기</a><a href="#notes">내 글</a></nav>
+    </div>
+    <p class="study-note">한 이야기와 실제 행동을 먼저 배치. 사진 위 쪽지 입구는 공개 글이 있을 때만 표시합니다. 대표 사진 전체가 보이며 별도의 배너·홍보 문구를 넣지 않습니다.</p>
+  </section>
+  <section id="detail" class="study" aria-labelledby="detail-label">
+    <div class="study-heading"><span>02</span><h2 id="detail-label">이야기 · 한 장면에서 더 깊이</h2></div>
+    <div class="phone plain">
+      <header class="appbar"><a class="back" href="#home">뒤로</a><strong class="appbar-title">근정전</strong><a class="quiet-action" href="#scene">쪽지</a></header>
+      <div class="screen-scroll">
+        <img class="detail-photo" src="../../../mobile/assets/places/geunjeongjeon.jpg" alt="근정전 전경과 앞마당">
+        <article class="reading"><h3>마당의 돌은<br>자리를 알려줘요</h3><p>가운데 길 양쪽에 선 돌 표식은 관리들이 품계에 따라 설 자리를 나타내요.</p><p>품계는 관리의 지위와 등급을 뜻해요. 같은 마당에 모였어도 서는 자리는 달랐던 셈이에요.</p>
+          <a class="scene-entry" href="#scene">사진 속 쪽지 보기</a>
+          <details><summary>왕과 신하가 마주하던 곳</summary><p>근정전에서는 왕의 즉위식 같은 큰 행사를 치르고 외국 사신을 맞았어요. 왕이 신하들의 인사를 받는 자리이기도 했죠.</p></details>
+          <details><summary>겉의 두 층과 안의 한 공간</summary><p>근정전은 두 단의 돌 기단 위에 서 있어요. 겉에서 보면 지붕이 두 층이지만, 내부는 위아래가 트인 하나의 공간이에요.</p></details>
+          <a class="source" href="https://royal.khs.go.kr/user/board/E101020000_view_storyBoard.ajax?id=20231123030313006700&amp;siteCode=ENG" target="_blank" rel="noopener noreferrer">글·사진 출처 · 국가유산청 궁능유적본부 (새 탭)</a>
+        </article>
+      </div>
+    </div>
+    <p class="study-note">홈에서 고른 바로 그 이야기를 표시. 다른 이야기는 제목으로 선택합니다. 본문은 불투명한 흰 면에 두고, 스크롤·펼침 상태를 제품에서 복원해야 합니다.</p>
+  </section>
+  <section id="scene" class="study" aria-labelledby="scene-label">
+    <div class="study-heading"><span>03</span><h2 id="scene-label">장면 · 흔적을 열어 읽기</h2></div>
+    <div class="phone scene-phone plain">
+      <header class="appbar"><a class="back" href="#detail">뒤로</a><strong class="appbar-title">근정전</strong><button id="fit" class="quiet-action" type="button">전체 사진</button></header>
+      <div id="stage" class="stage" role="group" aria-label="근정전 공통 사진과 예시 쪽지">
+        <img id="scene-image" src="../../../mobile/assets/places/geunjeongjeon.jpg" alt="근정전 공통 사진">
+        <button class="trace" data-u="0.46" data-v="0.83" data-note="0" aria-label="사진 아래쪽 마당의 쪽지 열기"><span aria-hidden="true"><i class="bubble"></i></span></button>
+        <button class="trace" data-u="0.62" data-v="0.41" data-note="1" aria-label="사진 가운데 오른쪽의 쪽지 열기"><span aria-hidden="true"><i class="bubble"></i></span></button>
+        <div class="scene-bottom"><a class="glass-action" href="#compose">글 남기기</a></div>
+        <div id="reader-layer" class="reader-layer" hidden>
+          <div class="reader-scrim"></div>
+          <section id="reader" class="reader" role="dialog" aria-modal="true" aria-labelledby="reader-author" tabindex="-1">
+            <header><span id="reader-author">방문자</span><button id="close-reader" type="button">닫기</button></header>
+            <p id="note-body">한참 지붕만 보다가, 돌 사이에 난 풀을 봤다. 오늘은 여기가 제일 기억에 남는다.</p>
+            <footer><button id="recommend" type="button" aria-pressed="false">추천 <span>24</span></button><button id="more" type="button" aria-expanded="false" aria-controls="note-menu">더보기</button></footer>
+            <div id="note-menu" hidden><button type="button" data-note-action="hide">이 글 숨기기</button><button type="button" data-note-action="report">신고</button></div>
+          </section>
+        </div>
+      </div>
+    </div>
+    <p class="study-note">표식을 누르면 예시 쪽지가 열립니다. 처음에는 중앙을 확대하고 ‘전체 사진’으로 크롭을 해제합니다. 이 문서는 두 표시 상태만 검토하며 자유 확대·이동과 Android 재질은 구현 전입니다.</p>
+  </section>
+  <section id="compose" class="study" aria-labelledby="compose-label">
+    <div class="study-heading"><span>04</span><h2 id="compose-label">작성 · 위치와 글만</h2></div>
+    <div class="phone plain">
+      <header class="appbar"><a class="back" href="#scene">뒤로</a><strong class="appbar-title">근정전</strong></header>
+      <div class="screen-scroll compose-content">
+        <div class="anchor-preview"><img src="../../../mobile/assets/places/geunjeongjeon.jpg" alt="글을 남길 근정전 공통 사진"><span class="anchor-dot" aria-label="현재 예시 위치"></span></div>
+        <form id="note-form"><label class="input-label" for="body">내용</label><textarea id="body" required placeholder="" rows="4"></textarea>
+          <fieldset><legend>공개 범위</legend><label><input type="radio" name="visibility" value="private" required> 나만 보기</label><label><input type="radio" name="visibility" value="public" required> 공개</label></fieldset>
+        </form>
+      </div>
+      <footer class="compose-footer"><button class="primary-action" form="note-form" type="submit">선택한 범위로 저장</button></footer>
+    </div>
+    <p id="save-state" class="study-note" role="status"></p>
+    <p class="study-note">사진 위치는 고정 예시이며 실제 위치 선택은 앱 구현에서 확인합니다. 입력은 이 문서를 연 동안만 메모리에 유지합니다. 실제 저장·공개를 하지 않습니다. 공개 범위는 미리 선택하지 않는 비교안이며 사용자 결정이 필요합니다. 브라우저를 닫으면 사라집니다.</p>
+  </section>
+  <section id="photo" class="study" aria-labelledby="photo-label">
+    <div class="study-heading"><span>05</span><h2 id="photo-label">사진 입력 · 취소해도 맥락 유지</h2></div>
+    <div class="phone plain">
+      <header class="appbar"><a class="back" href="#home">뒤로</a><strong class="appbar-title">사진으로 찾기</strong></header>
+      <div class="screen-scroll photo-content"><div class="photo-placeholder"><span>선택한 사진이 없어요</span><img id="input-preview" alt="선택한 사진 미리보기" hidden></div><label class="primary-action file-label">갤러리에서 선택<input id="photo-file" type="file" accept="image/*"></label><button id="clear-photo" class="secondary-action" type="button" hidden>선택 지우기</button><p id="photo-state" role="status"></p><a class="text-action" href="#home">장소 직접 선택</a></div>
+    </div>
+    <p class="study-note">제품에서는 촬영·갤러리 두 경로를 제공합니다. 이 문서는 브라우저 파일 선택과 미리보기만 연결했습니다. 선택 사진은 전송·저장하지 않으며 인식 결과를 꾸며내지 않습니다.</p>
+  </section>
+  <section id="notes" class="study" aria-labelledby="notes-label">
+    <div class="study-heading"><span>06</span><h2 id="notes-label">내 글 · 이어 쓰고 다시 찾기</h2></div>
+    <div class="phone plain">
+      <header class="appbar"><strong class="brand">내 글</strong></header>
+      <div class="screen-scroll notes-content"><div id="my-note"><h3>아직 남긴 글이 없어요</h3><a class="text-action" href="#home">장소 둘러보기</a></div></div>
+      <nav class="bottom-nav" aria-label="내 글 탐색"><a href="#home">둘러보기</a><a href="#notes" aria-current="page">내 글</a></nav>
+    </div>
+    <p class="study-note">읽기 위해 먼저 쓸 필요는 없습니다. 작성 예시를 저장하면 여기에서 문서 내 결과를 볼 수 있습니다. 공간 표식이 필요한 타인의 글과 달리 개인 기록의 관리는 간결한 목록을 사용합니다.</p>
+  </section>
+</main>
+<section id="review" class="review-footer">
+  <h2>두 차례 검토와 남은 확인</h2>
+  <div class="review-columns"><article><h3>1차 화면 검토 · 과업과 시선</h3><p>캡처에서 작성 버튼이 아래로 밀리고 읽는 쪽지 옆에 다른 행동이 경쟁하는 문제를 확인했습니다. 작은 위치 사진과 고정된 완료 행, 선택한 흔적만 남기는 읽기 상태로 수정했습니다.</p></article><article><h3>2차 화면 검토 · 큰 글자와 실패</h3><p>긴 글의 본문만 스크롤해 닫기·추천을 유지했습니다. 너비 360/390/430과 글자 100/200%, 복귀·입력 보존·사진 오류 복구를 포함한 15개 HTML 검사를 통과했습니다.</p></article><article><h3>판정 · HTML 검증과 제품 검증 구분</h3><p>브라우저 캡처를 직접 확인하고 수정 전후를 보존했습니다. Android·현장 사용자 비교는 미실행입니다. Airbnb·Apple·당근보다 사용성이 우수하다고 입증한 자료가 아닙니다.</p></article></div>
+  <p>사진: 국가유산청 궁능유적본부 · 공공누리 제1유형. 원본 파일은 변경하지 않고 화면에서 크롭/축소합니다. <a href="../../../mobile/src/features/place-content/catalog.json">개별 출처·이용조건</a> / 서체: 스포카 한 산스, OFL 1.1 / <a href="../../../prototype/src/fonts/LICENSE.txt">서체 라이선스</a> / <a href="../place-messages/vendor/LICENSE.k-style-ui-ux">K-style MIT 라이선스</a></p>
+</section>
+<script src="reference.js"></script>
+</body>
+</html>
