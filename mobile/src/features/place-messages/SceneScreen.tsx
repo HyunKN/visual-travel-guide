@@ -269,7 +269,7 @@ export default function SceneScreen({ sceneId, source, messageId, draftId }: { s
         <Button label="취소" disabled={overlayOpen || saving} onPress={()=>{setPositioning(false);setComposingSize(size);setEditing(moving);setMoving(null);setAnchor(null);}} />
         {!anchor && <Button label="사진 중앙 선택" disabled={overlayOpen||saving} onPress={()=>{if(!writing.current)setAnchor({u:.5,v:.5});}} />}
         <Button label="글 쓰기" variant="primary" disabled={overlayOpen || !anchor || saving || !loaded || imageFailed} onPress={()=>{void openEditor();}} />
-      </> : <Button label="글 남기기" variant="primary" disabled={overlayOpen || !loaded || imageFailed} onPress={()=>{setPositioning(true);setAnchor(null);setWriteError('');}} />}</View>}
+      </> : <Button label="나도 한 줄 남기기" variant="primary" disabled={overlayOpen || !loaded || imageFailed} onPress={()=>{setPositioning(true);setAnchor(null);setWriteError('');}} />}</View>}
       {!!writeError && <Text accessibilityRole="alert" style={s.meta}>{writeError}</Text>}
       <View style={s.row}>
         {cursors.length > 1 && <Button label="이전 흔적" disabled={overlayOpen} onPress={() => setCursors(xs => xs.slice(0, -1))} />}

@@ -22,10 +22,10 @@ export default function HomePreview(){
   if(state.kind!=='ready')return null;
   const m=state.message,place=content.listBuildings().find(p=>p.sceneId===m.sceneId),photo=place&&content.getPhoto(place.id);
   if(!place||!photo)return null;
-  return <TapArea accessibilityRole="button" accessibilityLabel={`${place.name} 방문자 쪽지 읽기`} containerStyle={s.slot} style={s.preview}
+  return <TapArea accessibilityRole="button" accessibilityLabel={`${place.name} 남긴 흔적 읽기`} containerStyle={s.slot} style={s.preview}
     onPress={()=>router.push({pathname:'/scenes/[sceneId]',params:{sceneId:m.sceneId,messageId:m.id}})}>
     <Image accessible={false} source={photos[photo.file]} style={s.photo}/>
-    <View style={s.words}><Text style={textStyles.source}>{place.name} · 방문자 쪽지</Text><Text numberOfLines={2} style={textStyles.body}>{m.body}</Text></View>
+    <View style={s.words}><Text style={textStyles.source}>{place.name} · 남긴 흔적</Text><Text numberOfLines={2} style={textStyles.body}>{m.body}</Text></View>
   </TapArea>;
 }
 const s=StyleSheet.create({
