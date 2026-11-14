@@ -24,6 +24,10 @@
 - 프로토타입: [검토한 모바일 배치](prototype/UI_LAYOUT_REVIEW.html)에 따라 검색·전체 사진 탐색·후보 비교·설명·다음 관람·공통 이동을 연결했다. 시나리오는 관찰 과제이며 앱을 잠그지 않는다. [검증 기록](../prototype/VERIFICATION.md)의 브라우저·자동 검사와 [세 사용자 테스트 결과](prototype/OBSERVATION_RESULTS.md)의 실제 기록·미검증 사항을 구분한다.
 - 기존 웹 프로토타입의 기술 구성은 Vanilla JavaScript + Vite다. 흰 바탕·둥근 UI·기와 먹청색 중심을 적용했다. R01·R02·R03 기록을 분석했으며 발견된 모바일·사용성 문제의 수정 후 검증과 현장 효과는 남아 있다.
 
+## Sprint 제출 문서
+
+- [Sprint 1 Planning 공개본](sprints/SPRINT1_PLANNING.md): 제출용 Planning 6차 작성본의 항목과 표를 옮기고 개인 식별 정보는 제외했다.
+
 ## 각 문서는 무엇이고, 언제 쓰는가?
 
 | 문서 | 쉬운 설명 | 처음 쓰는 시점 | 다시 읽고 고치는 시점 |
@@ -100,3 +104,5 @@
 - 자동화는 지정된 페이지만 관리하고 기존 Wiki 페이지를 보존한다. 게시 실패 시 직전 게시본을 유지하며, 재시도 방법은 WIKI에 기록한다.
 
 자동 게시의 대상과 검사 명령, 실패 시 처리 방법은 [WIKI](WIKI.md)가 기준이다. 설정 작업과 검증 결과는 [AI Workflow 설정 Issue](https://github.com/HyunKN/visual-travel-guide/issues/1)에 기록한다.
+
+Sprint 1의 제출 기준 계획과 Task·10/31 진행 기록은 [Sprint Planning](sprints/SPRINT1_PLANNING.md)과 [Sprint Backlog](sprints/SPRINT1_BACKLOG.md)에서 확인한다. 공개본은 개인정보를 제외하며 실제 개발 완료와 검증 통과를 의미하지 않는다.

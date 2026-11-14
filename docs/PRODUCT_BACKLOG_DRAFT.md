@@ -4,7 +4,11 @@
 
 2026-11-01 갱신. Product Backlog 4차를 바탕으로 확정한 Sprint 1 Planning·Sprint Backlog의 신규 범위와 우선순위·배치를 반영했다. 전체 7 Epic·17 Story·70 SP이며 Sprint 1의 상위 12개는 50 SP다. 계획 채택과 구현·AC 통과는 구분한다.
 
-기존 파일명과 Wiki 주소는 링크 호환을 위해 유지한다. 이 변경은 로컬 문서 원본의 갱신이며 커밋·푸시·Wiki 게시 완료를 뜻하지 않는다. 개인정보가 포함된 Word 표지와 개별 US 상세 파일은 공개하지 않는다.
+기존 파일명과 Wiki 주소는 링크 호환을 위해 유지한다. 개인정보가 포함된 Word 표지와 개별 US 상세 파일은 공개하지 않는다.
+
+프로젝트명: **관광객을 위한 장소 탐색 가이드 서비스** · Visual Travel Guide
+
+[Sprint Planning](sprints/SPRINT1_PLANNING.md) · [Sprint Backlog](sprints/SPRINT1_BACKLOG.md)
 
 ## 1. 제품 가치와 첫 적용 범위
 
