@@ -2,10 +2,6 @@ name: Build unsigned iPhone IPA
 
 on:
   workflow_dispatch:
-  # Run this verification before the workflow is registered on main.
-  push:
-    branches: [codex/ios-free-device-testing]
-    paths: ['.github/workflows/ios-unsigned.yml']
 
 permissions:
   contents: read
