@@ -4,7 +4,7 @@ const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),ts=require('typescript');
 
-function screen(modern,{development=true,hasMap=false,platform='android',initialState={kind:'locating'}}={}){
+function screen(modern,{development=true,hasMap=false,initialState={kind:'locating'}}={}){
   const slots=[],effects=[],pushes=[];let cursor=0,listener,focus,state=initialState,suspends=0;
   const controller={snapshot:()=>state,subscribe:()=>()=>{},refreshAge:()=>{},clear:()=>{state={kind:'idle'};}};
   if(modern)controller.suspend=()=>{suspends++;};
@@ -13,7 +13,7 @@ function screen(modern,{development=true,hasMap=false,platform='android',initial
   const modules={
     'react/jsx-runtime':{jsx,jsxs:jsx},
     react:{useState:slot,useRef:value=>slot({current:value})[0],useMemo:fn=>fn(),useEffect:fn=>effects.push(fn),useCallback:fn=>fn,useSyncExternalStore:(_,snapshot)=>snapshot()},
-    'react-native':{View:'View',ScrollView:'ScrollView',StyleSheet:{create:x=>x},Platform:{OS:platform},TurboModuleRegistry:{get:()=>hasMap?{}:null},AppState:{currentState:'active',addEventListener:(_,fn)=>{listener=fn;return {remove:()=>{}};}}},
+    'react-native':{View:'View',ScrollView:'ScrollView',StyleSheet:{create:x=>x},Platform:{OS:'android'},TurboModuleRegistry:{get:()=>hasMap?{}:null},AppState:{currentState:'active',addEventListener:(_,fn)=>{listener=fn;return {remove:()=>{}};}}},
     'react-native-safe-area-context':{useSafeAreaInsets:()=>({bottom:0})},
     'expo-router':{router:{push:route=>pushes.push(route)},Stack:{Screen:'Screen'},useFocusEffect:fn=>{focus=fn;}},
     '../ui/Text':{Text:'Text'},'../ui/theme':{color:{}},
@@ -66,16 +66,10 @@ test('development failure uses the real map failure callback, preserves direct p
   assert.equal(h.text(tree).includes('개발 테스트 · 지도 로딩 실패'),false);
 });
 
-test('iOS loads the map when the native module exists',async()=>{
-  const h=screen(true,{platform:'ios',hasMap:true,initialState:{kind:'idle'}});
-  assert.ok(h.nodes(await h.load()).some(n=>n.type==='Map'));
-});
-
-test('production on iOS without the native map still permits direct selection with imprecise location',async()=>{
-  const h=screen(true,{platform:'ios',development:false,initialState:{kind:'imprecise'}});
+test('production has no failure injection menu; a real unavailable map still permits direct selection with imprecise location',async()=>{
+  const h=screen(true,{development:false,initialState:{kind:'imprecise'}});
   const tree=await h.load();
   assert.equal(h.nodes(tree).some(n=>n.props?.label==='개발 메뉴'),false);
   assert.ok(h.text(tree).includes('위치가 정확하지 않아요.'));
-  assert.equal(h.nodes(tree).some(n=>n.type==='Map'),false);
   h.action(tree,'근정전').onPress();assert.equal(h.pushes[0].params.placeId,'geunjeongjeon');
 });

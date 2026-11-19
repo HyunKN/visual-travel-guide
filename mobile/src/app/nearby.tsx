@@ -59,8 +59,8 @@ export default function Nearby(){
         setUnavailable(true);
       }
     });
-    // Avoid evaluating MapLibre imports in builds without its native module.
-    if((Platform.OS!=='android'&&Platform.OS!=='ios')||!TurboModuleRegistry.get('MLRNMapViewModule'))load.fail('native-module');
+    // Do not evaluate MapLibre's getEnforcing imports on an older development APK.
+    if(Platform.OS!=='android'||!TurboModuleRegistry.get('MLRNMapViewModule'))load.fail('native-module');
     else void import('../features/location/PalaceMap').then(m=>{if(alive&&load.snapshot()==='loading'){const next={Component:m.default,load,attempt,generation};loadedMap.current=next;setMap(next);}},cause=>{
       if(alive&&__DEV__&&cause instanceof Error)console.warn('[NearbyMap] import error:',cause.message.replace(/https?:\/\/\S+/g,'[URL]').slice(0,240));
       load.fail('import');

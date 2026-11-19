@@ -2,10 +2,6 @@ name: Build unsigned iPhone IPA
 
 on:
   workflow_dispatch:
-  # Bootstrap the first run before GitHub registers workflow_dispatch on main.
-  push:
-    branches: [codex/ios-free-device-testing]
-    paths: ['.github/workflows/ios-unsigned.yml']
 
 permissions:
   contents: read
@@ -21,6 +17,7 @@ jobs:
     env:
       CI: '1'
       EXPO_NO_DOTENV: '1'
+      IOS_BUNDLE_IDENTIFIER: com.visualtravelguide.app
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -36,6 +33,42 @@ jobs:
           xcodebuild -version
           pod --version
           npm ci
+          if [[ -e app.config.ts || -e app.ios-ci-base.cjs ]]; then
+            echo "::error::The iOS CI config wrapper conflicts with an existing file."
+            exit 1
+          fi
+          cp app.config.js app.ios-ci-base.cjs
+          cat > app.config.js <<'EXPO_CONFIG'
+          const configureApp = require('./app.ios-ci-base.cjs');
+
+          module.exports = context => {
+            const config = configureApp(context);
+            const plugins = config.plugins.map(plugin => {
+              const [name, options] = Array.isArray(plugin) ? plugin : [plugin];
+              if (name === 'expo-font') {
+                return [name, {...options, ios: {fonts: [
+                  './assets/fonts/SpoqaHanSansRegular.ttf',
+                  './assets/fonts/SpoqaHanSansBold.ttf',
+                ]}}];
+              }
+              if (name === 'expo-location') {
+                return [name, {
+                  ...options,
+                  locationWhenInUsePermission: '주변 장소와 현재 위치를 확인하려면 위치 접근이 필요해요.',
+                  locationAlwaysAndWhenInUsePermission: false,
+                  locationAlwaysPermission: false,
+                  motionUsagePermission: false,
+                }];
+              }
+              return plugin;
+            });
+            return {
+              ...config,
+              ios: {...config.ios, bundleIdentifier: process.env.IOS_BUNDLE_IDENTIFIER},
+              plugins,
+            };
+          };
+          EXPO_CONFIG
           npx --no-install expo prebuild --platform ios --no-install
           pod install --project-directory=ios
       - name: Compile unsigned Release for iPhone
@@ -76,10 +109,9 @@ jobs:
           app="${apps[0]}"
           plist="$app/Info.plist"
           bundle_id="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$plist")"
-          expected_id="$(node -p 'require("./app.json").expo.ios.bundleIdentifier')"
           executable="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$plist")"
           minimum_ios="$(/usr/libexec/PlistBuddy -c 'Print :MinimumOSVersion' "$plist")"
-          [[ "$bundle_id" == "$expected_id" ]]
+          [[ "$bundle_id" == "$IOS_BUNDLE_IDENTIFIER" ]]
           [[ "$(xcrun lipo -archs "$app/$executable")" == arm64 ]]
           xcrun vtool -show-build "$app/$executable" | grep -Eiq '^[[:space:]]*platform[[:space:]]+IOS[[:space:]]*$'
           test -s "$app/main.jsbundle"
