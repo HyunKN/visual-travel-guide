@@ -2,6 +2,10 @@ name: Build unsigned iPhone IPA
 
 on:
   workflow_dispatch:
+  # Run this verification before the workflow is registered on main.
+  push:
+    branches: [codex/ios-free-device-testing]
+    paths: ['.github/workflows/ios-unsigned.yml']
 
 permissions:
   contents: read
@@ -123,10 +127,10 @@ jobs:
           ditto -c -k --keepParent "$package_dir/Payload" "$RUNNER_TEMP/Nubi-unsigned.ipa"
           unzip -tq "$RUNNER_TEMP/Nubi-unsigned.ipa"
           {
-            echo "Commit: `$GITHUB_SHA`"
-            echo "Bundle ID: `$bundle_id`"
-            echo "Device architecture: `arm64`"
-            echo "Minimum iOS: `$minimum_ios`"
+            printf 'Commit: `%s`\n' "$GITHUB_SHA"
+            printf 'Bundle ID: `%s`\n' "$bundle_id"
+            printf 'Device architecture: `arm64`\n'
+            printf 'Minimum iOS: `%s`\n' "$minimum_ios"
             echo 'IPA SHA-256:'
             shasum -a 256 "$RUNNER_TEMP/Nubi-unsigned.ipa"
           } >> "$GITHUB_STEP_SUMMARY"
