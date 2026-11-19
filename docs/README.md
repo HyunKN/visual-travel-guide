@@ -4,7 +4,7 @@
 
 ## 현재 상태
 
-- Windows에서 iPhone을 무료로 테스트하는 후속 경로는 [iOS 무료 기기 테스트](operations/IOS_FREE_DEVICE_TESTING.md)에 기록했다. 진행 원본은 [#37](https://github.com/HyunKN/visual-travel-guide/issues/37)이며, 사용자가 나중에 재개하기로 한 작업이다.
+- Windows에서 iPhone을 무료로 테스트하는 빌드·설치·갱신 절차는 [iOS 무료 기기 테스트](operations/IOS_FREE_DEVICE_TESTING.md)를 본다. 첫 CI 빌드와 실기기 확인은 [#37](https://github.com/HyunKN/visual-travel-guide/issues/37)에서 추적한다.
 
 - 2026-11-04 App 기능의 입구는 [GitHub 기능 지도 #27](https://github.com/HyunKN/visual-travel-guide/issues/27)이다. [개발 경계](design/APP_FEATURE_BOUNDARIES.md)는 책임·입출력을, 기능 이슈 #28~35는 연결·작성된/예정 함수·테스트·완료 조건과 개발 순서를 관리한다.
 
