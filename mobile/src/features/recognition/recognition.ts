@@ -1,4 +1,5 @@
 import type { Photo } from '../photo-input/photoInput';
+import {decodeModelOutputs,MODEL_OUTPUT_CONTRACT,type ModelAnalysis} from './modelOutputs';
 
 export type RecognitionInput = Readonly<{ requestId: string; photoId: string; contentVersion: string }>;
 export type Candidate = Readonly<{ targetId: string; rank: number; score: number }>;
@@ -9,6 +10,7 @@ type Provenance = {
   scoreKind: string; locationUsed: false;
 };
 export type RecognitionResult = RecognitionInput & (
+  | ({ status:'analyzed'; analysis:ModelAnalysis } & Provenance)
   | ({ status: 'identified'; candidates: Candidate[]; selectedTargetId: string } & Provenance)
   | ({ status: 'uncertain'; candidates: Candidate[]; reason: 'below-policy' | 'no-candidate' | 'policy-unvalidated' } & Provenance)
   | { status: 'cancelled'; reason: 'user' | 'superseded' }
@@ -38,10 +40,18 @@ function validate(value: unknown, input: RecognitionInput, config: RuntimeConfig
     ? { ...input, status: 'error', code: value.code as ErrorCode, retryable: value.retryable } : failure(input, 'INFERENCE_FAILED');
   if (value.status === 'cancelled') return value.reason === 'user' || value.reason === 'superseded'
     ? { ...input, status: 'cancelled', reason: value.reason } : failure(input, 'INFERENCE_FAILED');
-  if (value.status !== 'identified' && value.status !== 'uncertain') return failure(input, 'INFERENCE_FAILED');
+  if (value.status !== 'identified' && value.status !== 'uncertain' && value.status !== 'analyzed') return failure(input, 'INFERENCE_FAILED');
   if (value.modelVersion !== config.modelVersion || value.preprocessingVersion !== config.preprocessingVersion
     || value.decisionPolicyVersion !== config.decisionPolicyVersion || value.scoreKind !== config.scoreKind || value.locationUsed !== false)
     return failure(input, 'MODEL_INCOMPATIBLE', false);
+  const provenance: Provenance = { modelVersion: config.modelVersion, preprocessingVersion: config.preprocessingVersion,
+    decisionPolicyVersion: config.decisionPolicyVersion, scoreKind: config.scoreKind, locationUsed: false };
+  if(value.status==='analyzed'){
+    if(config.modelVersion!==MODEL_OUTPUT_CONTRACT.modelVersion||config.preprocessingVersion!==MODEL_OUTPUT_CONTRACT.preprocessingVersion)return failure(input,'MODEL_INCOMPATIBLE',false);
+    if(!MODEL_OUTPUT_CONTRACT.buildingLabels.every(id=>targets.includes(id)))return failure(input,'CONTENT_MISMATCH',false);
+    const analysis=decodeModelOutputs(value.outputs);
+    return analysis?{...input,...provenance,status:'analyzed',analysis}:failure(input,'MODEL_INCOMPATIBLE',false);
+  }
   if (!Array.isArray(value.candidates) || value.candidates.length > config.candidateLimit) return failure(input, 'INFERENCE_FAILED');
   const candidates: Candidate[] = [];
   for (const [index, item] of value.candidates.entries()) {
@@ -52,8 +62,6 @@ function validate(value: unknown, input: RecognitionInput, config: RuntimeConfig
     if (previous && (config.scoreOrder === 'descending' ? previous.score < item.score : previous.score > item.score)) return failure(input, 'INFERENCE_FAILED');
     candidates.push({ targetId: item.targetId, rank: index + 1, score: item.score });
   }
-  const provenance: Provenance = { modelVersion: config.modelVersion, preprocessingVersion: config.preprocessingVersion,
-    decisionPolicyVersion: config.decisionPolicyVersion, scoreKind: config.scoreKind, locationUsed: false };
   if (value.status === 'identified' && (!candidates.length || value.selectedTargetId !== candidates[0].targetId)) return failure(input, 'INFERENCE_FAILED');
   if (value.status === 'uncertain' && (typeof value.reason !== 'string'
     || !['below-policy', 'no-candidate', 'policy-unvalidated'].includes(value.reason)

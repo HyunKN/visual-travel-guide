@@ -10,6 +10,8 @@ export type RecoveryOperation='publish'|'withdraw'|'private';
 export interface RecoveryStorage extends PublicationStorage {
   prepareConflictPublication(d:Draft,owner:string,service:string,inspection:Inspection,withdraw:boolean):Promise<PublicationJob>;
   saveConflictPrivate(d:Draft,owner:string,service:string,inspection:Inspection):Promise<void>;
+  deleteConflictNote(d:Draft,owner:string,service:string,inspection:Inspection):Promise<void>;
+  deleteNote(id:string):Promise<unknown>;
 }
 export class RecoveryChanged extends Error { constructor(){super('Server state changed');} }
 export function recoveryOptions(state:OwnState,draft:Draft) {
@@ -44,17 +46,20 @@ export function createConflictRecovery(storage:RecoveryStorage,remote:Publicatio
       (requestId!==undefined&&job.requestId!==requestId))throw new RecoveryChanged();
     return job;
   }
+  async function checked(draft:Draft,inspection:Inspection){
+    const job=await current(draft.id,inspection.requestId);
+    if(inspection.noteId!==draft.id||inspection.state.id!==draft.id||inspection.state.sceneId!==draft.sceneId||job.payload.p_scene!==draft.sceneId)throw new RecoveryChanged();
+    const fresh=await read(draft.sceneId,draft.id);
+    if(!same(inspection.state,fresh))throw new RecoveryChanged();
+    return fresh;
+  }
   return {
     async inspect(id:string):Promise<Inspection> {
       const job=await current(id);
       return {noteId:id,requestId:job.requestId,state:await read(job.payload.p_scene,id)};
     },
     async act(draft:Draft,inspection:Inspection,operation:RecoveryOperation) {
-      const job=await current(draft.id,inspection.requestId);
-      if(inspection.noteId!==draft.id||inspection.state.id!==draft.id||inspection.state.sceneId!==draft.sceneId||job.payload.p_scene!==draft.sceneId)
-        throw new RecoveryChanged();
-      const fresh=await read(draft.sceneId,draft.id);
-      if(!same(inspection.state,fresh))throw new RecoveryChanged();
+      const fresh=await checked(draft,inspection);
       if(!recoveryOptions(fresh,draft)[operation])throw new Error('Recovery action unavailable');
       if(operation==='private'){
         await storage.saveConflictPrivate(draft,remote.ownerId,remote.serviceId,inspection);
@@ -62,6 +67,16 @@ export function createConflictRecovery(storage:RecoveryStorage,remote:Publicatio
       }
       const next=await storage.prepareConflictPublication(draft,remote.ownerId,remote.serviceId,inspection,operation==='withdraw');
       return createPublisher(storage,remote).deliver(next.noteId);
+    },
+    async remove(draft:Draft,inspection:Inspection){
+      const fresh=await checked(draft,inspection);
+      if(fresh.kind==='found'&&fresh.visible){
+        const next=await storage.prepareConflictPublication(draft,remote.ownerId,remote.serviceId,inspection,true);
+        const result=await createPublisher(storage,remote).deliver(next.noteId);
+        if(result.state!=='withdrawn')return result;
+        await storage.deleteNote(draft.id);
+      }else await storage.deleteConflictNote(draft,remote.ownerId,remote.serviceId,inspection);
+      return null;
     },
   };
 }

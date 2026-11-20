@@ -2,9 +2,10 @@ import catalog from '../place-content/catalog.json';
 import { content } from '../place-content/content';
 import { photoInput } from '../photo-input/nativePhotoInput';
 import { createRecognition } from './recognition';
+import { createDeviceRuntime } from './deviceRuntime';
 
-// One service across screen mounts. No fake runtime or policy before #21 artifact handoff.
+const contentVersion = String(catalog.version);
 export const recognition = createRecognition({
-  runtime: null,
-  getContext: () => ({ photo: photoInput.getPhoto(), contentVersion: String(catalog.version), supportedTargetIds: content.listBuildings().map(p => p.id) }),
+  runtime: createDeviceRuntime(contentVersion),
+  getContext: () => ({ photo: photoInput.getPhoto(), contentVersion, supportedTargetIds: content.listBuildings().map(p => p.id) }),
 });

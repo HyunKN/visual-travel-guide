@@ -6,14 +6,17 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { photoInput } from './nativePhotoInput';
 import type { Photo, PhotoResult } from './photoInput';
 import { recognition } from '../recognition/nativeRecognition';
+import { iosModel } from '../recognition/deviceRuntime';
 import type { ErrorCode, RecognitionResult } from '../recognition/recognition';
+import {TopicSelection} from '../recognition/TopicSelection';
+import type {BuildingId} from '../recognition/modelOutputs';
 import { Action } from '../../ui/Action';
 import { color, layout, textStyles } from '../../ui/theme';
 
 const recognitionErrors: Record<ErrorCode, string> = {
   PHOTO_UNREADABLE: '이 사진을 읽을 수 없어요. 다른 사진을 골라주세요.',
   IMAGE_UNSUPPORTED: '이 형식의 사진은 아직 읽을 수 없어요. 다른 사진을 골라주세요.',
-  MODEL_NOT_READY: '이 버전에는 사진 인식 모델이 없어요.',
+  MODEL_NOT_READY: '이 기기에 사진 인식 모델이 아직 준비되지 않았어요.',
   MODEL_INCOMPATIBLE: '인식 모델을 사용할 수 없어요. 장소를 직접 골라주세요.',
   CONTENT_MISMATCH: '인식 결과와 장소 정보가 맞지 않아요. 장소를 직접 골라주세요.',
   INFERENCE_FAILED: '사진에서 장소를 찾지 못했어요. 다시 시도해주세요.',
@@ -27,6 +30,7 @@ export default function PhotoInputScreen() {
   const [settings, setSettings] = useState(false);
   const [recognizing, setRecognizing] = useState(false);
   const [outcome, setOutcome] = useState<RecognitionResult | null>(null);
+  const [manualTopics,setManualTopics]=useState(false);
   const currentRequest = useRef<string | null>(null);
   const focused = useRef(false);
   const mounted = useRef(false);
@@ -35,12 +39,19 @@ export default function PhotoInputScreen() {
     const id = currentRequest.current;
     currentRequest.current = null;
     if (id) recognition.cancelRecognition(id, reason);
-    if (mounted.current) { setRecognizing(false); setOutcome(null); }
+    if (mounted.current) { setRecognizing(false); setOutcome(null); setManualTopics(false); }
   }, []);
   useFocusEffect(useCallback(() => {
     focused.current = true;
-    const subscription = AppState.addEventListener('change', state => { if (state !== 'active') cancel(); });
-    return () => { focused.current = false; subscription.remove(); cancel(); };
+    const subscription = AppState.addEventListener('change', state => {
+      if (state !== 'active' && currentRequest.current) cancel();
+    });
+    return () => {
+      focused.current = false;
+      subscription.remove();
+      // Keep completed results for Back from a place detail on this same photo.
+      if (currentRequest.current) cancel();
+    };
   }, [cancel]));
   const apply = useCallback((result: PhotoResult | null) => {
     if (!mounted.current || !result) return;
@@ -91,15 +102,25 @@ export default function PhotoInputScreen() {
     currentRequest.current = null;
     setRecognizing(false);
     setOutcome(result);
-    if (result.status === 'identified') router.push({ pathname: '/places/[placeId]', params: { placeId: result.selectedTargetId, origin: 'model', requestId: result.requestId } });
   };
+  const openPlace=(placeId:BuildingId)=>{
+    if(pending||!photo||photoInput.getPhoto()?.photoId!==photo.photoId||!focused.current||AppState.currentState!=='active')return;
+    // Explicit place selection is not visual model identification.
+    router.push({pathname:'/places/[placeId]',params:{placeId,origin:'manual-topic',photoId:photo.photoId}});
+  };
+  const currentOutcome=outcome?.photoId===photo?.photoId?outcome:null;
+  const hasAnalysis=currentOutcome?.status==='analyzed'||currentOutcome?.status==='identified'||currentOutcome?.status==='uncertain';
   return <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
     <Stack.Screen options={{ title: '사진' }} />
+    {iosModel && <Action label="사진 인식 모델 설정" disabled={pending || recognizing} onPress={() => router.push('/development-check')} />}
     {photo && <Image key={photo.photoId} source={{ uri: photo.uri }} accessible accessibilityLabel="선택한 사진" resizeMode="contain" style={styles.preview} onError={() => {if(photoInput.getPhoto()?.photoId===photo.photoId)setError('이 사진을 읽을 수 없어요. 다른 사진을 골라주세요.');}} />}
     {photo && <Action label={recognizing ? '장소 찾는 중' : '장소 찾기'} variant="primary" disabled={pending} busy={recognizing} onPress={() => void findPlace()}/>}
     {recognizing && <Action label="취소" onPress={() => cancel()}/>}
-    {outcome?.status === 'error' && <Text style={styles.error} accessibilityLiveRegion="polite">{recognitionErrors[outcome.code]}</Text>}
-    {outcome?.status === 'uncertain' && <Text style={styles.error} accessibilityLiveRegion="polite">장소를 확실히 찾지 못했어요. 다른 사진으로 시도하거나 직접 골라주세요.</Text>}
+    {currentOutcome?.status === 'error' && <Text style={styles.error} accessibilityLiveRegion="polite">{recognitionErrors[currentOutcome.code]}</Text>}
+    {currentOutcome?.status === 'uncertain' && <Text style={styles.error} accessibilityLiveRegion="polite">장소를 확실히 찾지 못했어요. 다른 사진으로 시도하거나 직접 골라주세요.</Text>}
+    {currentOutcome?.status === 'analyzed' && <Text style={styles.error} accessibilityLiveRegion="polite">사진 분석을 마쳤어요.</Text>}
+    {photo&&!pending&&!recognizing&&(manualTopics||hasAnalysis)&&<TopicSelection key={`${photo.photoId}:${currentOutcome?.requestId??'manual'}`} result={currentOutcome} onPlace={openPlace}/>}
+    {photo&&!recognizing&&!manualTopics&&!hasAnalysis&&<Action label="주제 직접 선택" disabled={pending} onPress={()=>setManualTopics(true)}/>}
     {photo && <Action label="장소 직접 선택" onPress={() => { cancel(); router.dismissTo('/'); }}/>}
     <Action label="사진 촬영" disabled={pending} variant={photo?'soft':'primary'} onPress={() => void select('camera')}/>
     <Action label="갤러리에서 선택" disabled={pending} variant="soft" onPress={() => void select('library')}/>

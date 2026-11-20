@@ -3,11 +3,12 @@ const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),ts=require('typescript');
 
-function harness({moving=false,saveFails=false,phase='open',saveWait,renderScene=false}={}){
+function harness({moving=false,saveFails=false,phase='open',saveWait,renderScene=false,owned}={}){
   const effects=[],dispatches=[],writes=[],errors=[],anchors=[];let prevention,closed=0,index=0;
   const draft={id:'draft',sceneId:'scene',body:'이동 중',u:.2,v:.3,revision:4};
-  const controller={snapshot:()=>({reader:null,list:{kind:'idle'}}),subscribe(){},close:()=>{closed++;}};
-  const presentation={snapshot:()=>({phase,reader:{kind:'loading',id:'note'},anchor:{u:.2,v:.3}}),subscribe(){}};
+  const reader=owned===undefined?null:{kind:'found',id:'note',message:{body:'글',owned,origin:'public',anchor:{u:.2,v:.3}}};
+  const controller={snapshot:()=>({reader,list:{kind:'idle'}}),subscribe(){},close:()=>{closed++;}};
+  const presentation={snapshot:()=>({phase,reader:reader??{kind:'loading',id:'note'},anchor:{u:.2,v:.3}}),subscribe(){}};
   const jsx=(type,props)=>({type,props}),exports={};
   const modules={
     'react/jsx-runtime':{jsx,jsxs:jsx},
@@ -39,6 +40,10 @@ test('Home leaves an open reader in one action, while ordinary Back only closes 
   assert.equal(h.enabled,true);h.remove(action);
   assert.equal(h.dispatches[0],action);assert.equal(h.closed,0);
   h.remove({type:'GO_BACK'});assert.equal(h.closed,1);assert.equal(h.dispatches.length,1);
+});
+for(const owned of [true,false])test(`photo reader identifies ${owned?'my own note':'another user note'} in its title`,()=>{
+  const h=harness({renderScene:true,owned});
+  assert.ok(h.nodes.some(n=>n.props?.accessibilityRole==='header'&&n.props.children===(owned?'내 글':'쪽지')));
 });
 
 test('Home preserves a changed photo point before leaving the positioning screen',async()=>{

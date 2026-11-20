@@ -2,7 +2,7 @@ import {AuthenticationRequired} from './session';
 import {authRuntime,memoConfig} from '../auth/nativeAuth';
 import {captureAccount,accountIsCurrent,accountRpc,type AccountScope} from '../auth/accountScope';
 import {createPublicationRemote} from './remote';
-import {createPublisher,createPrivateSaver} from './publication';
+import {createPublisher,createPrivateSaver,createNoteDeleter,canDeleteLocally} from './publication';
 import {accountNotes} from '../local-notes/device';
 import type {Draft} from '../local-notes/store';
 import {createSceneMessages} from './sceneMessages';
@@ -36,9 +36,14 @@ function build(c:NonNullable<typeof memoConfig>) {
     },
     inspectPublication:(id:string)=>recovery(value=>value.inspect(id)),
     recoverPublication:(draft:Draft,inspection:Inspection,operation:RecoveryOperation)=>recovery(value=>value.act(draft,inspection,operation)),
+    deleteAfterInspection:(draft:Draft,inspection:Inspection)=>recovery(value=>value.remove(draft,inspection)),
     async savePrivate(draft:Draft){
       const scope=captureAccount(),store=accountNotes(scope);
       return run(scope,owner=>createPrivateSaver(store,createPublicationRemote(owner,c.url,rpc(scope)))(draft));
+    },
+    async deleteNote(draft:Draft){
+      const scope=captureAccount(),store=accountNotes(scope);
+      return run(scope,owner=>createNoteDeleter(store,createPublicationRemote(owner,c.url,rpc(scope)))(draft));
     },
     async homePreview(scenes:readonly string[],signal:AbortSignal) {
       return gateway.read('vtg_home_preview',{p_scenes:[...scenes]},signal);
@@ -74,6 +79,11 @@ function build(c:NonNullable<typeof memoConfig>) {
 export function getPublicService(){
   if(!memoConfig)throw new Error('Public service is not configured');
   return service??=build(memoConfig);
+}
+/** Private notes remain deletable offline; an active public copy requires authentication. */
+export async function deleteOwnNote(draft:Draft,store=accountNotes()){
+  if(canDeleteLocally(await store.getPublication(draft.id))){await store.deleteNote(draft.id);return null;}
+  return getPublicService().deleteNote(draft);
 }
 export function productSceneMessages(){
   if(memoConfig)return getPublicService().messages();

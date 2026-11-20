@@ -46,6 +46,28 @@ test('hidden own post can be withdrawn with empty private draft; its body is nev
   const p=h.writes[0].p;assert.equal(p.p_body,null);assert.equal(p.p_expected,3);assert.equal(p.p_u,.4);assert.equal(p.p_v,.6);
   assert.equal((await h.store.getDraft(d.id,d.sceneId)).body,'');
 });
+test('after inspection, a hidden legacy long note can be deleted without shortening or publishing it',async t=>{
+  const h=await harness(t);h.state={...h.state,hidden:true};
+  const d={...h.d,body:'기존'.repeat(662),revision:2};await h.store.saveDraft(d);
+  const i=await h.recovery.inspect(d.id);
+  assert.equal(await h.recovery.remove(d,i),null);assert.equal(h.writes.length,1);
+  assert.equal(h.writes[0].p.p_withdraw,true);assert.equal(h.writes[0].p.p_body,null);
+  assert.equal(h.writes[0].p.p_expected,3);assert.deepEqual(await h.store.list(),[]);
+  assert.equal(await h.store.getPublication(d.id),null);
+});
+test('missing/withdrawn inspection permits atomic local deletion, while changed state blocks it',async t=>{
+  for(const missing of [false,true]){
+    const h=await harness(t);h.state=missing?{kind:'missing',id:h.d.id,sceneId:h.d.sceneId}:{...h.state,visible:false,body:''};
+    const i=await h.recovery.inspect(h.d.id),observed=h.state;
+    h.state={...observed,kind:'found',id:h.d.id,sceneId:h.d.sceneId,version:4,u:.2,v:.3,body:'새 수정',visible:true,hidden:false};
+    await assert.rejects(h.recovery.remove(h.d,i),RecoveryChanged);
+    h.state=observed;
+    h.db.exec("CREATE TRIGGER fail BEFORE DELETE ON drafts BEGIN SELECT RAISE(ABORT,'disk'); END");
+    await assert.rejects(h.recovery.remove(h.d,i));assert.equal((await h.store.getPublication(h.d.id)).state,'conflict');
+    h.db.exec('DROP TRIGGER fail');assert.equal(await h.recovery.remove(h.d,i),null);
+    assert.equal(h.writes.length,0);assert.deepEqual(await h.store.list(),[]);
+  }
+});
 test('withdrawn or missing observation saves private atomically without inventing a request receipt',async t=>{
   for(const missing of [false,true]){
     const h=await harness(t);h.state=missing?{kind:'missing',id:h.d.id,sceneId:h.d.sceneId}:{...h.state,visible:false,body:''};

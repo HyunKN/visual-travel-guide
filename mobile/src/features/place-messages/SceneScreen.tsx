@@ -233,7 +233,7 @@ export default function SceneScreen({ sceneId, source, messageId, draftId }: { s
         <Animated.View style={[s.card,{height:size.height / 2},motion.cardStyle]} pointerEvents={presented.phase === 'closing' ? 'none' : 'auto'} importantForAccessibility={presented.phase === 'closing' ? 'no-hide-descendants' : 'auto'} onLayout={({nativeEvent:{layout:frame}}) => {setCardSize({width:frame.width,height:frame.height});setCardOrigin({x:frame.x,y:frame.y});}} accessibilityViewIsModal onAccessibilityEscape={close}>
           {!opaque && loaded && !imageFailed && rect && <PhotoGlass source={photo} image={rect} frame={{...cardOrigin,...cardSize}} stageClip={{x:0,y:0,...size}} radius={20} tint={.12}/>}
           <View style={s.readingSurface}>
-          <View style={s.row}><PhotoReadingText accessibilityRole="header" style={s.heading}>쪽지</PhotoReadingText><PhotoReadingAction buttonRef={closeRef} label="닫기" onPress={close}/></View>
+          <View style={s.row}><PhotoReadingText accessibilityRole="header" style={s.heading}>{local&&reader?.kind==='found'&&reader.message.owned===true?'내 글':'쪽지'}</PhotoReadingText><PhotoReadingAction buttonRef={closeRef} label="닫기" onPress={close}/></View>
           <ScrollView style={s.bodyScroll} contentContainerStyle={s.bodyContent}>
             {reader?.kind === 'found' && <PhotoReadingText selectable style={s.body}>{reader.message.body}</PhotoReadingText>}
             {reader?.kind==='found' && reportFor===reader.id && <View>

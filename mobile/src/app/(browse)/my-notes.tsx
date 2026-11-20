@@ -11,6 +11,7 @@ import type { LocalItem } from '../../features/local-notes/store';
 import { getScene } from '../../features/place-messages/scenes';
 import {MemoGate,AccountActions} from '../../features/auth/MemoGate';
 import {OwnPublicationStatus} from '../../features/public-messages/OwnPublicationStatus';
+import {deleteOwnNote} from '../../features/public-messages/nativeService';
 
 export default function MyNotes() {
   return <MemoGate cancelToHome><MyNotesContent/></MemoGate>;
@@ -20,17 +21,36 @@ function MyNotesContent() {
   const insets=useSafeAreaInsets(), [rows,setRows]=useState<LocalItem[]|null>(null), [error,setError]=useState('');
   const gen=useRef(0),editRequest=useRef(0);
   const [opening,setOpening]=useState<string|null>(null);
+  const [deleting,setDeleting]=useState<string|null>(null);
+  const operation=useRef(false);
   const load=useCallback(async()=>{
     const id=++gen.current; setError(''); setRows(null);
     try { const list=await deviceNotes.list(); if(id===gen.current)setRows(list); }
     catch { if(id===gen.current)setError('기기의 글을 불러오지 못했어요.'); }
   },[deviceNotes]);
-  useFocusEffect(useCallback(()=>{setOpening(null);void load();return ()=>{gen.current++;editRequest.current++;};},[load]));
+  useFocusEffect(useCallback(()=>{operation.current=false;setOpening(null);setDeleting(null);void load();return ()=>{gen.current++;editRequest.current++;};},[load]));
   async function edit(id:string) {
+    if(operation.current)return;
+    operation.current=true;
     const request=++editRequest.current;setOpening(id);setError('');
     try {const d=await deviceNotes.edit(id); if(!d)throw new Error();if(request===editRequest.current)router.push({pathname:'/scenes/[sceneId]',params:{sceneId:d.sceneId,draftId:d.id}});}
     catch {if(request===editRequest.current)setError('글을 열지 못했어요.');}
-    finally {if(request===editRequest.current)setOpening(null);}
+    finally {if(request===editRequest.current){operation.current=false;setOpening(null);}}
+  }
+  async function remove(item:LocalItem,discard:boolean){
+    if(operation.current)return;
+    operation.current=true;
+    const request=++editRequest.current;setDeleting(item.id);setError('');
+    try{
+      let result=null;
+      if(discard)await deviceNotes.discardDraft(item.id);
+      else result=await deleteOwnNote(item,deviceNotes);
+      if(request===editRequest.current){
+        await load();
+        if(result&&request===editRequest.current)setError('삭제를 완료하지 못했어요. 편집에서 공개 결과나 서버 상태를 확인해 주세요.');
+      }
+    }catch{if(request===editRequest.current)setError('글을 삭제하지 못했어요. 편집에서 공개 상태를 확인한 뒤 다시 시도해 주세요.');}
+    finally{if(request===editRequest.current){operation.current=false;setDeleting(null);}}
   }
   return <View style={[styles.page,{paddingTop:insets.top}]}>
     <FlatList style={styles.reading} contentContainerStyle={styles.list} data={rows??[]} keyExtractor={item=>item.id}
@@ -44,6 +64,8 @@ function MyNotesContent() {
       ItemSeparatorComponent={()=><View style={styles.separator}/>}
       renderItem={({item})=>{
         const pristine=item.kind==='draft'&&item.revision===0&&item.body===''&&item.visibility===null&&!item.publicationState;
+        const discard=item.kind==='draft'&&!item.publicationState;
+        const disabled=opening!==null||deleting!==null;
         return <View style={[styles.note,pristine&&styles.pristine]}>
       {pristine?<Text style={styles.pristineTitle}>{getScene(item.sceneId)?.name??'장소를 찾을 수 없어요.'} · 작성 전 초안</Text>:<>
       <Text style={textStyles.heading}>{getScene(item.sceneId)?.name??'장소를 찾을 수 없어요.'}</Text>
@@ -52,10 +74,10 @@ function MyNotesContent() {
         item.publicationState==='conflict'||item.publicationState==='rejected'?'공개 상태 확인 필요':item.kind==='draft'?'초안':'나만 보기'}</Text>}
       <Text numberOfLines={3} style={textStyles.body}>{item.body || '빈 초안'}</Text>
       </>}
-      <View style={styles.actions}><Action label={opening===item.id?'여는 중':item.kind==='draft'?'이어 쓰기':'편집'} disabled={opening!==null} onPress={()=>{void edit(item.id);}} />
-        {item.kind!=='draft' && <Action label="사진에서 보기" onPress={()=>router.push({pathname:'/scenes/[sceneId]',params:{sceneId:item.sceneId,messageId:item.id}})} />}
-        {item.kind!=='published'&&<Action label={pristine?'버리기':item.kind==='draft'?'초안 버리기':'삭제'} variant={pristine?'quiet':'danger'} disabled={opening!==null} onPress={()=>Alert.alert(item.kind==='draft'?'작성 중인 초안을 버릴까요?':'이 기기에서 글을 삭제할까요?',undefined,[{text:'취소',style:'cancel'},
-          {text:'삭제',style:'destructive',onPress:()=>{void (item.kind==='draft'?deviceNotes.discardDraft(item.id):deviceNotes.deleteNote(item.id)).then(load,()=>setError('삭제하지 못했어요.'));}}])} />}</View>
+      <View style={styles.actions}><Action label={opening===item.id?'여는 중':item.kind==='draft'?'이어 쓰기':'편집'} disabled={disabled} onPress={()=>{void edit(item.id);}} />
+        {item.kind!=='draft' && <Action label="사진에서 보기" disabled={disabled} onPress={()=>router.push({pathname:'/scenes/[sceneId]',params:{sceneId:item.sceneId,messageId:item.id}})} />}
+        <Action label={pristine?'버리기':discard?'초안 버리기':'삭제'} variant={pristine?'quiet':'danger'} busy={deleting===item.id} disabled={disabled} onPress={()=>Alert.alert(discard?'작성 중인 초안을 버릴까요?':'글을 삭제할까요?',discard?undefined:'공개된 글은 공개를 내리고, 이 기기의 글과 수정 내용도 삭제해요. 되돌릴 수 없어요.',[{text:'취소',style:'cancel'},
+          {text:'삭제',style:'destructive',onPress:()=>{void remove(item,discard);}}])} /></View>
     </View>;}} />
   </View>;
 }

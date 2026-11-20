@@ -52,6 +52,11 @@ export function createStore(transaction: Transaction, newId: () => string, now =
     const job = await tx.getFirstAsync<{ state: PublicationState; serverVersion:number|null }>('SELECT state,serverVersion FROM publication_jobs WHERE noteId=?',id);
     if (job && job.state!=='withdrawn' && !(job.state==='rejected' && job.serverVersion===null)) throw new Error('Publication must be resolved or withdrawn first');
   }
+  async function removeNote(tx:Connection,id:string){
+    await tx.runAsync('DELETE FROM drafts WHERE id=?',id);
+    await tx.runAsync('DELETE FROM notes WHERE id=?',id);
+    await tx.runAsync('DELETE FROM publication_jobs WHERE noteId=?',id);
+  }
   const job = async (tx: Connection,id:string):Promise<PublicationJob|null> => {
     const row=await tx.getFirstAsync<Omit<PublicationJob,'payload'> & {payload:string}>('SELECT * FROM publication_jobs WHERE noteId=?',id);
     return row ? {...row,payload:JSON.parse(row.payload)} : null;
@@ -193,8 +198,12 @@ export function createStore(transaction: Transaction, newId: () => string, now =
     }),
     deleteNote: (id: string) => transact(async tx => {
       await protectPublication(tx,id);
-      await tx.runAsync('DELETE FROM drafts WHERE id=?',id);
-      await tx.runAsync('DELETE FROM notes WHERE id=?',id);
+      await removeNote(tx,id);
+    }),
+    deleteConflictNote: (d:Draft,ownerId:string,serviceId:string,inspection:Inspection) => transact(async tx=>{
+      await conflict(tx,d,ownerId,serviceId,inspection);
+      if(inspection.state.kind==='found'&&inspection.state.visible)throw new Error('Withdraw publication first');
+      await removeNote(tx,d.id);
     }),
     getPublication: (id:string) => transact(tx=>job(tx,id)),
     preparePublication: (d:Draft,ownerId:string,serviceId:string,withdraw=false) => transact(async tx=>{

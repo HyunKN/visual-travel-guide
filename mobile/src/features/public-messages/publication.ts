@@ -21,6 +21,25 @@ export interface PublicationRemote {
 export class PublicationRejected extends Error {
   constructor(readonly kind:'conflict'|'rejected',readonly rateLimit?:RateLimitInfo) { super(kind); }
 }
+export function canDeleteLocally(job:PublicationJob|null) {
+  return !job || job.state==='withdrawn' || (job.state==='rejected'&&job.serverVersion===null);
+}
+/** Keep the local copy and receipt until the server withdrawal is confirmed. */
+export function createNoteDeleter(storage:Pick<ReturnType<typeof createStore>,'getPublication'|'preparePublication'|'settlePublication'|'deleteNote'>,remote:PublicationRemote) {
+  return async(draft:Draft):Promise<DeliveryResult|null>=>{
+    const previous=await storage.getPublication(draft.id);
+    if(previous&&(previous.ownerId!==remote.ownerId||previous.serviceId!==remote.serviceId))throw new Error('Wrong publication session or service');
+    if(previous&&!canDeleteLocally(previous)){
+      // Do not publish an unresolved request as a side effect of deleting a note.
+      if(previous.state==='conflict'||(['pending','uncertain'].includes(previous.state)&&!previous.payload.p_withdraw))throw new Error('Resolve previous publication first');
+      if(!['pending','uncertain'].includes(previous.state))await storage.preparePublication(draft,remote.ownerId,remote.serviceId,true);
+      const result=await createPublisher(storage,remote).deliver(draft.id);
+      if(result.state!=='withdrawn')return result;
+    }
+    await storage.deleteNote(draft.id);
+    return null;
+  };
+}
 /** One explicit private-save action; never claim private before withdrawal is confirmed. */
 export function createPrivateSaver(storage:Pick<ReturnType<typeof createStore>,'getPublication'|'preparePublication'|'saveDraft'|'savePrivate'|'settlePublication'>,remote:PublicationRemote){
   return async(draft:Draft):Promise<DeliveryResult|null>=>{

@@ -6,7 +6,7 @@ const {tmpdir}=require('node:os');
 const path=require('node:path');
 const {randomUUID}=require('node:crypto');
 const {createStore,migrate}=require('../../../../.codex-build/app-message-tests/local-notes/store.js');
-const {createPublisher,createPrivateSaver,PublicationRejected}=require('../../../../.codex-build/app-message-tests/public-messages/publication.js');
+const {createPublisher,createPrivateSaver,createNoteDeleter,PublicationRejected}=require('../../../../.codex-build/app-message-tests/public-messages/publication.js');
 const {createPublicationRemote,serverRejection}=require('../../../../.codex-build/app-message-tests/public-messages/remote.js');
 function connect(file=':memory:') {
   const db=new DatabaseSync(file);
@@ -22,6 +22,60 @@ async function prepare(c){
 function remote(overrides={}){
   return {ownerId:'author-a',serviceId:'project-a',status:async()=>null,write:async()=>1,...overrides};
 }
+test('delete withdraws a legacy long public note before removing its local body and receipt',async t=>{
+  const c=connect();t.after(()=>c.db.close());await c.tx(migrate);const {d}=await prepare(c);
+  await createPublisher(c.store,remote()).deliver(d.id);let writes=0;
+  const legacy={...d,body:'긴'.repeat(1324),revision:2};await c.store.saveDraft(legacy);
+  const remove=createNoteDeleter(c.store,remote({write:async(_,p)=>{
+    writes++;assert.equal(p.p_withdraw,true);assert.equal(p.p_body,null);
+    assert.equal((await c.store.list()).length,1);return 2;
+  }}));
+  assert.equal(await remove(legacy),null);assert.equal(writes,1);
+  assert.deepEqual(await c.store.list(),[]);assert.equal(await c.store.getPublication(d.id),null);
+  assert.equal(await c.store.getDraft(d.id,d.sceneId),null);
+  await assert.rejects(c.store.saveDraft({...legacy,revision:3}));
+});
+test('delete of a private note does not contact the server',async t=>{
+  const c=connect();t.after(()=>c.db.close());await c.tx(migrate);
+  const d={...await c.store.createDraft('scene-a',{u:.2,v:.3}),body:'개인',visibility:'private',revision:1};
+  await c.store.savePrivate(d);
+  assert.equal(await createNoteDeleter(c.store,remote({write:async()=>assert.fail('private delete sent an RPC')}))(d),null);
+  assert.deepEqual(await c.store.list(),[]);
+});
+test('delete retries a lost withdrawal receipt without losing the body or sending a second request',async t=>{
+  const c=connect();t.after(()=>c.db.close());await c.tx(migrate);const {d}=await prepare(c);
+  await createPublisher(c.store,remote()).deliver(d.id);const receipts=new Map();let writes=0;
+  const remove=createNoteDeleter(c.store,remote({status:async id=>receipts.get(id)??null,write:async id=>{writes++;receipts.set(id,2);throw new Error('lost reply');}}));
+  assert.equal((await remove(d)).state,'uncertain');assert.equal((await c.store.getDraft(d.id,d.sceneId)).body,d.body);
+  const requestId=(await c.store.getPublication(d.id)).requestId;
+  assert.equal(await remove(d),null);assert.equal(writes,1);assert.ok(receipts.has(requestId));
+  assert.deepEqual(await c.store.list(),[]);
+});
+test('local delete failure retains the confirmed withdrawal and retries only local deletion',async t=>{
+  const c=connect();t.after(()=>c.db.close());await c.tx(migrate);const {d}=await prepare(c);
+  await createPublisher(c.store,remote()).deliver(d.id);let writes=0;
+  const remove=createNoteDeleter(c.store,remote({write:async()=>{writes++;return 2;}}));
+  c.db.exec("CREATE TRIGGER fail BEFORE DELETE ON drafts BEGIN SELECT RAISE(ABORT,'disk'); END");
+  await assert.rejects(remove(d));assert.equal((await c.store.getPublication(d.id)).state,'withdrawn');
+  assert.equal((await c.store.getDraft(d.id,d.sceneId)).body,d.body);
+  c.db.exec('DROP TRIGGER fail');assert.equal(await remove(d),null);assert.equal(writes,1);
+});
+test('delete never publishes an unresolved first publication and rejects other accounts/services',async t=>{
+  const c=connect();t.after(()=>c.db.close());await c.tx(migrate);const {d,job}=await prepare(c);
+  let writes=0;const r=remote({write:async()=>{writes++;return 1;}});
+  await assert.rejects(createNoteDeleter(c.store,r)(d));
+  await assert.rejects(createNoteDeleter(c.store,{...r,ownerId:'other'})(d));
+  await assert.rejects(createNoteDeleter(c.store,{...r,serviceId:'other'})(d));
+  assert.equal(writes,0);assert.equal((await c.store.getPublication(d.id)).requestId,job.requestId);
+  assert.equal((await c.store.getDraft(d.id,d.sceneId)).body,d.body);
+});
+test('withdrawal conflict preserves the note and makes state inspection necessary',async t=>{
+  const c=connect();t.after(()=>c.db.close());await c.tx(migrate);const {d}=await prepare(c);
+  await createPublisher(c.store,remote()).deliver(d.id);
+  const remove=createNoteDeleter(c.store,remote({write:async()=>{throw new PublicationRejected('conflict');}}));
+  assert.equal((await remove(d)).state,'conflict');await assert.rejects(remove(d));
+  assert.equal((await c.store.getDraft(d.id,d.sceneId)).body,d.body);
+});
 test('cancel public edit restores the confirmed body/position without resending and ignores stale writes',async t=>{
   const c=connect();t.after(()=>c.db.close());await c.tx(migrate);const {d}=await prepare(c);
   await createPublisher(c.store,remote()).deliver(d.id);
@@ -71,23 +125,24 @@ test('confirmed unchanged publication is listed as published after reopening wit
   assert.equal((await c.store.edit(d.id)).id,d.id);
 });
 
-test('My Notes renders a confirmed row with edit/photo actions and no unfinished-draft controls',async t=>{
+test('My Notes confirms deletion of a public row through server withdrawal, with no unfinished-draft controls',async t=>{
   const c=connect();t.after(()=>c.db.close());await c.tx(migrate);const {d}=await prepare(c);
   await createPublisher(c.store,remote()).deliver(d.id);const [row]=await c.store.list();
   const fs=require('node:fs'),vm=require('node:vm'),ts=require('typescript'),exports={};
-  const jsx=(type,props)=>({type,props});
+  const jsx=(type,props)=>({type,props}),alerts=[];let deletes=0;
   const modules={
     'react/jsx-runtime':{jsx,jsxs:jsx},
     react:{useCallback:fn=>fn,useRef:value=>({current:value}),useState:initial=>[typeof initial==='function'?initial():initial,()=>{}]},
     'expo-router':{router:{},useFocusEffect:()=>{}},
-    'react-native':{Alert:{},FlatList:'FlatList',View:'View',StyleSheet:{create:x=>x}},
+    'react-native':{Alert:{alert:(...args)=>alerts.push(args)},FlatList:'FlatList',View:'View',StyleSheet:{create:x=>x}},
     'react-native-safe-area-context':{useSafeAreaInsets:()=>({top:0})},
     '../../ui/Text':{Text:'Text'},'../../ui/Action':{Action:'Action'},'../../ui/Skeleton':{Skeleton:'Skeleton'},
     '../../ui/theme':{color:{},layout:{},textStyles:{}},
-    '../../features/local-notes/device':{accountNotes:()=>({})},
+    '../../features/local-notes/device':{accountNotes:()=>c.store},
     '../../features/place-messages/scenes':{getScene:()=>({name:'근정전'})},
     '../../features/auth/MemoGate':{MemoGate:'MemoGate',AccountActions:'AccountActions'},
     '../../features/public-messages/OwnPublicationStatus':{OwnPublicationStatus:'OwnPublicationStatus'},
+    '../../features/public-messages/nativeService':{deleteOwnNote:async(d,store)=>{deletes++;return createNoteDeleter(store,remote({write:async()=>2}))(d);}},
   };
   const code=ts.transpileModule(fs.readFileSync(path.join(process.cwd(),'src/app/(browse)/my-notes.tsx'),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX}}).outputText;
   vm.runInNewContext(code,{exports,require:name=>{assert.ok(name in modules,`unexpected import ${name}`);return modules[name];}});
@@ -96,8 +151,12 @@ test('My Notes renders a confirmed row with edit/photo actions and no unfinished
   const tree=flatList.props.renderItem({item:row});
   const nodes=x=>Array.isArray(x)?x.flatMap(nodes):!x||typeof x!=='object'?[]:[x,...nodes(x.props?.children)];
   const labels=nodes(tree).filter(x=>x.type==='Action').map(x=>x.props.label);
-  assert.deepEqual(labels,['편집','사진에서 보기']);
+  assert.deepEqual(labels,['편집','사진에서 보기','삭제']);
   assert.ok(nodes(tree).some(x=>x.type==='OwnPublicationStatus'&&x.props.item===row));
+  nodes(tree).find(x=>x.type==='Action'&&x.props.label==='삭제').props.onPress();
+  assert.equal(deletes,0);assert.ok(alerts.at(-1)[2].some(b=>b.style==='cancel'));
+  alerts.at(-1)[2].find(b=>b.text==='삭제').onPress();await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(deletes,1);assert.deepEqual(await c.store.list(),[]);
 });
 
 test('only the exact confirmed snapshot is completed; later local edits and uncertain delivery stay drafts',async t=>{

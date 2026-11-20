@@ -2,6 +2,9 @@ name: Build unsigned iPhone IPA
 
 on:
   workflow_dispatch:
+  push:
+    branches: [codex/ios-free-device-testing]
+    paths: ['mobile/**', '.github/workflows/ios-unsigned.yml']
 
 permissions:
   contents: read
@@ -71,6 +74,8 @@ jobs:
           EXPO_CONFIG
           npx --no-install expo prebuild --platform ios --no-install
           pod install --project-directory=ios
+          grep -F 'NubiIOSRecognition' ios/Podfile.lock
+          grep -F 'onnxruntime-objc (1.24.3)' ios/Podfile.lock
       - name: Compile unsigned Release for iPhone
         env:
           EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
@@ -116,6 +121,7 @@ jobs:
           xcrun vtool -show-build "$app/$executable" | grep -Eiq '^[[:space:]]*platform[[:space:]]+IOS[[:space:]]*$'
           test -s "$app/main.jsbundle"
           test ! -e "$app/embedded.mobileprovision"
+          [[ -z "$(find "$app" -type f -name '*.onnx' -print -quit)" ]]
 
           package_dir="$RUNNER_TEMP/nubi-package"
           mkdir -p "$package_dir/Payload"
