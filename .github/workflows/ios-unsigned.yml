@@ -1,0 +1,154 @@
+name: Build Nubi 0.1.1 iPhone Core ML IPA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [codex/ios-coreml-0-1-1]
+    paths: ['mobile/**', '.github/workflows/ios-unsigned.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+        working-directory: mobile
+    env:
+      CI: '1'
+      EXPO_NO_DOTENV: '1'
+      IOS_BUNDLE_IDENTIFIER: com.visualtravelguide.app
+      NUBI_IOS_COREML_BENCHMARK: '1'
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - name: Install dependencies and generate iOS project
+        run: |
+          node --version
+          xcodebuild -version
+          pod --version
+          npm ci
+          if [[ -e app.config.ts || -e app.ios-ci-base.cjs ]]; then
+            echo "::error::The iOS CI config wrapper conflicts with an existing file."
+            exit 1
+          fi
+          cp app.config.js app.ios-ci-base.cjs
+          cat > app.config.js <<'EXPO_CONFIG'
+          const configureApp = require('./app.ios-ci-base.cjs');
+
+          module.exports = context => {
+            const config = configureApp(context);
+            const plugins = config.plugins.map(plugin => {
+              const [name, options] = Array.isArray(plugin) ? plugin : [plugin];
+              if (name === 'expo-font') {
+                return [name, {...options, ios: {fonts: [
+                  './assets/fonts/SpoqaHanSansRegular.ttf',
+                  './assets/fonts/SpoqaHanSansBold.ttf',
+                ]}}];
+              }
+              if (name === 'expo-location') {
+                return [name, {
+                  ...options,
+                  locationWhenInUsePermission: '주변 장소와 현재 위치를 확인하려면 위치 접근이 필요해요.',
+                  locationAlwaysAndWhenInUsePermission: false,
+                  locationAlwaysPermission: false,
+                  motionUsagePermission: false,
+                }];
+              }
+              return plugin;
+            });
+            return {
+              ...config,
+              name: '누비 Nubi',
+              ios: {...config.ios, bundleIdentifier: process.env.IOS_BUNDLE_IDENTIFIER},
+              plugins,
+            };
+          };
+          EXPO_CONFIG
+          npx --no-install expo prebuild --platform ios --no-install
+          pod install --project-directory=ios
+          grep -F 'NubiIOSRecognition' ios/Podfile.lock
+          if grep -q onnxruntime ios/Podfile.lock; then
+            echo "::error::Core ML benchmark must build without the ONNX Runtime pods."
+            exit 1
+          fi
+      - name: Compile unsigned Release for iPhone
+        env:
+          EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
+          EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          auth_config=disabled
+          if [[ -n "$EXPO_PUBLIC_SUPABASE_URL" || -n "$EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY" ]]; then
+            if [[ ! "$EXPO_PUBLIC_SUPABASE_URL" =~ ^https://[a-z0-9-]+\.supabase\.co/?$ ||
+                  ! "$EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY" =~ ^sb_publishable_[a-zA-Z0-9_-]+$ ]]; then
+              echo "::error::Set the Supabase project URL variable and publishable key secret together, or leave both unset."
+              exit 1
+            fi
+            auth_config=enabled
+          fi
+
+          workspaces=(ios/*.xcworkspace)
+          if [[ ${#workspaces[@]} -ne 1 || ! -d "${workspaces[0]}" ]]; then
+            echo "::error::Expected a single generated iOS workspace."
+            exit 1
+          fi
+          workspace="${workspaces[0]}"
+          scheme="$(basename "$workspace" .xcworkspace)"
+          xcodebuild -workspace "$workspace" -scheme "$scheme" \
+            -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' \
+            -derivedDataPath "$RUNNER_TEMP/nubi-ios" \
+            ARCHS=arm64 CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY= \
+            build
+          echo "Supabase configuration: $auth_config" >> "$GITHUB_STEP_SUMMARY"
+      - name: Verify device build and package IPA
+        run: |
+          apps=("$RUNNER_TEMP"/nubi-ios/Build/Products/Release-iphoneos/*.app)
+          if [[ ${#apps[@]} -ne 1 || ! -d "${apps[0]}" ]]; then
+            echo "::error::Expected a single Release-iphoneos app."
+            exit 1
+          fi
+          app="${apps[0]}"
+          plist="$app/Info.plist"
+          bundle_id="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$plist")"
+          executable="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$plist")"
+          minimum_ios="$(/usr/libexec/PlistBuddy -c 'Print :MinimumOSVersion' "$plist")"
+          [[ "$bundle_id" == "$IOS_BUNDLE_IDENTIFIER" ]]
+          [[ "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleDisplayName' "$plist")" == "누비 Nubi" ]]
+          [[ "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$plist")" == "0.1.1" ]]
+          [[ "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$plist")" == "2" ]]
+          [[ "$(xcrun lipo -archs "$app/$executable")" == arm64 ]]
+          xcrun vtool -show-build "$app/$executable" | grep -Eiq '^[[:space:]]*platform[[:space:]]+IOS[[:space:]]*$'
+          test -s "$app/main.jsbundle"
+          test ! -e "$app/embedded.mobileprovision"
+          [[ -z "$(find "$app" -type f -name '*.onnx' -print -quit)" ]]
+
+          package_dir="$RUNNER_TEMP/nubi-package"
+          mkdir -p "$package_dir/Payload"
+          ditto "$app" "$package_dir/Payload/$(basename "$app")"
+          ditto -c -k --keepParent "$package_dir/Payload" "$RUNNER_TEMP/Nubi-iOS-0.1.1-CoreML.ipa"
+          unzip -tq "$RUNNER_TEMP/Nubi-iOS-0.1.1-CoreML.ipa"
+          {
+            printf 'Commit: `%s`\n' "$GITHUB_SHA"
+            printf 'Bundle ID: `%s`\n' "$bundle_id"
+            printf 'Device architecture: `arm64`\n'
+            printf 'Minimum iOS: `%s`\n' "$minimum_ios"
+            echo 'IPA SHA-256:'
+            shasum -a 256 "$RUNNER_TEMP/Nubi-iOS-0.1.1-CoreML.ipa"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload unsigned IPA
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: nubi-iphone-coreml-0.1.1-${{ github.sha }}
+          path: ${{ runner.temp }}/Nubi-iOS-0.1.1-CoreML.ipa
+          if-no-files-found: error
+          retention-days: 7
+          compression-level: 0

@@ -1,0 +1,9 @@
+{
+  "platforms": ["android", "apple"],
+  "apple": {
+    "modules": ["NubiIOSRecognitionModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.nubirecognition.RecognitionModule"]
+  }
+}

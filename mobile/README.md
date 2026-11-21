@@ -243,7 +243,7 @@ SDK 57 사진 선택기를 추가한 빌드에서는 Expo가 네이티브 모듈
 
 사진 인식의 앱 쪽 요청 흐름은 `src/features/recognition/`에 있다. `createRequest` → `recognize`가 현재 사진·콘텐츠 버전을 고정하고, `cancelRecognition`은 화면의 기다림과 결과 적용을 취소한다. 30초는 개발용 대기 상한이며 추론 성능 목표가 아니다. 취소·시간 초과 뒤에도 adapter의 Promise가 실제 네이티브 작업 종료를 알릴 때까지 새 추론은 `BUSY`다. 화면 이탈·백그라운드 전환·사진 교체/해제에서도 이전 결과를 적용하지 않는다. 사진 파일은 삭제하지 않는다.
 
-`nativeRecognition.ts`의 runtime은 아직 `null`이다. 현재 앱은 `MODEL_NOT_READY`와 직접 선택 경로를 제공하며, 테스트의 가짜 모델을 제품에 연결하지 않는다. #21에서 artifact·전처리·매핑·정책 검증 근거를 받으면 `RecognitionRuntime`을 구현해 이 한 곳에 연결한다. adapter는 실제 계산이 끝나기 전에 Promise를 완료시키면 안 된다. 결과 ID·버전·순위·점수 유한성·지원 장소·출처를 검사하고, 정책 검증이 없으면 `identified`를 `uncertain`으로 보류한다. 위치는 인식 입력에 넣지 않는다. 앱 쪽 14개 경합·실패 검사는 `npm run test:recognition`이며 실제 추론·Android 화면 검사를 대신하지 않는다.
+`nativeRecognition.ts`는 설치된 네이티브 추론 모듈을 연결한다. iPhone 테스트 빌드에서 **사진 → 사진 인식 모델 설정 → 모델 파일 가져오기**로 `NubiRecognition.mlpackage`를 한 번 등록한다. 이후 촬영하거나 갤러리에서 사진을 고르면 자동으로 분석하고, 순위가 가장 높은 장소를 후보로 보여준다. 장소 이야기는 사용자가 후보를 선택하면 열린다. 모델을 사용할 수 없을 때는 장소를 직접 고를 수 있다. 위치는 인식 입력에 넣지 않는다. `npm run test:recognition`으로 요청 경합과 결과 계약을 확인하며, 실제 추론은 기기에서 검증한다.
 
 ## 데이터 계약
 

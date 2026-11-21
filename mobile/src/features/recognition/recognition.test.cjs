@@ -6,6 +6,9 @@ const { createRecognition } = require(path.resolve(__dirname, '../../../../.code
 const photo = () => ({ photoId: 'photo-a', uri: 'file:///cache/a.jpg', width: 100, height: 80, mimeType: 'image/jpeg', origin: 'library' });
 const configuration = { contentVersion: '1', modelVersion: 'test-model', preprocessingVersion: 'test-preprocess', decisionPolicyVersion: 'test-policy', scoreKind: 'test-similarity', scoreOrder: 'descending', candidateLimit: 2, policyValidation: 'validated' };
 const identified = input => ({ ...input, status: 'identified', selectedTargetId: 'a', candidates: [{ targetId: 'a', rank: 1, score: .8 }, { targetId: 'b', rank: 2, score: .2 }], modelVersion: configuration.modelVersion, preprocessingVersion: configuration.preprocessingVersion, decisionPolicyVersion: configuration.decisionPolicyVersion, scoreKind: configuration.scoreKind, locationUsed: false });
+const {MODEL_OUTPUT_CONTRACT:outputContract}=require(path.resolve(__dirname,'../../../../.codex-build/app-recognition-tests/recognition/modelOutputs.js'));
+function analyzed(input){return {...identified(input),modelVersion:outputContract.modelVersion,preprocessingVersion:outputContract.preprocessingVersion,status:'analyzed',outputs:{contractVersion:outputContract.version,modelSha256:outputContract.modelSha256,encoderSha256:outputContract.encoderSha256,
+  buildingLabels:[...outputContract.buildingLabels],partLabels:[...outputContract.partLabels],focusLabels:[...outputContract.focusLabels],buildingLogits:[3,2,1],partLogits:[4,5,6],focusLogits:null}};}
 function deferred() { let resolve, reject; const promise = new Promise((a, b) => { resolve = a; reject = b; }); return { promise, resolve, reject }; }
 function setup(overrides = {}) {
   const context = { photo: photo(), contentVersion: '1', supportedTargetIds: ['a', 'b'] };
@@ -40,6 +43,24 @@ test('unvalidated policy cannot turn even a first-ranked candidate into an ident
   const result = await h.api.recognize(h.input());
   assert.equal(result.status, 'uncertain'); assert.equal(result.reason, 'policy-unvalidated');
   assert.equal(result.selectedTargetId, undefined);
+});
+test('hash-bound three-head results retain diagnostic values and explicit unavailable focus without identifying',async()=>{
+  const h=setup({configuration:{...configuration,modelVersion:outputContract.modelVersion,preprocessingVersion:outputContract.preprocessingVersion,policyValidation:'pending'},recognize:async input=>analyzed(input)});
+  h.context.supportedTargetIds=[...outputContract.buildingLabels];
+  const result=await h.api.recognize(h.input());assert.equal(result.status,'analyzed');assert.equal(result.selectedTargetId,undefined);
+  assert.equal(result.analysis.automaticPolicyValidated,false);assert.equal(result.analysis.focus.state,'unavailable');
+  assert.equal(result.analysis.partScores[2].label,'japsang');
+});
+test('three-head packets still enforce identity, provenance and exact output labels before UI acceptance',async()=>{
+  for(const change of [r=>{r.photoId='old-photo';},r=>{r.preprocessingVersion='wrong';},r=>{r.outputs.partLabels=['signboard','eaves'];}]){
+    const h=setup({configuration:{...configuration,modelVersion:outputContract.modelVersion,preprocessingVersion:outputContract.preprocessingVersion},recognize:async input=>{const r=analyzed(input);change(r);return r;}});
+    h.context.supportedTargetIds=[...outputContract.buildingLabels];
+    assert.equal((await h.api.recognize(h.input())).status,'error');
+  }
+});
+test('three-head building label mapping must exist in the current content, even while automatic routing is disabled',async()=>{
+  const h=setup({configuration:{...configuration,modelVersion:outputContract.modelVersion,preprocessingVersion:outputContract.preprocessingVersion},recognize:async input=>analyzed(input)});
+  const result=await h.api.recognize(h.input());assert.equal(result.status,'error');assert.equal(result.code,'CONTENT_MISMATCH');
 });
 test('cancel resolves waiting immediately, is idempotent and holds native lock across a new photo/screen', async () => {
   const work = deferred(); let runs = 0;

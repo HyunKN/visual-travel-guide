@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { photoInput } from './nativePhotoInput';
 import type { Photo, PhotoResult } from './photoInput';
 import { recognition } from '../recognition/nativeRecognition';
+import { iosModel } from '../recognition/deviceRuntime';
 import type { ErrorCode, RecognitionResult } from '../recognition/recognition';
 import { content } from '../place-content/content';
 import { Action } from '../../ui/Action';
@@ -14,7 +15,7 @@ import { color, layout, textStyles } from '../../ui/theme';
 const recognitionErrors: Record<ErrorCode, string> = {
   PHOTO_UNREADABLE: '이 사진을 읽을 수 없어요. 다른 사진을 골라주세요.',
   IMAGE_UNSUPPORTED: '이 형식의 사진은 아직 읽을 수 없어요. 다른 사진을 골라주세요.',
-  MODEL_NOT_READY: '이 버전에는 사진 인식 모델이 없어요.',
+  MODEL_NOT_READY: iosModel ? '사진 인식 모델 설정에서 모델 파일을 먼저 가져와 주세요.' : '이 버전에는 사진 인식 모델이 없어요.',
   MODEL_INCOMPATIBLE: '인식 모델을 사용할 수 없어요. 장소를 직접 골라주세요.',
   CONTENT_MISMATCH: '인식 결과와 장소 정보가 맞지 않아요. 장소를 직접 골라주세요.',
   INFERENCE_FAILED: '사진에서 장소를 찾지 못했어요. 다시 시도해주세요.',
@@ -28,6 +29,7 @@ export default function PhotoInputScreen() {
   const [settings, setSettings] = useState(false);
   const [recognizing, setRecognizing] = useState(false);
   const [outcome, setOutcome] = useState<RecognitionResult | null>(null);
+  const [showOtherPlaces, setShowOtherPlaces] = useState(false);
   const currentRequest = useRef<string | null>(null);
   const queuedPhoto = useRef<string | null>(null);
   const focused = useRef(false);
@@ -38,14 +40,14 @@ export default function PhotoInputScreen() {
     const id = currentRequest.current;
     currentRequest.current = null;
     if (id) recognition.cancelRecognition(id, reason);
-    if (mounted.current) { setRecognizing(false); setOutcome(null); }
+    if (mounted.current) { setRecognizing(false); setOutcome(null); setShowOtherPlaces(false); }
   }, []);
   const findPlace = useCallback(async (photoId: string) => {
     if (!mounted.current || currentRequest.current || !focused.current || AppState.currentState !== 'active') return;
     queuedPhoto.current = null;
     const input = recognition.createRequest(photoId);
     currentRequest.current = input.requestId;
-    setRecognizing(true); setOutcome(null); setError('');
+    setRecognizing(true); setOutcome(null); setError(''); setShowOtherPlaces(false);
     const result = await recognition.recognize(input);
     if (!mounted.current || !focused.current || currentRequest.current !== input.requestId) return;
     currentRequest.current = null;
@@ -112,16 +114,33 @@ export default function PhotoInputScreen() {
   };
   const identified=outcome?.status==='identified'?outcome:null;
   const place=identified?content.getBuilding(identified.selectedTargetId):null;
+  const [top,...otherPlaces] = outcome?.status === 'analyzed'
+    ? [...outcome.analysis.buildingScores].sort((a,b)=>b.probability-a.probability).flatMap(score=>{
+        const result=content.getBuilding(score.label);
+        return result.status==='ok'?[result.data]:[];
+      })
+    : [];
+  const openCandidate=(placeId: string)=>{
+    if (!photo || photoInput.getPhoto()?.photoId!==photo.photoId || AppState.currentState!=='active') return;
+    router.push({pathname:'/places/[placeId]',params:{placeId,origin:'manual-topic',photoId:photo.photoId}});
+  };
   return <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
     <Stack.Screen options={{ title: '사진' }} />
     {photo && <Image key={photo.photoId} source={{ uri: photo.uri }} accessible accessibilityLabel="선택한 사진" resizeMode="contain" style={styles.preview} onError={() => {if(photoInput.getPhoto()?.photoId===photo.photoId)setError('이 사진을 읽을 수 없어요. 다른 사진을 골라주세요.');}} />}
     {recognizing && <Text accessibilityLiveRegion="polite" style={styles.error}>장소를 찾는 중이에요.</Text>}
     {recognizing && <Action label="분석 취소" onPress={() => cancel()}/>}
-    {photo && !recognizing && !identified && <Action label="다시 분석" variant="soft" disabled={pending} onPress={() => void findPlace(photo.photoId)}/>}
+    {photo && !recognizing && !identified && !top && <Action label="다시 분석" variant="soft" disabled={pending} onPress={() => void findPlace(photo.photoId)}/>}
     {identified && place?.status==='ok' && <>
       <Text accessibilityRole="header" style={textStyles.heading}>{place.data.name}으로 보여요</Text>
       <Text style={textStyles.body}>{place.data.overview}</Text>
       <Action label={`${place.data.name} 이야기 보기`} variant="primary" onPress={() => router.push({ pathname: '/places/[placeId]', params: { placeId: place.data.id, origin: 'model', requestId: identified.requestId } })}/>
+    </>}
+    {top && <>
+      <Text accessibilityRole="header" style={textStyles.heading}>{top.name}일까요?</Text>
+      <Text style={textStyles.body}>{top.overview}</Text>
+      <Action label={`${top.name} 이야기 보기`} variant="primary" onPress={()=>openCandidate(top.id)}/>
+      {otherPlaces.length>0&&<Action label={showOtherPlaces?'다른 후보 접기':'다른 후보 보기'} onPress={()=>setShowOtherPlaces(value=>!value)}/>}
+      {showOtherPlaces&&otherPlaces.map(candidate=><Action key={candidate.id} label={candidate.name} variant="soft" onPress={()=>openCandidate(candidate.id)}/>)}
     </>}
     {outcome?.status === 'error' && <Text style={styles.error} accessibilityLiveRegion="polite">{recognitionErrors[outcome.code]}</Text>}
     {outcome?.status === 'uncertain' && <Text style={styles.error} accessibilityLiveRegion="polite">장소를 확실히 찾지 못했어요. 다른 사진으로 시도하거나 직접 골라주세요.</Text>}
@@ -131,6 +150,7 @@ export default function PhotoInputScreen() {
     {photo && <Action label="사진 선택 해제" disabled={pending} onPress={() => { cancel('superseded'); photoInput.releasePhoto(photo.photoId); setPhoto(null); setError(''); }}/>}
     {!!error && <Text accessibilityRole="alert" style={styles.error}>{error}</Text>}
     {settings && <Action label="설정 열기" onPress={() => void Linking.openSettings().catch(() => {if(mounted.current)setError('설정을 열지 못했어요. 휴대폰 설정에서 카메라 권한을 확인해주세요.');})}/>}
+    {iosModel && <Action label="사진 인식 모델 설정" disabled={pending||recognizing} onPress={()=>router.push('/development-check')}/>}
   </ScrollView>;
 }
 const styles = StyleSheet.create({
