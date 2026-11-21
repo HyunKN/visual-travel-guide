@@ -68,6 +68,7 @@ jobs:
             });
             return {
               ...config,
+              name: 'Nubi Core ML',
               ios: {...config.ios, bundleIdentifier: process.env.IOS_BUNDLE_IDENTIFIER},
               plugins,
             };
@@ -121,6 +122,7 @@ jobs:
           executable="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$plist")"
           minimum_ios="$(/usr/libexec/PlistBuddy -c 'Print :MinimumOSVersion' "$plist")"
           [[ "$bundle_id" == "$IOS_BUNDLE_IDENTIFIER" ]]
+          [[ "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleDisplayName' "$plist")" == "Nubi Core ML" ]]
           [[ "$(xcrun lipo -archs "$app/$executable")" == arm64 ]]
           xcrun vtool -show-build "$app/$executable" | grep -Eiq '^[[:space:]]*platform[[:space:]]+IOS[[:space:]]*$'
           test -s "$app/main.jsbundle"
@@ -130,21 +132,21 @@ jobs:
           package_dir="$RUNNER_TEMP/nubi-package"
           mkdir -p "$package_dir/Payload"
           ditto "$app" "$package_dir/Payload/$(basename "$app")"
-          ditto -c -k --keepParent "$package_dir/Payload" "$RUNNER_TEMP/Nubi-CoreML-Benchmark.ipa"
-          unzip -tq "$RUNNER_TEMP/Nubi-CoreML-Benchmark.ipa"
+          ditto -c -k --keepParent "$package_dir/Payload" "$RUNNER_TEMP/Nubi-CoreML-Benchmark-v2.ipa"
+          unzip -tq "$RUNNER_TEMP/Nubi-CoreML-Benchmark-v2.ipa"
           {
             printf 'Commit: `%s`\n' "$GITHUB_SHA"
             printf 'Bundle ID: `%s`\n' "$bundle_id"
             printf 'Device architecture: `arm64`\n'
             printf 'Minimum iOS: `%s`\n' "$minimum_ios"
             echo 'IPA SHA-256:'
-            shasum -a 256 "$RUNNER_TEMP/Nubi-CoreML-Benchmark.ipa"
+            shasum -a 256 "$RUNNER_TEMP/Nubi-CoreML-Benchmark-v2.ipa"
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Upload unsigned IPA
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: nubi-iphone-coreml-benchmark-${{ github.sha }}
-          path: ${{ runner.temp }}/Nubi-CoreML-Benchmark.ipa
+          path: ${{ runner.temp }}/Nubi-CoreML-Benchmark-v2.ipa
           if-no-files-found: error
           retention-days: 7
           compression-level: 0

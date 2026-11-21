@@ -131,7 +131,9 @@ public final class NubiIOSRecognitionModule: Module {
     }
     pickerDelegate = delegate
     #if NUBI_COREML_BENCHMARK
-    let types: [UTType] = [UTType(filenameExtension: "mlpackage") ?? .package, .folder]
+    // Files providers can classify extracted .mlpackage items as generic documents.
+    // install(_:) verifies the extension and the compiled model contract.
+    let types: [UTType] = [.item]
     #else
     let types: [UTType] = [.data]
     #endif

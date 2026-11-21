@@ -32,6 +32,7 @@ export default function DevelopmentCheckScreen() {
   const [report, setReport] = useState('');
   const [modelPresent, setModelPresent] = useState(false);
   const [coreMLBenchmark, setCoreMLBenchmark] = useState(false);
+  const modelTitle = coreMLBenchmark ? 'Core ML 모델 검사' : '사진 인식 모델';
   const [importing, setImporting] = useState(false);
   useEffect(() => {
     let active = true;
@@ -111,8 +112,8 @@ export default function DevelopmentCheckScreen() {
   return (
     <ScrollView contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 24 }]}>
       {iosModel ? <>
-        <Stack.Screen options={{ title: '사진 인식 모델' }} />
-        <Text accessibilityRole="header" style={styles.title}>사진 인식 모델</Text>
+        <Stack.Screen options={{ title: modelTitle }} />
+        <Text accessibilityRole="header" style={styles.title}>{modelTitle}</Text>
         <Text style={styles.description}>{modelPresent
           ? '모델 파일이 저장되어 있어요.'
           : `파일 앱에 저장한 ${coreMLBenchmark ? 'NubiRecognition.mlpackage' : 'model.onnx'}를 선택해 주세요.`}</Text>
