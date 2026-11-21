@@ -15,6 +15,7 @@ export default function RootLayout() {
           headerTitleStyle: { fontFamily: 'SpoqaHanSans', fontWeight: '700', fontSize: 17 },
           headerStyle: { backgroundColor: color.page },
           headerShadowVisible: false,
+          headerBackButtonDisplayMode: 'minimal',
           headerRight: () => <HomeButton />,
           contentStyle: { backgroundColor: color.page },
         }}

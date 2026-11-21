@@ -37,7 +37,8 @@ export function createPlaceContent(data: Catalog) {
     searchBuildings(query: string) {
       const normalize = (value: string) => value.normalize('NFC').replace(/\s+/g, '').toLocaleLowerCase('ko-KR');
       const term = normalize(query);
-      return data.places.filter(p => building(p.id).status === 'ok' && normalize(p.name).includes(term));
+      return data.places.filter(p => building(p.id).status === 'ok'
+        && (normalize(p.name).includes(term) || normalize(p.palace).includes(term)));
     },
     getBuilding: building,
     listEditorialStories: () => data.places.filter(p => building(p.id).status === 'ok').flatMap(place => {

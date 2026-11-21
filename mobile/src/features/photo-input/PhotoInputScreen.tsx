@@ -7,6 +7,7 @@ import { photoInput } from './nativePhotoInput';
 import type { Photo, PhotoResult } from './photoInput';
 import { recognition } from '../recognition/nativeRecognition';
 import type { ErrorCode, RecognitionResult } from '../recognition/recognition';
+import { content } from '../place-content/content';
 import { Action } from '../../ui/Action';
 import { color, layout, textStyles } from '../../ui/theme';
 
@@ -28,23 +29,51 @@ export default function PhotoInputScreen() {
   const [recognizing, setRecognizing] = useState(false);
   const [outcome, setOutcome] = useState<RecognitionResult | null>(null);
   const currentRequest = useRef<string | null>(null);
+  const queuedPhoto = useRef<string | null>(null);
   const focused = useRef(false);
   const mounted = useRef(false);
   const insets = useSafeAreaInsets();
   const cancel = useCallback((reason: 'user' | 'superseded' = 'user') => {
+    queuedPhoto.current = null;
     const id = currentRequest.current;
     currentRequest.current = null;
     if (id) recognition.cancelRecognition(id, reason);
     if (mounted.current) { setRecognizing(false); setOutcome(null); }
   }, []);
+  const findPlace = useCallback(async (photoId: string) => {
+    if (!mounted.current || currentRequest.current || !focused.current || AppState.currentState !== 'active') return;
+    queuedPhoto.current = null;
+    const input = recognition.createRequest(photoId);
+    currentRequest.current = input.requestId;
+    setRecognizing(true); setOutcome(null); setError('');
+    const result = await recognition.recognize(input);
+    if (!mounted.current || !focused.current || currentRequest.current !== input.requestId) return;
+    currentRequest.current = null;
+    setRecognizing(false);
+    setOutcome(result);
+  }, []);
   useFocusEffect(useCallback(() => {
     focused.current = true;
-    const subscription = AppState.addEventListener('change', state => { if (state !== 'active') cancel(); });
-    return () => { focused.current = false; subscription.remove(); cancel(); };
-  }, [cancel]));
+    const subscription = AppState.addEventListener('change', state => {
+      if (state === 'active' && queuedPhoto.current) void findPlace(queuedPhoto.current);
+      if (state !== 'active' && currentRequest.current) cancel();
+    });
+    return () => {
+      focused.current = false;
+      subscription.remove();
+      if (currentRequest.current || queuedPhoto.current) cancel();
+    };
+  }, [cancel, findPlace]));
   const apply = useCallback((result: PhotoResult | null) => {
     if (!mounted.current || !result) return;
-    if (result.kind === 'selected') { cancel('superseded'); setPhoto(result.photo); setError(''); setSettings(false); }
+    if (result.kind === 'selected') {
+      cancel('superseded');
+      setPhoto(result.photo); setError(''); setSettings(false);
+      if (focused.current) {
+        queuedPhoto.current = result.photo.photoId;
+        void findPlace(result.photo.photoId);
+      }
+    }
     if (result.kind === 'error') {
       setError(result.reason === 'permission' ? '카메라 권한을 허용해주세요.' : result.reason === 'unreadable' ? '이 사진을 읽을 수 없어요. 다른 사진을 골라주세요.' : '사진을 열지 못했어요. 다시 시도해주세요.');
       setSettings(result.reason === 'permission' && result.canAskAgain === false);
@@ -65,7 +94,7 @@ export default function PhotoInputScreen() {
         );
       }
     }
-  }, [cancel]);
+  }, [cancel, findPlace]);
   useEffect(() => {
     mounted.current = true;
     void photoInput.recoverPhoto().then(result => {
@@ -81,23 +110,19 @@ export default function PhotoInputScreen() {
     apply(await photoInput.selectPhoto(source));
     if (mounted.current) setPending(false);
   };
-  const findPlace = async () => {
-    if (!photo || pending || currentRequest.current || !focused.current || AppState.currentState !== 'active') return;
-    const input = recognition.createRequest(photo.photoId);
-    currentRequest.current = input.requestId;
-    setRecognizing(true); setOutcome(null); setError('');
-    const result = await recognition.recognize(input);
-    if (!mounted.current || !focused.current || currentRequest.current !== input.requestId) return;
-    currentRequest.current = null;
-    setRecognizing(false);
-    setOutcome(result);
-    if (result.status === 'identified') router.push({ pathname: '/places/[placeId]', params: { placeId: result.selectedTargetId, origin: 'model', requestId: result.requestId } });
-  };
+  const identified=outcome?.status==='identified'?outcome:null;
+  const place=identified?content.getBuilding(identified.selectedTargetId):null;
   return <ScrollView contentContainerStyle={[styles.page, { paddingBottom: insets.bottom + 24 }]}>
     <Stack.Screen options={{ title: '사진' }} />
     {photo && <Image key={photo.photoId} source={{ uri: photo.uri }} accessible accessibilityLabel="선택한 사진" resizeMode="contain" style={styles.preview} onError={() => {if(photoInput.getPhoto()?.photoId===photo.photoId)setError('이 사진을 읽을 수 없어요. 다른 사진을 골라주세요.');}} />}
-    {photo && <Action label={recognizing ? '장소 찾는 중' : '장소 찾기'} variant="primary" disabled={pending} busy={recognizing} onPress={() => void findPlace()}/>}
-    {recognizing && <Action label="취소" onPress={() => cancel()}/>}
+    {recognizing && <Text accessibilityLiveRegion="polite" style={styles.error}>장소를 찾는 중이에요.</Text>}
+    {recognizing && <Action label="분석 취소" onPress={() => cancel()}/>}
+    {photo && !recognizing && !identified && <Action label="다시 분석" variant="soft" disabled={pending} onPress={() => void findPlace(photo.photoId)}/>}
+    {identified && place?.status==='ok' && <>
+      <Text accessibilityRole="header" style={textStyles.heading}>{place.data.name}으로 보여요</Text>
+      <Text style={textStyles.body}>{place.data.overview}</Text>
+      <Action label={`${place.data.name} 이야기 보기`} variant="primary" onPress={() => router.push({ pathname: '/places/[placeId]', params: { placeId: place.data.id, origin: 'model', requestId: identified.requestId } })}/>
+    </>}
     {outcome?.status === 'error' && <Text style={styles.error} accessibilityLiveRegion="polite">{recognitionErrors[outcome.code]}</Text>}
     {outcome?.status === 'uncertain' && <Text style={styles.error} accessibilityLiveRegion="polite">장소를 확실히 찾지 못했어요. 다른 사진으로 시도하거나 직접 골라주세요.</Text>}
     {photo && <Action label="장소 직접 선택" onPress={() => { cancel(); router.dismissTo('/'); }}/>}

@@ -29,10 +29,14 @@ export default function Nearby(){
   const controller=useMemo(()=>createLocationController(nativeLocation),[]);
   const state=useSyncExternalStore(controller.subscribe,controller.snapshot);
   const [error,setError]=useState('');
+  const [showDistantPlaces,setShowDistantPlaces]=useState(false);
   const [devMenu,setDevMenu]=useState(false),[devFailure,setDevFailure]=useState(false);
   const active=useRef(false);
   const fix=state.kind==='ready'?state.fix:null,busy=state.kind==='locating';
   const details=locationDetails(fix,state.kind==='ready'?state.checkedAt:0);
+  const places=nearbyPlaces(fix,state.kind==='ready'?state.checkedAt:0);
+  const palaceDistance=places.find(place=>place.placeId==='gwanghwamun')?.distanceMeters;
+  const distant=places[0]?.distanceMeters != null && places[0].distanceMeters >= 5000;
   useFocusEffect(useCallback(()=>{
     active.current=true;setMapActive(AppState.currentState==='active'); controller.refreshAge();
     const subscription=AppState.addEventListener('change',value=>{
@@ -60,7 +64,7 @@ export default function Nearby(){
       }
     });
     // Do not evaluate MapLibre's getEnforcing imports on an older development APK.
-    if(Platform.OS!=='android'||!TurboModuleRegistry.get('MLRNMapViewModule'))load.fail('native-module');
+    if(!['android','ios'].includes(Platform.OS)||!TurboModuleRegistry.get('MLRNMapViewModule'))load.fail('native-module');
     else void import('../features/location/PalaceMap').then(m=>{if(alive&&load.snapshot()==='loading'){const next={Component:m.default,load,attempt,generation};loadedMap.current=next;setMap(next);}},cause=>{
       if(alive&&__DEV__&&cause instanceof Error)console.warn('[NearbyMap] import error:',cause.message.replace(/https?:\/\/\S+/g,'[URL]').slice(0,240));
       load.fail('import');
@@ -88,7 +92,7 @@ export default function Nearby(){
   const Map=map?.attempt===attempt&&(mapPhase==='ready'||(mapActive&&mapPhase==='loading'))?map.Component:null;
   return <ScrollView ref={scroll} style={styles.screen} contentContainerStyle={[styles.page,{paddingBottom:insets.bottom+12}]}><Stack.Screen options={{title:'주변 장소'}} />
     <View style={styles.content}>
-    {Map && map && !unavailable ? <Map key={map.generation} fix={fix} checkedAt={state.kind==='ready'?state.checkedAt:0} locating={busy} onLocate={()=>{void locate();}} focusRequest={focusRequest} onFocus={focusMap} open={open} onReady={()=>{if(active.current&&AppState.currentState==='active')map.load.ready();}} onFailure={()=>{if(active.current&&AppState.currentState==='active')map.load.fail();}}/> : <Text style={s.meta}>{!unavailable?'지도를 불러오는 중이에요.':'지도를 불러오지 못했어요. 데이터 또는 Wi-Fi 연결을 확인해주세요. 아래 목록에서 장소를 선택할 수 있어요.'}</Text>}
+    {Map && map && !unavailable ? <Map key={map.generation} fix={fix} checkedAt={state.kind==='ready'?state.checkedAt:0} locating={busy} onLocate={()=>{void locate();}} focusRequest={focusRequest} onFocus={focusMap} open={open} onReady={()=>{if(active.current&&AppState.currentState==='active')map.load.ready();}} onFailure={()=>{if(active.current&&AppState.currentState==='active')map.load.fail();}}/> : <Text style={s.meta}>{!unavailable?'지도를 불러오는 중이에요.':'지도를 표시할 수 없어요. 장소 목록에서 계속 둘러볼 수 있어요.'}</Text>}
     {unavailable&&<Action label="지도 다시 시도" onPress={()=>{setDevFailure(false);setUnavailable(false);setAttempt(a=>a+1);}}/>}
     <Action label={busy?'위치 확인 중':'현재 위치 확인'} disabled={busy} onPress={()=>{void locate();}}/>
     {busy&&<Action label="취소" onPress={()=>controller.clear()}/>}
@@ -99,7 +103,11 @@ export default function Nearby(){
     {state.kind==='denied'&&!state.canAskAgain&&<Action label="앱 권한 설정 열기" onPress={()=>{void settings();}}/>}
     {state.kind==='disabled'&&<Action label="위치 설정 열기" onPress={()=>{void settings(true);}}/>}
     {!!error&&<Text accessibilityRole="alert" style={s.meta}>{error}</Text>}
-    {nearbyPlaces(fix,state.kind==='ready'?state.checkedAt:0).map(p=>{const b=content.getBuilding(p.placeId),d=p.distanceMeters;
+    {distant && palaceDistance != null && <>
+      <Text style={s.meta}>경복궁까지 직선 약 {(palaceDistance/1000).toFixed(1)}km · 광화문 기준</Text>
+      <Action label={showDistantPlaces?'경복궁 장소 접기':'경복궁 장소 보기'} onPress={()=>setShowDistantPlaces(value=>!value)}/>
+    </>}
+    {(!distant||showDistantPlaces)&&places.map(p=>{const b=content.getBuilding(p.placeId),d=distant?null:p.distanceMeters;
       const distance=d===null?'':` · 직선 약 ${d<1000?Math.round(d)+'m':(d/1000).toFixed(1)+'km'}`;
       return b.status==='ok'&&<Action key={p.placeId} label={b.data.name+distance} onPress={()=>{if(unavailable)open(p.placeId);else focusMap({kind:'place',placeId:p.placeId});}}/>;})}
     </View>

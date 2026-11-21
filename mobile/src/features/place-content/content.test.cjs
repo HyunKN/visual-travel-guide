@@ -36,6 +36,8 @@ test('local name search handles spaces, canonical Hangul, partial and missing na
   assert.deepEqual(api.searchBuildings(' 근 정 전 ').map(p=>p.id),['geunjeongjeon']);
   assert.deepEqual(api.searchBuildings('교태전'.normalize('NFD')).map(p=>p.id),['gyotaejeon']);
   assert.equal(api.searchBuildings('전').length,2);
+  assert.deepEqual(api.searchBuildings('경복'),api.listBuildings());
+  assert.deepEqual(api.searchBuildings('경복궁'),api.listBuildings());
   assert.equal(api.searchBuildings('부산').length,0);
   assert.deepEqual(api.searchBuildings('  '),api.listBuildings());
 });

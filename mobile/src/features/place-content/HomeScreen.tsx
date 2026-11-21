@@ -170,10 +170,12 @@ export default function HomeScreen() {
       {results.map(p=><Action key={p.id} label={p.name} style={s.start} onPress={()=>{input.current?.blur();openPlace(p.id);}}/>)}
       {!results.length&&<Text accessibilityLiveRegion="polite" style={textStyles.source}>일치하는 장소가 없어요.</Text>}
     </View>}
+    {!searching&&<>
     {story&&<View style={s.recommendation}><Text style={[textStyles.heading,s.recommendationHeading]} accessibilityRole="header">추천 이야기</Text><StoryCard key={story} id={story}/></View>}
     <View style={s.section}><View style={s.sectionHead}><Text style={textStyles.heading} accessibilityRole="header">장소 둘러보기</Text><Action label="주변 장소" onPress={()=>router.push('/nearby')}/></View><PlaceDeck places={places}/></View>
     <HomePreview/>
     {__DEV__&&<View style={s.dev}><Action label="개발 메뉴" onPress={()=>setDev(x=>!x)}/>{dev&&<><Action label="쪽지 읽기 예시" onPress={()=>router.push('/place-message-preview')}/><Action label="개발 실행 확인" onPress={()=>router.push('/development-check')}/></>}</View>}
+    </>}
   </ScrollView>;
 }
 const s=StyleSheet.create({

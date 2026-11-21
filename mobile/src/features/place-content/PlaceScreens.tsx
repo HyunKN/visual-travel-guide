@@ -39,6 +39,10 @@ export function PlaceDetailScreen() {
   return <ScrollView contentContainerStyle={[styles.reading, { paddingBottom: insets.bottom + 24 }]}>
     <Stack.Screen options={{ title: place.name }} />
     <PlacePhoto key={id} placeId={id} />
+    {!entryId && <View style={styles.section}>
+      <Text accessibilityRole="header" style={textStyles.story}>{place.palace} {place.name}</Text>
+      <Text selectable style={textStyles.body}>{place.overview}</Text>
+    </View>}
     {entries.map((entry, i) => entry.status === 'ok' && <View key={entry.data.id} style={styles.section}>
       {i===0 ? <Text accessibilityRole="header" style={textStyles.story}>{entry.data.title}</Text> :
         <TapArea accessibilityRole="button" accessibilityState={{expanded:expanded.includes(entry.data.id)}} style={styles.disclosure}
