@@ -1,8 +1,21 @@
-# 누비 Nubi · Android 개발 앱
+# 누비 Nubi · 모바일 앱
 
 누비의 React Native·Expo Development Build다. 기존 [웹 프로토타입](../prototype/README.md)과 독립적으로 설치한다. 진행 순서·기능별 확인·남은 개발의 원본은 [App 기능 지도 #27](https://github.com/HyunKN/visual-travel-guide/issues/27), 실제 모델 연결은 [#30](https://github.com/HyunKN/visual-travel-guide/issues/30)이다. 앱·에뮬레이터·Metro는 사용자가 직접 실행한다.
 
 ## 이번 구현의 범위
+
+### 0.1.1 개발 기준
+
+Android와 iOS는 같은 `main` 커밋에서 빌드하며 앱 버전은 `0.1.1`로 표시한다. 첫 빌드 번호는 Android `versionCode 2`, iOS `buildNumber 2`다. 다음 빌드에서 해당 플랫폼의 빌드 번호를 올리고 커밋 SHA를 산출물 기록에 남긴다.
+
+| 플랫폼 | 연결할 추론 엔진 | 배포 모델 |
+| --- | --- | --- |
+| Android | ONNX Runtime | `model.onnx` |
+| iOS | Apple Core ML | `NubiRecognition.mlpackage` |
+
+두 모델은 같은 MobileCLIP2-S3 학습 체크포인트를 사용한다. 사진 전처리 규격, 출력의 이름과 순서, 후보를 해석하는 로직, 장소 콘텐츠와 UI는 공유한다. 플랫폼별 모델 적재와 추론만 네이티브 구현에서 맡는다.
+
+이 버전은 검색·장소 소개·지도 진입·사진 분석 요청을 반영한 공통 앱 코드의 개발 기준이다. Android와 iOS의 일반 사진 검색에 모델을 연결한 뒤 각 기기에서 확인한다. 기존 `0.1.0` Core ML 진단 IPA에서는 두 기준 입력이 통과했고 반복 추론 중앙값은 47~48ms였다. 모델 적재와 첫 추론에 걸린 시간은 약 4.3초였으므로, 실제 사진 검색의 첫 응답 시간도 iPhone에서 기록한다. 모델 연결과 기기 검증은 [#30](https://github.com/HyunKN/visual-travel-guide/issues/30), iPhone 빌드는 [#37](https://github.com/HyunKN/visual-travel-guide/issues/37)에서 추적한다.
 
 R3를 기준으로 ‘누비 Nubi’ 이야기 홈과 불투명한 ‘홈 / 내 글’ 탭을 구현했다. 홈의 공개 글은 ‘남긴 흔적’, 사진에서 새 글을 시작하는 버튼은 ‘나도 한 줄 남기기’다. 설명·출처·지도·사진에서는 상단 집 버튼으로 홈에 돌아간다. [상세 설계](../docs/design/APP_SPRINT1_SPEC.md)와 [공통 UI #36](https://github.com/HyunKN/visual-travel-guide/issues/36)에서 구현과 미확인 배치·최종 디자인을 구분한다. 2026-11-14 사용자 결정으로 TalkBack 수동 검사는 현재 인수 범위에서 제외한다.
 

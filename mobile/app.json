@@ -2,17 +2,20 @@
   "expo": {
     "name": "Visual Travel Guide",
     "slug": "visual-travel-guide",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "scheme": "visual-travel-guide",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
+      "bundleIdentifier": "com.visualtravelguide.app",
+      "buildNumber": "2",
       "supportsTablet": true
     },
     "android": {
       "allowBackup": false,
       "package": "com.visualtravelguide.app",
+      "versionCode": 2,
       "adaptiveIcon": {
         "backgroundColor": "#FFFFFF",
         "foregroundImage": "./assets/android-icon-foreground.png",
