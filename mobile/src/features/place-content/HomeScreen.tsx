@@ -16,7 +16,7 @@ import type { Rect } from '../place-messages/geometry';
 import { color, layout, textStyles } from '../../ui/theme';
 import HomePreview from '../public-messages/HomePreviewCard';
 import { editorialNotes } from '../local-notes/device';
-import { deckDirection, emptyEditorialState, nextEditorial } from './editorial';
+import { deckDirection, emptyEditorialState, isHorizontalDeckDrag, nextEditorial } from './editorial';
 
 let fallbackEditorial = emptyEditorialState;
 
@@ -86,18 +86,36 @@ function PlaceDeck({places}:{places:Place[]}) {
     const depth=next===1?Math.min(2,places.length-1):1;
     setFlight({place:places[index%places.length],direction:next,depth,start:offset.get()});
     setIndex(i=>(i+next+places.length)%places.length);setDirection(1);offset.set(0);progress.set(0);
-    progress.set(withTiming(1,{duration:420,reduceMotion:ReduceMotion.System},done=>{if(done)scheduleOnRN(complete);}));
+    progress.set(withTiming(1,{duration:300,reduceMotion:ReduceMotion.System},()=>scheduleOnRN(complete)));
   }
-  const settle=()=>{offset.set(withSpring(0,{reduceMotion:ReduceMotion.System}));requestAnimationFrame(()=>{dragged.current=false;});};
+  const clearDrag=()=>requestAnimationFrame(()=>{dragged.current=false;});
+  const settle=()=>{
+    setDirection(1);
+    offset.set(withSpring(0,{reduceMotion:ReduceMotion.System}));
+    clearDrag();
+  };
   if(!places.length)return <Text style={textStyles.body}>지금은 장소를 불러올 수 없어요.</Text>;
   const place=places[index%places.length];
   return <View>
     <View style={s.deck}
       onTouchStart={e=>{const p=e.nativeEvent;touch.current={x:p.pageX,y:p.pageY,lastX:p.pageX,lastTime:p.timestamp,velocity:0};dragged.current=false;}}
-      onMoveShouldSetResponderCapture={e=>{const p=e.nativeEvent,start=touch.current,dx=p.pageX-start.x,dy=p.pageY-start.y;return !locked.current&&places.length>1&&Math.abs(dx)>10&&Math.abs(dx)>Math.abs(dy)*1.3;}}
+      onMoveShouldSetResponderCapture={e=>{
+        const point=e.nativeEvent,start=touch.current;
+        return !locked.current&&places.length>1&&isHorizontalDeckDrag(point.pageX-start.x,point.pageY-start.y);
+      }}
       onResponderGrant={()=>{dragged.current=true;cancelAnimation(offset);}}
       onResponderMove={e=>{const p=e.nativeEvent,start=touch.current,elapsed=p.timestamp-start.lastTime;start.velocity=elapsed>0?(p.pageX-start.lastX)/elapsed:start.velocity;start.lastX=p.pageX;start.lastTime=p.timestamp;setDirection(p.pageX<=start.x?1:-1);offset.set(p.pageX-start.x);}}
-      onResponderRelease={e=>{const p=e.nativeEvent,start=touch.current,v=p.timestamp-start.lastTime<100?start.velocity:0,next=deckDirection(p.pageX-start.x,p.pageY-start.y,v);if(next)swap(next);else settle();requestAnimationFrame(()=>{dragged.current=false;});}}
+      onResponderRelease={e=>{
+        const point=e.nativeEvent,start=touch.current;
+        const velocity=point.timestamp-start.lastTime<100?start.velocity:0;
+        const next=deckDirection(point.pageX-start.x,point.pageY-start.y,velocity);
+        if (!next) {
+          settle();
+          return;
+        }
+        swap(next);
+        clearDrag();
+      }}
       onResponderTerminate={settle} onResponderTerminationRequest={()=>true}>
       {Array.from({length:Math.min(2,places.length-1)},(_,i)=>{const depth=Math.min(2,places.length-1)-i,p=places[(index+direction*depth+places.length)%places.length];return p.id===flight?.place.id?null:<BackCard key={p.id} depth={depth} place={p} offset={offset} progress={progress} advancing={flight?.direction===1}/>;})}
       <Animated.View style={[s.deckCard,s.front,animated]}>

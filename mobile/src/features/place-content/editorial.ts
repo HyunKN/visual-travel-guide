@@ -29,8 +29,12 @@ export function decodeEditorial(raw: string | null): EditorialState {
 }
 
 /** Horizontal intent and fling must agree; a vertical scroll never swaps cards. */
+export function isHorizontalDeckDrag(dx: number, dy: number): boolean {
+  return Math.abs(dx) >= 10 && Math.abs(dx) >= Math.abs(dy) * 1.3;
+}
+
 export function deckDirection(dx: number, dy: number, vx: number): -1 | 0 | 1 {
-  if (Math.abs(dx) < 10 || Math.abs(dx) < Math.abs(dy) * 1.3) return 0;
-  if (Math.abs(dx) < 42 && !(Math.abs(vx) > .5 && Math.sign(vx) === Math.sign(dx))) return 0;
+  if (!isHorizontalDeckDrag(dx, dy)) return 0;
+  if (Math.abs(dx) < 24 && !(Math.abs(vx) > .5 && Math.sign(vx) === Math.sign(dx))) return 0;
   return dx < 0 ? 1 : -1;
 }
