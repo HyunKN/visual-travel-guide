@@ -76,7 +76,10 @@ jobs:
           npx --no-install expo prebuild --platform ios --no-install
           pod install --project-directory=ios
           grep -F 'NubiIOSRecognition' ios/Podfile.lock
-          grep -F 'onnxruntime-objc (1.24.3)' ios/Podfile.lock
+          if grep -q onnxruntime ios/Podfile.lock; then
+            echo "::error::Core ML benchmark must build without the ONNX Runtime pods."
+            exit 1
+          fi
       - name: Compile unsigned Release for iPhone
         env:
           EXPO_PUBLIC_SUPABASE_URL: ${{ vars.EXPO_PUBLIC_SUPABASE_URL }}
