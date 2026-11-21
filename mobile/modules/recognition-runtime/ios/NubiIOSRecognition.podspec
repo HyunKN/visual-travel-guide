@@ -10,11 +10,20 @@ Pod::Spec.new do |s|
   s.swift_version = '5.9'
   s.static_framework = true
   s.source_files = '*.{h,m,swift}'
-  s.public_header_files = 'NubiORTSession.h'
   s.dependency 'ExpoModulesCore'
-  s.dependency 'onnxruntime-objc', '1.24.3'
-  s.pod_target_xcconfig = {
-    'DEFINES_MODULE' => 'YES',
-    'HEADER_SEARCH_PATHS' => '$(inherited) "${PODS_ROOT}/onnxruntime-objc/objectivec/include"'
-  }
+  if ENV['NUBI_IOS_COREML_BENCHMARK'] == '1'
+    s.source_files = '*.swift'
+    s.frameworks = 'CoreML'
+    s.pod_target_xcconfig = {
+      'DEFINES_MODULE' => 'YES',
+      'SWIFT_ACTIVE_COMPILATION_CONDITIONS' => '$(inherited) NUBI_COREML_BENCHMARK'
+    }
+  else
+    s.public_header_files = 'NubiORTSession.h'
+    s.dependency 'onnxruntime-objc', '1.24.3'
+    s.pod_target_xcconfig = {
+      'DEFINES_MODULE' => 'YES',
+      'HEADER_SEARCH_PATHS' => '$(inherited) "${PODS_ROOT}/onnxruntime-objc/objectivec/include"'
+    }
+  end
 end

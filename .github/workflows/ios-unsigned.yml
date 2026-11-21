@@ -1,9 +1,9 @@
-name: Build unsigned iPhone IPA
+name: Build iPhone Core ML benchmark IPA
 
 on:
   workflow_dispatch:
   push:
-    branches: [codex/ios-free-device-testing]
+    branches: [codex/ios-coreml-benchmark]
     paths: ['mobile/**', '.github/workflows/ios-unsigned.yml']
 
 permissions:
@@ -20,7 +20,8 @@ jobs:
     env:
       CI: '1'
       EXPO_NO_DOTENV: '1'
-      IOS_BUNDLE_IDENTIFIER: com.visualtravelguide.app
+      IOS_BUNDLE_IDENTIFIER: com.visualtravelguide.coremlbenchmark
+      NUBI_IOS_COREML_BENCHMARK: '1'
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
@@ -126,21 +127,21 @@ jobs:
           package_dir="$RUNNER_TEMP/nubi-package"
           mkdir -p "$package_dir/Payload"
           ditto "$app" "$package_dir/Payload/$(basename "$app")"
-          ditto -c -k --keepParent "$package_dir/Payload" "$RUNNER_TEMP/Nubi-unsigned.ipa"
-          unzip -tq "$RUNNER_TEMP/Nubi-unsigned.ipa"
+          ditto -c -k --keepParent "$package_dir/Payload" "$RUNNER_TEMP/Nubi-CoreML-Benchmark.ipa"
+          unzip -tq "$RUNNER_TEMP/Nubi-CoreML-Benchmark.ipa"
           {
             printf 'Commit: `%s`\n' "$GITHUB_SHA"
             printf 'Bundle ID: `%s`\n' "$bundle_id"
             printf 'Device architecture: `arm64`\n'
             printf 'Minimum iOS: `%s`\n' "$minimum_ios"
             echo 'IPA SHA-256:'
-            shasum -a 256 "$RUNNER_TEMP/Nubi-unsigned.ipa"
+            shasum -a 256 "$RUNNER_TEMP/Nubi-CoreML-Benchmark.ipa"
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Upload unsigned IPA
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
-          name: nubi-iphone-unsigned-${{ github.sha }}
-          path: ${{ runner.temp }}/Nubi-unsigned.ipa
+          name: nubi-iphone-coreml-benchmark-${{ github.sha }}
+          path: ${{ runner.temp }}/Nubi-CoreML-Benchmark.ipa
           if-no-files-found: error
           retention-days: 7
           compression-level: 0

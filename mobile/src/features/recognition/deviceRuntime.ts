@@ -11,6 +11,8 @@ type ReferenceRun = {
   loadMs: number;
   beforePssKb?: number;
   afterLoadPssKb?: number;
+  beforeFootprintKiB?: number;
+  afterLoadFootprintKiB?: number;
   cases: {
     id: string;
     logits: Logits;
@@ -19,6 +21,8 @@ type ReferenceRun = {
     preprocessingMs: number;
     maxInputDelta: number;
     pssKb?: number;
+    repeatedInferenceMedianMs?: number;
+    sampledFootprintKiB?: number;
   }[];
 };
 
@@ -30,6 +34,7 @@ type NativeRuntime = {
 export const iosModel = Platform.OS === 'ios' ? requireOptionalNativeModule<NativeRuntime & {
   modelPresent(): Promise<boolean>;
   importModel(): Promise<boolean>;
+  isCoreMLBenchmark?(): Promise<boolean>;
 }>('NubiIOSRecognition') : null;
 
 const native = Platform.OS === 'android'

@@ -6,6 +6,12 @@ import Foundation
 import ImageIO
 import UIKit
 import UniformTypeIdentifiers
+#if NUBI_COREML_BENCHMARK
+import CoreML
+private typealias RecognitionSession = NubiCoreMLSession
+#else
+private typealias RecognitionSession = NubiORTSession
+#endif
 
 @MainActor
 private final class ModelDocumentPicker: NSObject, UIDocumentPickerDelegate {
@@ -28,8 +34,15 @@ public final class NubiIOSRecognitionModule: Module {
   private static let modelSize = 501_360_338
   private static let modelHash = "b5a040e0339c3be06ee2d62956f75a9c132e71b7f41755ebd02890f0ca7ab560"
   private let worker = DispatchQueue(label: "org.nubi.recognition", qos: .userInitiated)
-  private var session: NubiORTSession?
+  private var session: RecognitionSession?
   private var installedFileVerified = false
+  private var modelFilename: String {
+    #if NUBI_COREML_BENCHMARK
+    return "NubiRecognition.mlmodelc"
+    #else
+    return "model.onnx"
+    #endif
+  }
   @MainActor private var pickerDelegate: ModelDocumentPicker?
 
   public func definition() -> ModuleDefinition {
@@ -37,7 +50,7 @@ public final class NubiIOSRecognitionModule: Module {
 
     AsyncFunction("modelPresent") { (promise: Promise) in
       self.submit(promise) {
-        let file = try self.modelDirectory().appendingPathComponent("model.onnx")
+        let file = try self.modelDirectory().appendingPathComponent(self.modelFilename)
         return FileManager.default.fileExists(atPath: file.path)
       }
     }
@@ -48,13 +61,26 @@ public final class NubiIOSRecognitionModule: Module {
 
     AsyncFunction("analyze") { (uri: String, promise: Promise) in
       self.submit(promise) {
+        #if NUBI_COREML_BENCHMARK
+        // The unsigned diagnostic build accepts local models and only reports reference predictions.
+        throw RecognitionFailure.missingModel
+        #else
         guard let url = URL(string: uri), url.isFileURL else { throw RecognitionFailure.unreadablePhoto }
         let tensor = try autoreleasepool { try FitPad.decode(url) }
         let session = try self.loadedSession()
         var result = try session.run(Self.data(tensor)).mapValues { $0.map(\.doubleValue) } as [String: Any]
         result["onnxSha256"] = Self.modelHash
         return result
+        #endif
       }
+    }
+
+    AsyncFunction("isCoreMLBenchmark") {
+      #if NUBI_COREML_BENCHMARK
+      return true
+      #else
+      return false
+      #endif
     }
 
     AsyncFunction("checkReferences") { (promise: Promise) in
@@ -104,7 +130,12 @@ public final class NubiIOSRecognitionModule: Module {
       }
     }
     pickerDelegate = delegate
-    let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.data], asCopy: false)
+    #if NUBI_COREML_BENCHMARK
+    let types: [UTType] = [UTType(filenameExtension: "mlpackage") ?? .package, .folder]
+    #else
+    let types: [UTType] = [.data]
+    #endif
+    let picker = UIDocumentPickerViewController(forOpeningContentTypes: types, asCopy: false)
     picker.delegate = delegate
     controller.present(picker, animated: true)
   }
@@ -123,6 +154,34 @@ public final class NubiIOSRecognitionModule: Module {
   private func install(_ source: URL) throws {
     let scoped = source.startAccessingSecurityScopedResource()
     defer { if scoped { source.stopAccessingSecurityScopedResource() } }
+    #if NUBI_COREML_BENCHMARK
+    guard source.pathExtension.lowercased() == "mlpackage" else { throw RecognitionFailure.incompatibleModel }
+    var coordinationError: NSError?
+    var result: Result<URL, Error>?
+    NSFileCoordinator().coordinate(readingItemAt: source, options: [], error: &coordinationError) { local in
+      result = Result { try MLModel.compileModel(at: local) }
+    }
+    if let coordinationError { throw coordinationError }
+    guard let result else { throw RecognitionFailure.importFailed }
+    let compiled = try result.get()
+    let files = FileManager.default
+    defer { try? files.removeItem(at: compiled) }
+    let target = try modelDirectory().appendingPathComponent(modelFilename, isDirectory: true)
+    let pending = target.deletingLastPathComponent().appendingPathComponent(UUID().uuidString + ".mlmodelc")
+    defer { try? files.removeItem(at: pending) }
+    try files.copyItem(at: compiled, to: pending)
+    do {
+      _ = try autoreleasepool { try RecognitionSession(modelURL: pending) }
+    } catch {
+      throw RecognitionFailure.incompatibleModel
+    }
+    if files.fileExists(atPath: target.path) {
+      _ = try files.replaceItemAt(target, withItemAt: pending)
+    } else {
+      try files.moveItem(at: pending, to: target)
+    }
+    session = nil
+    #else
     let directory = try modelDirectory()
     let target = directory.appendingPathComponent("model.onnx")
     let pending = directory.appendingPathComponent(UUID().uuidString)
@@ -144,6 +203,7 @@ public final class NubiIOSRecognitionModule: Module {
     // Atomically replace only a verified model. A failed import leaves the previous model usable.
     guard rename(pending.path, target.path) == 0 else { throw RecognitionFailure.importFailed }
     installedFileVerified = true
+    #endif
   }
 
   private static func verify(_ url: URL, copyTo target: FileHandle? = nil) throws {
@@ -161,16 +221,22 @@ public final class NubiIOSRecognitionModule: Module {
     guard bytes == modelSize, hash == modelHash else { throw RecognitionFailure.incompatibleModel }
   }
 
-  private func loadedSession() throws -> NubiORTSession {
+  private func loadedSession() throws -> RecognitionSession {
     if let session { return session }
-    let url = try modelDirectory().appendingPathComponent("model.onnx")
+    let url = try modelDirectory().appendingPathComponent(modelFilename)
     guard FileManager.default.fileExists(atPath: url.path) else { throw RecognitionFailure.missingModel }
+    #if !NUBI_COREML_BENCHMARK
     if !installedFileVerified {
       try Self.verify(url)
       installedFileVerified = true
     }
+    #endif
     do {
-      let loaded = try NubiORTSession(modelPath: url.path)
+      #if NUBI_COREML_BENCHMARK
+      let loaded = try RecognitionSession(modelURL: url)
+      #else
+      let loaded = try RecognitionSession(modelPath: url.path)
+      #endif
       session = loaded
       return loaded
     } catch {
@@ -180,9 +246,16 @@ public final class NubiIOSRecognitionModule: Module {
 
   private func checkReferences() throws -> [String: Any] {
     let alreadyLoaded = session != nil
+    var report: [String: Any] = [:]
+    #if NUBI_COREML_BENCHMARK
+    report["beforeFootprintKiB"] = RecognitionSession.footprintKiB()
+    #endif
     let start = DispatchTime.now()
     let session = try loadedSession()
     let loadMs = Self.elapsed(start)
+    #if NUBI_COREML_BENCHMARK
+    report["afterLoadFootprintKiB"] = RecognitionSession.footprintKiB()
+    #endif
     let controls = [
       (id: "generated-landscape", width: 384, height: 192, rotate: false),
       (id: "generated-orientation-6", width: 256, height: 256, rotate: true),
@@ -193,18 +266,41 @@ public final class NubiIOSRecognitionModule: Module {
       defer { try? FileManager.default.removeItem(at: source) }
       try Self.writeControl(to: source, width: control.width, height: control.height, rotate: control.rotate)
       let tensorStart = DispatchTime.now()
-      let logits = try session.run(Self.data(expected)).mapValues { $0.map(\.doubleValue) }
+      let input = Self.data(expected)
+      let logits = try session.run(input).mapValues { $0.map(\.doubleValue) }
       let inferenceMs = Self.elapsed(tensorStart)
       let photoStart = DispatchTime.now()
       let actual = try autoreleasepool { try FitPad.decode(source) }
       let preprocessingMs = Self.elapsed(photoStart)
       let photoLogits = try session.run(Self.data(actual)).mapValues { $0.map(\.doubleValue) }
       let difference = zip(actual, expected).reduce(Float.zero) { max($0, abs($1.0 - $1.1)) }
-      return ["id": control.id, "logits": logits, "photoLogits": photoLogits, "inferenceMs": inferenceMs,
-              "preprocessingMs": preprocessingMs, "maxInputDelta": difference]
+      var sample: [String: Any] = ["id": control.id, "logits": logits, "photoLogits": photoLogits,
+                                    "inferenceMs": inferenceMs, "preprocessingMs": preprocessingMs,
+                                    "maxInputDelta": difference]
+      #if NUBI_COREML_BENCHMARK
+      var durations: [Double] = []
+      var footprints: [Int] = []
+      for _ in 0..<10 {
+        let runStart = DispatchTime.now()
+        _ = try autoreleasepool { try session.run(input) }
+        durations.append(Self.elapsed(runStart))
+        if let footprint = RecognitionSession.footprintKiB() { footprints.append(footprint) }
+      }
+      durations.sort()
+      sample["repeatedInferenceMedianMs"] = (durations[4] + durations[5]) / 2
+      sample["sampledFootprintKiB"] = footprints.max()
+      #endif
+      return sample
     }
-    return ["runtimeVersion": NubiORTSession.runtimeVersion(), "sessionAlreadyLoaded": alreadyLoaded,
-            "loadMs": loadMs, "cases": cases]
+    #if NUBI_COREML_BENCHMARK
+    report["runtimeVersion"] = "Core ML"
+    #else
+    report["runtimeVersion"] = RecognitionSession.runtimeVersion()
+    #endif
+    report["sessionAlreadyLoaded"] = alreadyLoaded
+    report["loadMs"] = loadMs
+    report["cases"] = cases
+    return report
   }
 
   private static func controlPixel(_ x: Int, _ y: Int) -> Int {

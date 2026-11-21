@@ -31,6 +31,7 @@ export default function DevelopmentCheckScreen() {
   const [busy, setBusy] = useState(false);
   const [report, setReport] = useState('');
   const [modelPresent, setModelPresent] = useState(false);
+  const [coreMLBenchmark, setCoreMLBenchmark] = useState(false);
   const [importing, setImporting] = useState(false);
   useEffect(() => {
     let active = true;
@@ -39,6 +40,9 @@ export default function DevelopmentCheckScreen() {
     }).catch(() => {
       if (active) setReport('저장된 모델을 확인하지 못했어요.');
     });
+    void iosModel?.isCoreMLBenchmark?.().then(enabled => {
+      if (active) setCoreMLBenchmark(enabled);
+    }).catch(() => {});
     return () => { active = false; };
   }, []);
 
@@ -54,7 +58,7 @@ export default function DevelopmentCheckScreen() {
     } catch (error) {
       const code = typeof error === 'object' && error !== null && 'code' in error ? error.code : null;
       setReport(code === 'MODEL_INCOMPATIBLE'
-        ? '이 빌드와 맞는 model.onnx 파일을 선택해 주세요.'
+        ? `이 빌드와 맞는 ${coreMLBenchmark ? 'NubiRecognition.mlpackage' : 'model.onnx'}를 선택해 주세요.`
         : '모델을 가져오지 못했어요. 파일이 다운로드됐는지와 여유 공간을 확인해 주세요.');
     } finally {
       setImporting(false);
@@ -80,12 +84,21 @@ export default function DevelopmentCheckScreen() {
           `원본 입력 최대 차이 ${sample.maxInputDelta.toExponential(2)} · 원본 출력 ${photo.passed ? '통과' : '실패'} · 최대 오차 ${photo.maximum.toExponential(2)}`,
           `전처리 ${sample.preprocessingMs.toFixed(1)}ms · 추론 ${sample.inferenceMs.toFixed(1)}ms` +
             (sample.pssKb == null ? '' : ` · PSS ${sample.pssKb}KiB`),
+          ...(sample.repeatedInferenceMedianMs == null ? [] : [
+            `추론 10회 중앙값 ${sample.repeatedInferenceMedianMs.toFixed(1)}ms`,
+            ...(sample.sampledFootprintKiB == null ? [] : [
+              `반복 실행 후 측정한 최대 메모리 ${(sample.sampledFootprintKiB / 1024).toFixed(1)}MiB`,
+            ]),
+          ]),
         ].join('\n');
       });
       setReport([
-        `ONNX Runtime ${result.runtimeVersion} · CPU`,
+        result.runtimeVersion === 'Core ML' ? 'Core ML · 모든 연산 장치 허용' : `ONNX Runtime ${result.runtimeVersion} · CPU`,
         `모델 준비 ${result.loadMs.toFixed(1)}ms · ${result.sessionAlreadyLoaded ? '이미 적재됨' : '첫 적재'}`,
         ...(result.beforePssKb == null ? [] : [`프로세스 PSS ${result.beforePssKb} → ${result.afterLoadPssKb}KiB`]),
+        ...(result.beforeFootprintKiB == null || result.afterLoadFootprintKiB == null ? [] : [
+          `프로세스 메모리 ${(result.beforeFootprintKiB / 1024).toFixed(1)} → ${(result.afterLoadFootprintKiB / 1024).toFixed(1)}MiB`,
+        ]),
         ...caseLines,
       ].join('\n\n'));
     } catch (error) {
@@ -102,7 +115,7 @@ export default function DevelopmentCheckScreen() {
         <Text accessibilityRole="header" style={styles.title}>사진 인식 모델</Text>
         <Text style={styles.description}>{modelPresent
           ? '모델 파일이 저장되어 있어요.'
-          : '파일 앱에 저장한 model.onnx를 선택해 주세요.'}</Text>
+          : `파일 앱에 저장한 ${coreMLBenchmark ? 'NubiRecognition.mlpackage' : 'model.onnx'}를 선택해 주세요.`}</Text>
         <Action label="모델 파일 가져오기" busy={importing} disabled={busy} onPress={() => void importModel()} />
       </> : <>
         <Text accessibilityRole="header" style={styles.title}>상세 화면에 도착했습니다</Text>
